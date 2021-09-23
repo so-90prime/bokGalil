@@ -1,0 +1,27 @@
+Some links I have found useful:
+
+INDI:
+    https://github.com/indilib/indi
+    https://github.com/geehalel/pyindi-client
+    http://docs.indilib.org
+    https://indilib.org/forum/
+
+GitHub:
+    https://github.com/geehalel/pyindi-client.git
+
+Elwood's INDI:
+    https://github.com/MMTObservatory/mmtINDI.git
+
+MtnOps C Drivers:
+    https://github.com/so-mops/ng-indi.git
+
+WebSockets:
+    https://github.com/aaugustin/websockets.git
+
+Very Experimental:
+    https://github.com/geehalel/npindi.git
+    https://github.com/MMTObservatory/indiclient.git
+    https://github.com/MMTObservatory/pyINDI.git
+
+Testing:
+    echo "<getProperties version='1.7'>" | nc localhost 7624

@@ -1,0 +1,40 @@
+# +
+# Compiled
+# -
+*.pyc
+__pycache__
+.pytest_cache
+
+# +
+# Packages
+# -
+*.csv
+*.dmg
+*.gz
+*.tar
+*.tgz
+*.zip
+*.js
+*.json
+*.map
+*.obsolete
+
+# +
+# Logs
+# -
+*.log
+
+# +
+# Pycharm
+# -
+.idea
+
+# +
+# OS
+# -
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+*.db
