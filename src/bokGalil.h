@@ -86,8 +86,8 @@
  * typedef(s)
  ******************************************************************************/
 typedef struct filter_file_data {
-  char code[BOK_STR_32];
-  char name[BOK_STR_32];
+  char code[BOK_STR_16];
+  char name[BOK_STR_16];
 } filter_file_t, *filter_file_p, **filter_file_s;
 
 typedef signed char byte_t;

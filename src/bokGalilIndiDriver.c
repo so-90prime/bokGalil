@@ -40,12 +40,12 @@
  * typedef(s)
  ******************************************************************************/
 typedef struct filternamedata {
-  char filter_1[BOK_STR_16];
-  char filter_2[BOK_STR_16];
-  char filter_3[BOK_STR_16];
-  char filter_4[BOK_STR_16];
-  char filter_5[BOK_STR_16];
-  char filter_6[BOK_STR_16];
+  char filter_1[BOK_STR_32];
+  char filter_2[BOK_STR_32];
+  char filter_3[BOK_STR_32];
+  char filter_4[BOK_STR_32];
+  char filter_5[BOK_STR_32];
+  char filter_6[BOK_STR_32];
 } filter_name_t, *filter_name_p, **filter_name_s;
 
 typedef struct ifocusdata {
@@ -97,20 +97,20 @@ typedef struct telemetrydata {
   char errfilt[BOK_STR_32];
   char filtisin[BOK_STR_32];
   char filtval[BOK_STR_32];
-  char ifilter_1[BOK_STR_32];
-  char ifilter_2[BOK_STR_32];
-  char ifilter_3[BOK_STR_32];
-  char ifilter_4[BOK_STR_32];
-  char ifilter_5[BOK_STR_32];
-  char ifilter_6[BOK_STR_32];
+  char ifilter_1[BOK_STR_64];
+  char ifilter_2[BOK_STR_64];
+  char ifilter_3[BOK_STR_64];
+  char ifilter_4[BOK_STR_64];
+  char ifilter_5[BOK_STR_64];
+  char ifilter_6[BOK_STR_64];
   char gfiltn[BOK_STR_32];
   char reqfilt[BOK_STR_32];
-  char gfilter_1[BOK_STR_32];
-  char gfilter_2[BOK_STR_32];
-  char gfilter_3[BOK_STR_32];
-  char gfilter_4[BOK_STR_32];
-  char gfilter_5[BOK_STR_32];
-  char gfilter_6[BOK_STR_32];
+  char gfilter_1[BOK_STR_64];
+  char gfilter_2[BOK_STR_64];
+  char gfilter_3[BOK_STR_64];
+  char gfilter_4[BOK_STR_64];
+  char gfilter_5[BOK_STR_64];
+  char gfilter_6[BOK_STR_64];
 } telemetry_t, *telemetry_p, **telemetry_s;
 
 
