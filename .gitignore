@@ -40,7 +40,7 @@ __pycache__
 *.db
 
 # +
-# binaries
+# build(s)
 # -
 bin/bokGalilIndiDriver
 bin/bok_read_filters
@@ -66,3 +66,5 @@ src/Galil_DMC_22x0_UDP_Read
 src/Galil_DMC_22x0_UDP_Write
 src/libbokGalil.a
 src/libbokGalil.so
+lib/libbokGalil.a
+lib/libbokGalil.so
