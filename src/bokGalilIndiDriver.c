@@ -507,8 +507,7 @@ static void driver_init(void) {
   read_filters_from_file(BOK_IFILTER_FILE, (filter_file_t *)bok_ifilters, BOK_IFILTER_SLOTS, BOK_IFILTER_COLUMNS);
   for (int j=0; j<BOK_IFILTER_SLOTS; j++) {
     if (strlen(bok_ifilters[j].code)>0 && strlen(bok_ifilters[j].name)>0) {
-      (void) fprintf(stderr, "instrument filters> index=%d, code='%s', name='%s'\n",
-        j, bok_ifilters[j].code, bok_ifilters[j].name);
+      (void) fprintf(stderr, "instrument filters> index=%d, code='%s', name='%s'\n", j, bok_ifilters[j].code, bok_ifilters[j].name);
       (void) fflush(stderr);
     }
   }
@@ -518,8 +517,7 @@ static void driver_init(void) {
   read_filters_from_file(BOK_GFILTER_FILE, (filter_file_t *)bok_gfilters, BOK_GFILTER_SLOTS, BOK_GFILTER_COLUMNS);
   for (int j=0; j<BOK_GFILTER_SLOTS; j++) {
     if (strlen(bok_gfilters[j].code)>0 && strlen(bok_gfilters[j].name)>0) {
-      (void) fprintf(stderr, "guider filters> index=%d, code='%s', name='%s'\n",
-        j, bok_gfilters[j].code, bok_gfilters[j].name);
+      (void) fprintf(stderr, "guider filters> index=%d, code='%s', name='%s'\n", j, bok_gfilters[j].code, bok_gfilters[j].name);
       (void) fflush(stderr);
     }
   }
@@ -1224,63 +1222,71 @@ static void execute_timer(void *p) {
     _ufd = -1;
   }
 
-  /* update gfilter(s) - really only need to do this once when filters are changed */
+  /* update gfilter(s) */
   (void) memset((void *)&gfilter_names, 0, sizeof(gfilter_names));
-  (void) sprintf(gfilter_names.filter_1, "%s", bok_gfilters[0].name);
-  (void) sprintf(gfilter_names.filter_2, "%s", bok_gfilters[1].name);
-  (void) sprintf(gfilter_names.filter_3, "%s", bok_gfilters[2].name);
-  (void) sprintf(gfilter_names.filter_4, "%s", bok_gfilters[3].name);
-  (void) sprintf(gfilter_names.filter_5, "%s", bok_gfilters[4].name);
-  (void) sprintf(gfilter_names.filter_6, "%s", bok_gfilters[5].name);
+  (void) sprintf(gfilter_names.filter_1, "%s", bok_gfilters[1].name);
+  (void) sprintf(gfilter_names.filter_2, "%s", bok_gfilters[2].name);
+  (void) sprintf(gfilter_names.filter_3, "%s", bok_gfilters[3].name);
+  (void) sprintf(gfilter_names.filter_4, "%s", bok_gfilters[4].name);
+  (void) sprintf(gfilter_names.filter_5, "%s", bok_gfilters[5].name);
+  (void) sprintf(gfilter_names.filter_6, "%s", bok_gfilters[6].name);
   IDSetText(&gfilterTP, NULL);
 
   /* update ifilter(s) */
   (void) memset((void *)&ifilter_names, 0, sizeof(ifilter_names));
-  for (int i=0; i<BOK_IFILTER_SLOTS; i++) {
-    if (tcp_val.filtvals[0] == (float)i) {
-      if (tcp_val.filtvals[0] == tcp_val.lv.filtval) {
-        (void) sprintf(ifilter_names.filter_1, "| %s |", bok_ifilters[i].name);
-      } else {
-        (void) sprintf(ifilter_names.filter_1, "%s", bok_ifilters[i].name);
-      }
-    }
-    if (tcp_val.filtvals[1] == (float)i) {
-      if (tcp_val.filtvals[1] == tcp_val.lv.filtval) {
-        (void) sprintf(ifilter_names.filter_2, "| %s |", bok_ifilters[i].name);
-      } else {
-        (void) sprintf(ifilter_names.filter_2, "%s", bok_ifilters[i].name);
-      }
-    }
-    if (tcp_val.filtvals[2] == (float)i) {
-      if (tcp_val.filtvals[2] == tcp_val.lv.filtval) {
-        (void) sprintf(ifilter_names.filter_3, "| %s |", bok_ifilters[i].name);
-      } else {
-        (void) sprintf(ifilter_names.filter_3, "%s", bok_ifilters[i].name);
-      }
-    }
-    if (tcp_val.filtvals[3] == (float)i) {
-      if (tcp_val.filtvals[3] == tcp_val.lv.filtval) {
-        (void) sprintf(ifilter_names.filter_4, "| %s |", bok_ifilters[i].name);
-      } else {
-        (void) sprintf(ifilter_names.filter_4, "%s", bok_ifilters[i].name);
-      }
-    }
-    if (tcp_val.filtvals[4] == (float)i) {
-      if (tcp_val.filtvals[4] == tcp_val.lv.filtval) {
-        (void) sprintf(ifilter_names.filter_5, "| %s |", bok_ifilters[i].name);
-      } else {
-        (void) sprintf(ifilter_names.filter_5, "%s", bok_ifilters[i].name);
-      }
-    }
-    if (tcp_val.filtvals[5] == (float)i) {
-      if (tcp_val.filtvals[5] == tcp_val.lv.filtval) {
-        (void) sprintf(ifilter_names.filter_6, "| %s |", bok_ifilters[i].name);
-      } else {
-        (void) sprintf(ifilter_names.filter_6, "%s", bok_ifilters[i].name);
-      }
-    }
-  }
+  (void) sprintf(ifilter_names.filter_1, "%s", bok_gfilters[(int)round(tcp_val.filtvals[0])].name);
+  (void) sprintf(ifilter_names.filter_2, "%s", bok_gfilters[(int)round(tcp_val.filtvals[1])].name);
+  (void) sprintf(ifilter_names.filter_3, "%s", bok_gfilters[(int)round(tcp_val.filtvals[2])].name);
+  (void) sprintf(ifilter_names.filter_4, "%s", bok_gfilters[(int)round(tcp_val.filtvals[3])].name);
+  (void) sprintf(ifilter_names.filter_5, "%s", bok_gfilters[(int)round(tcp_val.filtvals[4])].name);
+  (void) sprintf(ifilter_names.filter_6, "%s", bok_gfilters[(int)round(tcp_val.filtvals[5])].name);
   IDSetText(&ifilterTP, NULL);
+
+//  for (int i=0; i<BOK_IFILTER_SLOTS; i++) {
+//    if (tcp_val.filtvals[0] == (float)i) {
+//      if (tcp_val.filtvals[0] == tcp_val.lv.filtval) {
+//        (void) sprintf(ifilter_names.filter_1, "| %s |", bok_ifilters[i].name);
+//      } else {
+//        (void) sprintf(ifilter_names.filter_1, "%s", bok_ifilters[i].name);
+//      }
+//    }
+//    if (tcp_val.filtvals[1] == (float)i) {
+//      if (tcp_val.filtvals[1] == tcp_val.lv.filtval) {
+//        (void) sprintf(ifilter_names.filter_2, "| %s |", bok_ifilters[i].name);
+//      } else {
+//        (void) sprintf(ifilter_names.filter_2, "%s", bok_ifilters[i].name);
+//      }
+//    }
+//    if (tcp_val.filtvals[2] == (float)i) {
+//      if (tcp_val.filtvals[2] == tcp_val.lv.filtval) {
+//        (void) sprintf(ifilter_names.filter_3, "| %s |", bok_ifilters[i].name);
+//      } else {
+//        (void) sprintf(ifilter_names.filter_3, "%s", bok_ifilters[i].name);
+//      }
+//    }
+//    if (tcp_val.filtvals[3] == (float)i) {
+//      if (tcp_val.filtvals[3] == tcp_val.lv.filtval) {
+//        (void) sprintf(ifilter_names.filter_4, "| %s |", bok_ifilters[i].name);
+//      } else {
+//        (void) sprintf(ifilter_names.filter_4, "%s", bok_ifilters[i].name);
+//      }
+//    }
+//    if (tcp_val.filtvals[4] == (float)i) {
+//      if (tcp_val.filtvals[4] == tcp_val.lv.filtval) {
+//        (void) sprintf(ifilter_names.filter_5, "| %s |", bok_ifilters[i].name);
+//      } else {
+//        (void) sprintf(ifilter_names.filter_5, "%s", bok_ifilters[i].name);
+//      }
+//    }
+//    if (tcp_val.filtvals[5] == (float)i) {
+//      if (tcp_val.filtvals[5] == tcp_val.lv.filtval) {
+//        (void) sprintf(ifilter_names.filter_6, "| %s |", bok_ifilters[i].name);
+//      } else {
+//        (void) sprintf(ifilter_names.filter_6, "%s", bok_ifilters[i].name);
+//      }
+//    }
+//  }
+//  IDSetText(&ifilterTP, NULL);
 
   /* update values */
   ifoci.enca = tcp_val.position[0];
