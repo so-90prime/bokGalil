@@ -37,7 +37,7 @@
 
 
 /*******************************************************************************
- * typedefs(s)
+ * typedef(s)
  ******************************************************************************/
 typedef struct filternamedata {
   char filter_1[BOK_STR_16];
@@ -115,7 +115,7 @@ typedef struct telemetrydata {
 
 
 /*******************************************************************************
- * prototypes(s)
+ * prototype(s)
  ******************************************************************************/
 static void driver_init(void);
 static void execute_gfilter_switches(ISState [], char *[], int);
@@ -1236,27 +1236,27 @@ static void execute_timer(void *p) {
     (void) sprintf(gfilter_names.filter_1, "%s", bok_gfilters[1].name);
   }
   if (_gfiltn == 2) {
-    (void) sprintf(gfilter_names.filter_2, "%s", bok_gfilters[2].name);
+    (void) sprintf(gfilter_names.filter_2, "| %s |", bok_gfilters[2].name);
   } else {
     (void) sprintf(gfilter_names.filter_2, "%s", bok_gfilters[2].name);
   }
   if (_gfiltn == 3) {
-    (void) sprintf(gfilter_names.filter_3, "%s", bok_gfilters[3].name);
+    (void) sprintf(gfilter_names.filter_3, "| %s |", bok_gfilters[3].name);
   } else {
     (void) sprintf(gfilter_names.filter_3, "%s", bok_gfilters[3].name);
   }
   if (_gfiltn == 4) {
-    (void) sprintf(gfilter_names.filter_4, "%s", bok_gfilters[4].name);
+    (void) sprintf(gfilter_names.filter_4, "| %s |", bok_gfilters[4].name);
   } else {
     (void) sprintf(gfilter_names.filter_4, "%s", bok_gfilters[4].name);
   }
   if (_gfiltn == 5) {
-    (void) sprintf(gfilter_names.filter_5, "%s", bok_gfilters[5].name);
+    (void) sprintf(gfilter_names.filter_5, "| %s |", bok_gfilters[5].name);
   } else {
     (void) sprintf(gfilter_names.filter_5, "%s", bok_gfilters[5].name);
   }
   if (_gfiltn == 6) {
-    (void) sprintf(gfilter_names.filter_6, "%s", bok_gfilters[6].name);
+    (void) sprintf(gfilter_names.filter_6, "| %s |", bok_gfilters[6].name);
   } else {
     (void) sprintf(gfilter_names.filter_6, "%s", bok_gfilters[6].name);
   }
