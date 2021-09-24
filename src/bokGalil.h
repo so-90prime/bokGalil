@@ -39,14 +39,14 @@
 #define BOK_AXES             8
 #define BOK_BAD_FLOAT        (float)123456789.0
 #define BOK_IFILTERS         6
-#define BOK_IFILTER_FILE     "/home/mtnops/PycharmProjects/bokGalil/docs/bok_filters.txt"
+#define BOK_IFILTER_FILE     "/home/mtnops/PycharmProjects/bokGalil/docs/bok_ifilters.txt"
 #define BOK_IFILTER_COLUMNS  3
-#define BOK_IFILTER_POSITIONS 6
-#define BOK_IFILTER_SLOTS     256
+#define BOK_IFILTER_SLOTS    256
 #define BOK_GALIL_TCP_CMD    "10.30.3.31 --command TCP"
+#define BOK_GFILTERS         6
 #define BOK_GFILTER_FILE     "/home/mtnops/PycharmProjects/bokGalil/docs/bok_gfilters.txt"
 #define BOK_GFILTER_COLUMNS  3
-#define BOK_GFILTER_SLOTS    6
+#define BOK_GFILTER_SLOTS    256
 #define BOK_IAXIS_INPUTS     10
 #define BOK_LVDT_STEPS       (10.0/32767.0)
 #define BOK_LVDT_ATOD        (-1.0/0.00055)

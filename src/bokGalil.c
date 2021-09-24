@@ -991,6 +991,7 @@ void read_filters_from_file(char *fname, filter_file_t filters[], int max_filter
   filter_file_t this_filter;
 
   /* open the file and read it */
+  (void) memset((void *)buffer, '\0', sizeof(buffer));
   if ((fp=fopen(fname, "r")) != (FILE *)NULL) {
     while ((p=fgets(buffer, sizeof(buffer), fp)) != (char *)NULL) {
       (void) memset((void *)&this_filter, '\0', sizeof(this_filter));

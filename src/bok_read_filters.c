@@ -27,11 +27,11 @@ int main( int argc, char *argv[] ) {
   char fname[BOK_STR_1024] = {'\0'};
   int ncols = BOK_IFILTER_COLUMNS;
   int nslots = BOK_IFILTER_SLOTS;
-  filter_file_t bok_ifilters[BOK_IFILTER_SLOTS];
+  filter_file_t bok_filters[BOK_IFILTER_SLOTS];
 
   /* initialize structure(s) */
   (void) memset((void *)&fname, '\0', sizeof(fname));
-  for (int i=0; i<BOK_IFILTER_SLOTS; i++) { (void) memset((void *)&bok_ifilters[i], '\0', sizeof(filter_file_t)); }
+  for (int i=0; i<BOK_IFILTER_SLOTS; i++) { (void) memset((void *)&bok_filters[i], '\0', sizeof(filter_file_t)); }
 
   /* get command line parameter(s) */
   while ( argc>1L && argv[1][0]=='-' ) {
@@ -67,12 +67,12 @@ int main( int argc, char *argv[] ) {
   }
 
   /* read */
-  read_filters_from_file(fname, (filter_file_t *)bok_ifilters, nslots, ncols);
+  read_filters_from_file(fname, (filter_file_t *)bok_filters, nslots, ncols);
 
   /* dump */
-  for (int j=0; j<BOK_IFILTER_SLOTS; j++) {
-    if (strlen(bok_ifilters[j].code)>0 && strlen(bok_ifilters[j].name)>0) {
-      (void) printf("index=%d, code='%s', name='%s'\n", j, bok_ifilters[j].code, bok_ifilters[j].name);
+  for (int j=0; j<nslots; j++) {
+    if (strlen(bok_filters[j].code)>0 && strlen(bok_filters[j].name)>0) {
+      (void) printf("index=%d, code='%s', name='%s'\n", j, bok_filters[j].code, bok_filters[j].name);
     }
   }
 
