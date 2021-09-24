@@ -1234,12 +1234,12 @@ static void execute_timer(void *p) {
 
   /* update ifilter(s) */
   (void) memset((void *)&ifilter_names, 0, sizeof(ifilter_names));
-  (void) sprintf(ifilter_names.filter_1, "%s", bok_gfilters[(int)round(tcp_val.filtvals[0])].name);
-  (void) sprintf(ifilter_names.filter_2, "%s", bok_gfilters[(int)round(tcp_val.filtvals[1])].name);
-  (void) sprintf(ifilter_names.filter_3, "%s", bok_gfilters[(int)round(tcp_val.filtvals[2])].name);
-  (void) sprintf(ifilter_names.filter_4, "%s", bok_gfilters[(int)round(tcp_val.filtvals[3])].name);
-  (void) sprintf(ifilter_names.filter_5, "%s", bok_gfilters[(int)round(tcp_val.filtvals[4])].name);
-  (void) sprintf(ifilter_names.filter_6, "%s", bok_gfilters[(int)round(tcp_val.filtvals[5])].name);
+  (void) sprintf(ifilter_names.filter_1, "%s", bok_ifilters[(int)round(tcp_val.filtvals[0])].name);
+  (void) sprintf(ifilter_names.filter_2, "%s", bok_ifilters[(int)round(tcp_val.filtvals[1])].name);
+  (void) sprintf(ifilter_names.filter_3, "%s", bok_ifilters[(int)round(tcp_val.filtvals[2])].name);
+  (void) sprintf(ifilter_names.filter_4, "%s", bok_ifilters[(int)round(tcp_val.filtvals[3])].name);
+  (void) sprintf(ifilter_names.filter_5, "%s", bok_ifilters[(int)round(tcp_val.filtvals[4])].name);
+  (void) sprintf(ifilter_names.filter_6, "%s", bok_ifilters[(int)round(tcp_val.filtvals[5])].name);
   IDSetText(&ifilterTP, NULL);
 
 //  for (int i=0; i<BOK_IFILTER_SLOTS; i++) {
