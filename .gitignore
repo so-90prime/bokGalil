@@ -38,3 +38,17 @@ __pycache__
 .Spotlight-V100
 .Trashes
 *.db
+
+# +
+# binaries
+# -
+bin/bokGalilIndiDriver
+bin/bok_read_filters
+bin/bok_read_guider_filters
+bin/bok_read_instrument_filters
+bin/bok_read_nominal_plane
+src/bokGalilIndiDriver
+src/bok_read_filters
+src/bok_read_guider_filters
+src/bok_read_instrument_filters
+src/bok_read_nominal_plane
