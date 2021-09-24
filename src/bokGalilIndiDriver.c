@@ -288,7 +288,7 @@ static IText telemetryT[] = {
   {"dista",        "dista                             ", telemetrys.dista,        0, 0, 0},
   {"distb",        "distb                             ", telemetrys.distb,        0, 0, 0},
   {"distc",        "distc                             ", telemetrys.distc,        0, 0, 0},
-  {"distgcam",     "distgcam                          ", telemetrys.distgcam,     0, 0, 0},
+  {"distgcam",     "distgcam (gfocus)                 ", telemetrys.distgcam,     0, 0, 0},
   {"errfilt",      "errfilt (1.0=Error, 0.0=OK)       ", telemetrys.errfilt,      0, 0, 0},
   {"filtisin",     "filtisin  (1.0=True, 0.0=False)   ", telemetrys.filtisin,     0, 0, 0},
   {"ifilter_0",    "iFilter 1 (filtvals[0])           ", telemetrys.ifilter_1,    0, 0, 0},
@@ -319,7 +319,8 @@ static ILight telemetry_lightsL[] = {
   {"fin",    "Instrument Filter In Beam    ", ISS_OFF, 0, 0},
   {"frot",   "Instrument Filter Rotating   ", ISS_OFF, 0, 0},
   {"flin",   "Instrument Filter Translating", ISS_OFF, 0, 0},
-  {"ferr",   "Instrument Filter Error      ", ISS_OFF, 0, 0}
+  {"ferr",   "Instrument Filter Error      ", ISS_OFF, 0, 0},
+  {"grot",   "Guider Filter Rotating       ", ISS_OFF, 0, 0}
 };
 ILightVectorProperty telemetry_lightsLP = {
   GALIL_DEVICE, "TELEMETRY", "Telemetry Indicators", TELEMETRY_GROUP, IPS_IDLE, telemetry_lightsL, NARRAY(telemetry_lightsL), "", 0
@@ -1356,6 +1357,7 @@ static void execute_timer(void *p) {
   telemetry_lightsL[5].s = (udp_val.faxis_moving == 1) ? ISS_ON : ISS_OFF;
   telemetry_lightsL[6].s = (udp_val.gaxis_moving == 1) ? ISS_ON : ISS_OFF;
   telemetry_lightsL[7].s = (tcp_val.lv.errfilt == 1.0) ? ISS_ON : ISS_OFF;
+  telemetry_lightsL[8].s = (udp_val.haxis_moving == 1) ? ISS_ON : ISS_OFF;
 
   telemetry_lightsLP.s   = IPS_OK;
   IDSetLight(&telemetry_lightsLP, NULL);
@@ -1407,6 +1409,7 @@ static void zero_telemetry(void) {
   telemetry_lightsL[5].s = ISS_OFF;
   telemetry_lightsL[6].s = ISS_OFF;
   telemetry_lightsL[7].s = ISS_OFF;
+  telemetry_lightsL[8].s = ISS_OFF;
   telemetry_lightsLP.s   = IPS_IDLE;
 
   /* initialize indi structure(s) */
