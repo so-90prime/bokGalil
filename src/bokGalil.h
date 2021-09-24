@@ -46,7 +46,7 @@
 #define BOK_GFILTERS         6
 #define BOK_GFILTER_FILE     "/home/mtnops/PycharmProjects/bokGalil/docs/bok_gfilters.txt"
 #define BOK_GFILTER_COLUMNS  3
-#define BOK_GFILTER_SLOTS    256
+#define BOK_GFILTER_SLOTS    6
 #define BOK_IAXIS_INPUTS     10
 #define BOK_LVDT_STEPS       (10.0/32767.0)
 #define BOK_LVDT_ATOD        (-1.0/0.00055)
