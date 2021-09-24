@@ -77,6 +77,7 @@ typedef struct telemetrydata {
   char hardware[BOK_STR_64];
   char software[BOK_STR_64];
   char timestamp[BOK_TIME_STAMP];
+  char jd[BOK_STR_32];
   char tcp_shm_mode[BOK_STR_32];
   char udp_shm_mode[BOK_STR_32];
   char a_encoder[BOK_STR_32];
@@ -268,42 +269,43 @@ static ITextVectorProperty supportTP = {
 
 /* telemetry group */
 static IText telemetryT[] = {
-  {"hardware",     "Hardware                    ",  telemetrys.hardware,     0, 0, 0},
-  {"software",     "Software                    ",  telemetrys.software,     0, 0, 0},
-  {"timestamp",    "Timestamp                   ",  telemetrys.timestamp,    0, 0, 0},
-  {"tcp_shm_mode", "TCP (Shared Memory) Mode    ",  telemetrys.tcp_shm_mode, 0, 0, 0},
-  {"udp_shm_mode", "UDP (Shared Memory) Mode    ",  telemetrys.udp_shm_mode, 0, 0, 0},
-  {"a_encoder",    "A Encoder (A axis motor pos)",  telemetrys.a_encoder,    0, 0, 0},
-  {"b_encoder",    "B Encoder (B axis motor pos)",  telemetrys.b_encoder,    0, 0, 0},
-  {"c_encoder",    "C Encoder (C axis motor pos)",  telemetrys.c_encoder,    0, 0, 0},
-  {"a_position",   "A Position (B axis analog in)", telemetrys.a_position,   0, 0, 0},
-  {"b_position",   "B Position (D axis analog in)", telemetrys.b_position,   0, 0, 0},
-  {"c_position",   "C Position (F axis analog in)", telemetrys.c_position,   0, 0, 0},
-  {"a_reference",  "A Focus Reference            ", telemetrys.a_reference,  0, 0, 0},
-  {"b_reference",  "B Focus Reference            ", telemetrys.b_reference,  0, 0, 0},
-  {"c_reference",  "C Focus Reference            ", telemetrys.c_reference,  0, 0, 0},
-  {"distall",      "distall                      ", telemetrys.distall,      0, 0, 0},
-  {"dista",        "dista                        ", telemetrys.dista,        0, 0, 0},
-  {"distb",        "distb                        ", telemetrys.distb,        0, 0, 0},
-  {"distc",        "distc                        ", telemetrys.distc,        0, 0, 0},
-  {"distgcam",     "distgcam                     ", telemetrys.distgcam,     0, 0, 0},
-  {"errfilt",      "errfilt                      ", telemetrys.errfilt,      0, 0, 0},
-  {"filtisin",     "filtisin                     ", telemetrys.filtisin,     0, 0, 0},
-  {"ifilter_0",    "iFilter 1 (filtvals[0])      ", telemetrys.ifilter_1,    0, 0, 0},
-  {"ifilter_1",    "iFilter 2 (filtvals[1])      ", telemetrys.ifilter_2,    0, 0, 0},
-  {"ifilter_2",    "iFilter 3 (filtvals[2])      ", telemetrys.ifilter_3,    0, 0, 0},
-  {"ifilter_3",    "iFilter 4 (filtvals[3])      ", telemetrys.ifilter_4,    0, 0, 0},
-  {"ifilter_4",    "iFilter 5 (filtvals[4])      ", telemetrys.ifilter_5,    0, 0, 0},
-  {"ifilter_5",    "iFilter 6 (filtvals[5])      ", telemetrys.ifilter_6,    0, 0, 0},
-  {"reqfilt",      "reqfilt                      ", telemetrys.reqfilt,      0, 0, 0},
-  {"filtval",      "filtval                      ", telemetrys.filtval,      0, 0, 0},
-  {"gfiltn",       "gfiltn                       ", telemetrys.gfiltn,       0, 0, 0},
-  {"gfilter_1",    "gFilter 1                    ", telemetrys.gfilter_1,    0, 0, 0},
-  {"gfilter_2",    "gFilter 2                    ", telemetrys.gfilter_2,    0, 0, 0},
-  {"gfilter_3",    "gFilter 3                    ", telemetrys.gfilter_3,    0, 0, 0},
-  {"gfilter_4",    "gFilter 4                    ", telemetrys.gfilter_4,    0, 0, 0},
-  {"gfilter_5",    "gFilter 5                    ", telemetrys.gfilter_5,    0, 0, 0},
-  {"gfilter_6",    "gFilter 6                    ", telemetrys.gfilter_6,    0, 0, 0}
+  {"hardware",     "Hardware Version                  ", telemetrys.hardware,     0, 0, 0},
+  {"software",     "Software Version                  ", telemetrys.software,     0, 0, 0},
+  {"timestamp",    "Timestamp                         ", telemetrys.timestamp,    0, 0, 0},
+  {"julian",       "Julian Date                       ", telemetrys.jd,           0, 0, 0},
+  {"tcp_shm_mode", "TCP (Shared Memory) Mode          ", telemetrys.tcp_shm_mode, 0, 0, 0},
+  {"udp_shm_mode", "UDP (Shared Memory) Mode          ", telemetrys.udp_shm_mode, 0, 0, 0},
+  {"a_encoder",    "A Encoder (A axis motor position) ", telemetrys.a_encoder,    0, 0, 0},
+  {"b_encoder",    "B Encoder (B axis motor position) ", telemetrys.b_encoder,    0, 0, 0},
+  {"c_encoder",    "C Encoder (C axis motor position) ", telemetrys.c_encoder,    0, 0, 0},
+  {"a_position",   "A Position (B axis analog in)     ", telemetrys.a_position,   0, 0, 0},
+  {"b_position",   "B Position (D axis analog in)     ", telemetrys.b_position,   0, 0, 0},
+  {"c_position",   "C Position (F axis analog in)     ", telemetrys.c_position,   0, 0, 0},
+  {"a_reference",  "A Focus Reference                 ", telemetrys.a_reference,  0, 0, 0},
+  {"b_reference",  "B Focus Reference                 ", telemetrys.b_reference,  0, 0, 0},
+  {"c_reference",  "C Focus Reference                 ", telemetrys.c_reference,  0, 0, 0},
+  {"distall",      "distall                           ", telemetrys.distall,      0, 0, 0},
+  {"dista",        "dista                             ", telemetrys.dista,        0, 0, 0},
+  {"distb",        "distb                             ", telemetrys.distb,        0, 0, 0},
+  {"distc",        "distc                             ", telemetrys.distc,        0, 0, 0},
+  {"distgcam",     "distgcam                          ", telemetrys.distgcam,     0, 0, 0},
+  {"errfilt",      "errfilt (1.0=Error, 0.0=OK)       ", telemetrys.errfilt,      0, 0, 0},
+  {"filtisin",     "filtisin  (1.0=True, 0.0=False)   ", telemetrys.filtisin,     0, 0, 0},
+  {"ifilter_0",    "iFilter 1 (filtvals[0])           ", telemetrys.ifilter_1,    0, 0, 0},
+  {"ifilter_1",    "iFilter 2 (filtvals[1])           ", telemetrys.ifilter_2,    0, 0, 0},
+  {"ifilter_2",    "iFilter 3 (filtvals[2])           ", telemetrys.ifilter_3,    0, 0, 0},
+  {"ifilter_3",    "iFilter 4 (filtvals[3])           ", telemetrys.ifilter_4,    0, 0, 0},
+  {"ifilter_4",    "iFilter 5 (filtvals[4])           ", telemetrys.ifilter_5,    0, 0, 0},
+  {"ifilter_5",    "iFilter 6 (filtvals[5])           ", telemetrys.ifilter_6,    0, 0, 0},
+  {"reqfilt",      "reqfilt (requested filter)        ", telemetrys.reqfilt,      0, 0, 0},
+  {"filtval",      "filtval (selected filter)         ", telemetrys.filtval,      0, 0, 0},
+  {"gfiltn",       "gfiltn                            ", telemetrys.gfiltn,       0, 0, 0},
+  {"gfilter_1",    "gFilter 1                         ", telemetrys.gfilter_1,    0, 0, 0},
+  {"gfilter_2",    "gFilter 2                         ", telemetrys.gfilter_2,    0, 0, 0},
+  {"gfilter_3",    "gFilter 3                         ", telemetrys.gfilter_3,    0, 0, 0},
+  {"gfilter_4",    "gFilter 4                         ", telemetrys.gfilter_4,    0, 0, 0},
+  {"gfilter_5",    "gFilter 5                         ", telemetrys.gfilter_5,    0, 0, 0},
+  {"gfilter_6",    "gFilter 6                         ", telemetrys.gfilter_6,    0, 0, 0}
 };
 static ITextVectorProperty telemetryTP = {
   GALIL_DEVICE, "Telemetry", "Telemetry",  TELEMETRY_GROUP, IP_RO, 0, IPS_IDLE, telemetryT, NARRAY(telemetryT), "", 0
@@ -1311,6 +1313,7 @@ static void execute_timer(void *p) {
   (void) sprintf(telemetrys.hardware,     "%s",             tcp_val.hardware);
   (void) sprintf(telemetrys.software,     "%s",             tcp_val.software);
   (void) sprintf(telemetrys.timestamp,    "%s",             tcp_val.timestamp);
+  (void) sprintf(telemetrys.jd,           "%f",             tcp_val.jd);
   (void) sprintf(telemetrys.tcp_shm_mode, "%s",             tcp_val.simulate > 0 ? "SIMULATE" : "DIRECT");
   (void) sprintf(telemetrys.udp_shm_mode, "%s",             udp_val.simulate > 0 ? "SIMULATE" : "DIRECT");
   (void) sprintf(telemetrys.a_encoder,    "%05d / %05d",    (int)ifoci.enca, udp_val.aaxis_motor_position);
