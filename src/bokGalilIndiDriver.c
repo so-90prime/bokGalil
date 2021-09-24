@@ -1242,52 +1242,6 @@ static void execute_timer(void *p) {
   (void) sprintf(ifilter_names.filter_6, "%s", bok_ifilters[(int)round(tcp_val.filtvals[5])].name);
   IDSetText(&ifilterTP, NULL);
 
-//  for (int i=0; i<BOK_IFILTER_SLOTS; i++) {
-//    if (tcp_val.filtvals[0] == (float)i) {
-//      if (tcp_val.filtvals[0] == tcp_val.lv.filtval) {
-//        (void) sprintf(ifilter_names.filter_1, "| %s |", bok_ifilters[i].name);
-//      } else {
-//        (void) sprintf(ifilter_names.filter_1, "%s", bok_ifilters[i].name);
-//      }
-//    }
-//    if (tcp_val.filtvals[1] == (float)i) {
-//      if (tcp_val.filtvals[1] == tcp_val.lv.filtval) {
-//        (void) sprintf(ifilter_names.filter_2, "| %s |", bok_ifilters[i].name);
-//      } else {
-//        (void) sprintf(ifilter_names.filter_2, "%s", bok_ifilters[i].name);
-//      }
-//    }
-//    if (tcp_val.filtvals[2] == (float)i) {
-//      if (tcp_val.filtvals[2] == tcp_val.lv.filtval) {
-//        (void) sprintf(ifilter_names.filter_3, "| %s |", bok_ifilters[i].name);
-//      } else {
-//        (void) sprintf(ifilter_names.filter_3, "%s", bok_ifilters[i].name);
-//      }
-//    }
-//    if (tcp_val.filtvals[3] == (float)i) {
-//      if (tcp_val.filtvals[3] == tcp_val.lv.filtval) {
-//        (void) sprintf(ifilter_names.filter_4, "| %s |", bok_ifilters[i].name);
-//      } else {
-//        (void) sprintf(ifilter_names.filter_4, "%s", bok_ifilters[i].name);
-//      }
-//    }
-//    if (tcp_val.filtvals[4] == (float)i) {
-//      if (tcp_val.filtvals[4] == tcp_val.lv.filtval) {
-//        (void) sprintf(ifilter_names.filter_5, "| %s |", bok_ifilters[i].name);
-//      } else {
-//        (void) sprintf(ifilter_names.filter_5, "%s", bok_ifilters[i].name);
-//      }
-//    }
-//    if (tcp_val.filtvals[5] == (float)i) {
-//      if (tcp_val.filtvals[5] == tcp_val.lv.filtval) {
-//        (void) sprintf(ifilter_names.filter_6, "| %s |", bok_ifilters[i].name);
-//      } else {
-//        (void) sprintf(ifilter_names.filter_6, "%s", bok_ifilters[i].name);
-//      }
-//    }
-//  }
-//  IDSetText(&ifilterTP, NULL);
-
   /* update values */
   ifoci.enca = tcp_val.position[0];
   ifoci.encb = tcp_val.position[1];
@@ -1299,8 +1253,8 @@ static void execute_timer(void *p) {
   /* set and update text(s) */
   (void) memset((void *)&telemetrys, 0, sizeof(telemetrys));
   for (int j=0; j<BOK_IFILTER_SLOTS; j++) {
-    if (tcp_val.lv.filtval  == (float)j) { (void) sprintf(telemetrys.filtval, "%03d (%6s)", j, bok_ifilters[j].name); }
-    if (tcp_val.lv.reqfilt  == (float)j) { (void) sprintf(telemetrys.reqfilt, "%03d (%6s)", j, bok_ifilters[j].name); }
+    if (tcp_val.lv.filtval  == (float)j) { (void) sprintf(telemetrys.filtval, "%s (%d)", bok_ifilters[j].name, j); }
+    if (tcp_val.lv.reqfilt  == (float)j) { (void) sprintf(telemetrys.reqfilt, "%s (%d)", bok_ifilters[j].name, j); }
   }
   (void) sprintf(telemetrys.hardware,     "%s",             tcp_val.hardware);
   (void) sprintf(telemetrys.software,     "%s",             tcp_val.software);
@@ -1323,19 +1277,19 @@ static void execute_timer(void *p) {
   (void) sprintf(telemetrys.distgcam,     "%08.1f",         tcp_val.lv.distgcam);
   (void) sprintf(telemetrys.errfilt,      "%08.1f",         tcp_val.lv.errfilt);
   (void) sprintf(telemetrys.filtisin,     "%08.1f",         tcp_val.lv.filtisin);
-  (void) sprintf(telemetrys.ifilter_1,    "%03d %s",        (int)tcp_val.filtvals[0], ifilter_names.filter_1);
-  (void) sprintf(telemetrys.ifilter_2,    "%03d %s",        (int)tcp_val.filtvals[1], ifilter_names.filter_2);
-  (void) sprintf(telemetrys.ifilter_3,    "%03d %s",        (int)tcp_val.filtvals[2], ifilter_names.filter_3);
-  (void) sprintf(telemetrys.ifilter_4,    "%03d %s",        (int)tcp_val.filtvals[3], ifilter_names.filter_4);
-  (void) sprintf(telemetrys.ifilter_5,    "%03d %s",        (int)tcp_val.filtvals[4], ifilter_names.filter_5);
-  (void) sprintf(telemetrys.ifilter_6,    "%03d %s",        (int)tcp_val.filtvals[5], ifilter_names.filter_6);
+  (void) sprintf(telemetrys.ifilter_1,    "%s (%d)",        ifilter_names.filter_1, (int)round(tcp_val.filtvals[0]));
+  (void) sprintf(telemetrys.ifilter_2,    "%s (%d)",        ifilter_names.filter_2, (int)round(tcp_val.filtvals[1]));
+  (void) sprintf(telemetrys.ifilter_3,    "%s (%d)",        ifilter_names.filter_3, (int)round(tcp_val.filtvals[2]));
+  (void) sprintf(telemetrys.ifilter_4,    "%s (%d)",        ifilter_names.filter_4, (int)round(tcp_val.filtvals[3]));
+  (void) sprintf(telemetrys.ifilter_5,    "%s (%d)",        ifilter_names.filter_5, (int)round(tcp_val.filtvals[4]));
+  (void) sprintf(telemetrys.ifilter_6,    "%s (%d)",        ifilter_names.filter_6, (int)round(tcp_val.filtvals[5]));
   (void) sprintf(telemetrys.gfiltn,       "%08.1f",         tcp_val.lv.gfiltn);
-  (void) sprintf(telemetrys.gfilter_1,    "001 %s",         gfilter_names.filter_1);
-  (void) sprintf(telemetrys.gfilter_2,    "002 %s",         gfilter_names.filter_2);
-  (void) sprintf(telemetrys.gfilter_3,    "003 %s",         gfilter_names.filter_3);
-  (void) sprintf(telemetrys.gfilter_4,    "004 %s",         gfilter_names.filter_4);
-  (void) sprintf(telemetrys.gfilter_5,    "005 %s",         gfilter_names.filter_5);
-  (void) sprintf(telemetrys.gfilter_6,    "006 %s",         gfilter_names.filter_6);
+  (void) sprintf(telemetrys.gfilter_1,    "%s (1)",         gfilter_names.filter_1);
+  (void) sprintf(telemetrys.gfilter_2,    "%s (2)",         gfilter_names.filter_2);
+  (void) sprintf(telemetrys.gfilter_3,    "%s (3)",         gfilter_names.filter_3);
+  (void) sprintf(telemetrys.gfilter_4,    "%s (4)",         gfilter_names.filter_4);
+  (void) sprintf(telemetrys.gfilter_5,    "%s (5)",         gfilter_names.filter_5);
+  (void) sprintf(telemetrys.gfilter_6,    "%s (6)",         gfilter_names.filter_6);
   IDSetText(&telemetryTP, NULL);
 
   /* set and update light(s)*/
