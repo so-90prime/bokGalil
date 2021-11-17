@@ -332,7 +332,7 @@ static ITextVectorProperty telemetryTP = {
 
 static ILight telemetry_ifilterwheelL[] = {
   {"fout", "Filter Out", ISS_OFF, 0, 0},
-  {"frot", "tFW Rotating", ISS_OFF, 0, 0},
+  {"frot", "FW Rotating", ISS_OFF, 0, 0},
   {"flin", "Filter Translating", ISS_OFF, 0, 0},
   {"fin", "Filter In", ISS_OFF, 0, 0},
   {"ferr", "FW Error", ISS_OFF, 0, 0}
@@ -1332,36 +1332,12 @@ static void execute_timer(void *p) {
   (void) memset((void *)&gfilter_names, 0, sizeof(gfilter_names));
   _gfiltn = (int)round(tcp_val.lv.gfiltn);
   // Use the above value to set the switch to on to highlight
-  if (_gfiltn == 1) {
-    (void) sprintf(gfilter_names.filter_1, "| %s |", bok_gfilters[1].name);
-  } else {
-    (void) sprintf(gfilter_names.filter_1, "%s", bok_gfilters[1].name);
-  }
-  if (_gfiltn == 2) {
-    (void) sprintf(gfilter_names.filter_2, "| %s |", bok_gfilters[2].name);
-  } else {
-    (void) sprintf(gfilter_names.filter_2, "%s", bok_gfilters[2].name);
-  }
-  if (_gfiltn == 3) {
-    (void) sprintf(gfilter_names.filter_3, "| %s |", bok_gfilters[3].name);
-  } else {
-    (void) sprintf(gfilter_names.filter_3, "%s", bok_gfilters[3].name);
-  }
-  if (_gfiltn == 4) {
-    (void) sprintf(gfilter_names.filter_4, "| %s |", bok_gfilters[4].name);
-  } else {
-    (void) sprintf(gfilter_names.filter_4, "%s", bok_gfilters[4].name);
-  }
-  if (_gfiltn == 5) {
-    (void) sprintf(gfilter_names.filter_5, "| %s |", bok_gfilters[5].name);
-  } else {
-    (void) sprintf(gfilter_names.filter_5, "%s", bok_gfilters[5].name);
-  }
-  if (_gfiltn == 6) {
-    (void) sprintf(gfilter_names.filter_6, "| %s |", bok_gfilters[6].name);
-  } else {
-    (void) sprintf(gfilter_names.filter_6, "%s", bok_gfilters[6].name);
-  }
+  (void) sprintf(gfilter_names.filter_1, "%s", bok_gfilters[1].name);
+  (void) sprintf(gfilter_names.filter_2, "%s", bok_gfilters[2].name);
+  (void) sprintf(gfilter_names.filter_3, "%s", bok_gfilters[3].name);
+  (void) sprintf(gfilter_names.filter_4, "%s", bok_gfilters[4].name);
+  (void) sprintf(gfilter_names.filter_5, "%s", bok_gfilters[5].name);
+  (void) sprintf(gfilter_names.filter_6, "%s", bok_gfilters[6].name);
   IUResetSwitch(&gfilter_changeSP); // Reset the switches to OFF
   gfilter_changeS[_gfiltn - 1].s = ISS_ON; // Subtract one since zero based
   IDSetSwitch(&gfilter_changeSP, NULL); // Update the switches
@@ -1373,37 +1349,37 @@ static void execute_timer(void *p) {
   (void) memset((void *)&ifilter_names, 0, sizeof(ifilter_names));
   _ifiltn = (int)round(tcp_val.lv.filtval);
   if (_ifiltn == (int)round(tcp_val.filtvals[0])) {
-    (void) sprintf(ifilter_names.filter_1, "| %s |", bok_ifilters[(int)round(tcp_val.filtvals[0])].name);
+    (void) sprintf(ifilter_names.filter_1, "%s", bok_ifilters[(int)round(tcp_val.filtvals[0])].name);
     ifilter_changeS[0].s = ISS_ON;
   } else {
     (void) sprintf(ifilter_names.filter_1, "%s", bok_ifilters[(int)round(tcp_val.filtvals[0])].name);
   }
   if (_ifiltn == (int)round(tcp_val.filtvals[1])) {
-    (void) sprintf(ifilter_names.filter_2, "| %s |", bok_ifilters[(int)round(tcp_val.filtvals[1])].name);
+    (void) sprintf(ifilter_names.filter_2, "%s", bok_ifilters[(int)round(tcp_val.filtvals[1])].name);
     ifilter_changeS[1].s = ISS_ON;
   } else {
     (void) sprintf(ifilter_names.filter_2, "%s", bok_ifilters[(int)round(tcp_val.filtvals[1])].name);
   }
   if (_ifiltn == (int)round(tcp_val.filtvals[2])) {
-    (void) sprintf(ifilter_names.filter_3, "| %s |", bok_ifilters[(int)round(tcp_val.filtvals[2])].name);
+    (void) sprintf(ifilter_names.filter_3, "%s", bok_ifilters[(int)round(tcp_val.filtvals[2])].name);
     ifilter_changeS[2].s = ISS_ON;
   } else {
     (void) sprintf(ifilter_names.filter_3, "%s", bok_ifilters[(int)round(tcp_val.filtvals[2])].name);
   }
   if (_ifiltn == (int)round(tcp_val.filtvals[3])) {
-    (void) sprintf(ifilter_names.filter_4, "| %s |", bok_ifilters[(int)round(tcp_val.filtvals[3])].name);
+    (void) sprintf(ifilter_names.filter_4, "%s", bok_ifilters[(int)round(tcp_val.filtvals[3])].name);
     ifilter_changeS[3].s = ISS_ON;
   } else {
     (void) sprintf(ifilter_names.filter_4, "%s", bok_ifilters[(int)round(tcp_val.filtvals[3])].name);
   }
   if (_ifiltn == (int)round(tcp_val.filtvals[4])) {
-    (void) sprintf(ifilter_names.filter_5, "| %s |", bok_ifilters[(int)round(tcp_val.filtvals[4])].name);
+    (void) sprintf(ifilter_names.filter_5, "%s", bok_ifilters[(int)round(tcp_val.filtvals[4])].name);
     ifilter_changeS[4].s = ISS_ON;
   } else {
     (void) sprintf(ifilter_names.filter_5, "%s", bok_ifilters[(int)round(tcp_val.filtvals[4])].name);
   }
   if (_ifiltn == (int)round(tcp_val.filtvals[5])) {
-    (void) sprintf(ifilter_names.filter_6, "| %s | ", bok_ifilters[(int)round(tcp_val.filtvals[5])].name);
+    (void) sprintf(ifilter_names.filter_6, "%s", bok_ifilters[(int)round(tcp_val.filtvals[5])].name);
     ifilter_changeS[5].s = ISS_ON;
   } else {
     (void) sprintf(ifilter_names.filter_6, "%s", bok_ifilters[(int)round(tcp_val.filtvals[5])].name);
