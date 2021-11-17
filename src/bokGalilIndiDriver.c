@@ -264,6 +264,15 @@ static ITextVectorProperty supportTP = {
   GALIL_DEVICE, "SUPPORT", "Support Available From", SUPPORT_GROUP, IP_RO, 0, IPS_IDLE, supportT, NARRAY(supportT), "", 0
 };
 
+static IText telemetry_referenceT[] = {
+  {"a_reference",  "A Focus Reference", telemetrys.a_reference,  0, 0, 0},
+  {"b_reference",  "B Focus Reference", telemetrys.b_reference,  0, 0, 0},
+  {"c_reference",  "C Focus Reference", telemetrys.c_reference,  0, 0, 0}
+};
+static ITextVectorProperty telemetry_referenceTP = {
+  GALIL_DEVICE, "TELEMETRY_REFERENCE", "References", SUPPORT_GROUP, IP_RO, 0, IPS_IDLE, telemetry_referenceT, NARRAY(telemetry_referenceT), "", 0
+};
+
 /* telemetry group */
 // Wanted to break up into different groups for display purposes
 static IText telemetryT[] = {
@@ -357,6 +366,7 @@ void ISGetProperties(const char *dev) {
   IDDefLight(&telemetry_gfilterwheelLP, NULL);
   IDDefLight(&telemetry_lightsLP, NULL);
   IDDefLight(&telemetry_ifilterwheelLP, NULL);
+  IDDefText(&telemetry_referenceTP, NULL);
   IDDefText(&telemetryTP, NULL);
   IDDefSwitch(&ifilterSP, NULL);
   IDDefText(&ifilterTP, NULL);
@@ -1367,6 +1377,7 @@ static void execute_timer(void *p) {
   (void) sprintf(telemetrys.gfilter_5,    "%s (5)",         gfilter_names.filter_5);
   (void) sprintf(telemetrys.gfilter_6,    "%s (6)",         gfilter_names.filter_6);
   IDSetText(&telemetryTP, NULL);
+  IDSetText(&telemetry_referenceTP, NULL);
 
   /* set and update light(s)*/
   telemetry_connectionL[0].s = (tcp_val.simulate == 0) ? ISS_ON : ISS_OFF;
