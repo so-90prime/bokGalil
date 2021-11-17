@@ -773,9 +773,11 @@ void execute_gfilter_change(ISState states[], char *names[], int n) {
         busy = false;
       }
       gfilter_changeS[5].s = ISS_OFF;
-    gfilter_changeS[i].s = ISS_OFF;
     }
+  }
 
+  for (int i=0; i < n; i++) {
+    gfilter_changeS[i].s = ISS_OFF;
   }
 
     /* reset */
