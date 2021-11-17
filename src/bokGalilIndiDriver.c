@@ -292,6 +292,16 @@ static ITextVectorProperty telemetry_referenceTP = {
   GALIL_DEVICE, "TELEMETRY_REFERENCE", "References", TELEMETRY_GROUP, IP_RO, 0, IPS_IDLE, telemetry_referenceT, NARRAY(telemetry_referenceT), "", 0
 };
 
+static IText telemetry_lvdtT[] = {
+  {"a_position",  "LVDT A", telemetrys.a_position,  0, 0, 0},
+  {"b_position",  "LVDT B", telemetrys.b_position,  0, 0, 0},
+  {"c_position",  "LVDT C", telemetrys.c_position,  0, 0, 0}
+};
+static ITextVectorProperty telemetry_lvdtTP = {
+  GALIL_DEVICE, "TELEMETRY_LVDT", "Current LVDT", TELEMETRY_GROUP, IP_RO, 0, IPS_IDLE, telemetry_lvdtT, NARRAY(telemetry_lvdtT), "", 0
+};
+
+
 /* telemetry group */
 // Wanted to break up into different groups for display purposes
 static IText telemetryT[] = {
@@ -387,6 +397,7 @@ void ISGetProperties(const char *dev) {
   IDDefLight(&telemetry_lightsLP, NULL);
   IDDefLight(&telemetry_ifilterwheelLP, NULL);
   IDDefText(&telemetry_referenceTP, NULL);
+  IDDefText(&telemetry_lvdtTP, NULL);
   IDDefText(&telemetryTP, NULL);
   IDDefSwitch(&ifilter_startupSP, NULL);
   IDDefSwitch(&ifilterSP, NULL);
@@ -1474,6 +1485,7 @@ static void execute_timer(void *p) {
   (void) sprintf(telemetrys.gfilter_6,    "%s (6)",         gfilter_names.filter_6);
   IDSetText(&telemetryTP, NULL);
   IDSetText(&telemetry_referenceTP, NULL);
+  IDSetText(&telemetry_lvdtTP, NULL);
 
   /* set and update light(s)*/
   telemetry_connectionL[0].s = (tcp_val.simulate == 0) ? IPS_OK : IPS_ALERT;
