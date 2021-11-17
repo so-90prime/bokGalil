@@ -331,10 +331,11 @@ static ITextVectorProperty telemetryTP = {
 };
 
 static ILight telemetry_ifilterwheelL[] = {
-  {"fin", "Filter In", ISS_OFF, 0, 0},
-  {"frot", "FW Rotating", ISS_OFF, 0, 0},
+  {"fou", "Filter Out", ISS_OFF, 0, 0},
+  {"frot", "tFW Rotating", ISS_OFF, 0, 0},
   {"flin", "Filter Translating", ISS_OFF, 0, 0},
-  {"ferr", "FW Error", ISS_OFF, 0, 0},
+  ("fin", "Filter In", ISS_OFF, 0, 0},
+  {"ferr", "FW Error", ISS_OFF, 0, 0}
 };
 ILightVectorProperty telemetry_ifilterwheelLP = {
   GALIL_DEVICE, "FW_LIGHTS", "Filterwheel Status", TELEMETRY_GROUP, IPS_IDLE, telemetry_ifilterwheelL, NARRAY(telemetry_ifilterwheelL), "", 0
@@ -1468,10 +1469,11 @@ static void execute_timer(void *p) {
   telemetry_lightsL[0].s = (busy == true ) ? IPS_BUSY : IPS_IDLE;
   telemetry_lightsL[1].s = (IS_BIT_SET(tcp_val.status, 7)) ? IPS_BUSY : IPS_IDLE;
   telemetry_gfilterwheelL[0].s = (udp_val.haxis_moving == 1) ? IPS_BUSY : IPS_IDLE;
-  telemetry_ifilterwheelL[0].s = (tcp_val.lv.filtisin == 1.0) ? IPS_OK : IPS_IDLE;
+  telemetry_ifilterwheelL[0].s = (tcp_val.lv.filtisin == 1.0) ? IPS_IDLE : IPS_BUSY;
   telemetry_ifilterwheelL[1].s = (udp_val.faxis_moving == 1) ? IPS_BUSY : IPS_IDLE;
   telemetry_ifilterwheelL[2].s = (udp_val.gaxis_moving == 1) ? IPS_BUSY : IPS_IDLE;
-  telemetry_ifilterwheelL[3].s = (tcp_val.lv.errfilt == 1.0) ? IPS_ALERT : IPS_IDLE;
+  telemetry_ifilterwheelL[3].s = (tcp_val.lv.filtisin == 1.0) ? IPS_OK : IPS_IDLE;
+  telemetry_ifilterwheelL[4].s = (tcp_val.lv.errfilt == 1.0) ? IPS_ALERT : IPS_IDLE;
 
   telemetry_connectionLP.s = IPS_IDLE;
   telemetry_lightsLP.s   = IPS_IDLE;
