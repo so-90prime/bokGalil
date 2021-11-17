@@ -414,7 +414,7 @@ void ISGetProperties(const char *dev) {
   IDDefText(&telemetry_referenceTP, NULL);
   IDDefText(&telemetry_lvdtTP, NULL);
   IDDefText(&telemetryTP, NULL);
-  IDDefText(&ifilter_engineeringSP, NULL);
+  IDDefSwitch(&ifilter_engineeringSP, NULL);
   IDDefSwitch(&ifilterSP, NULL);
   IDDefSwitch(&ifilter_changeSP, NULL);
   IDDefText(&ifilterTP, NULL);
@@ -559,7 +559,7 @@ void ISNewSwitch(const char *dev, const char *name, ISState *states, char *names
   if (! strcmp(name, ifilter_engineeringSP.name)) {
     execute_ifilter_engineering(states, names, n);
     IUResetSwitch(&ifilter_engineeringSP);
-    IDSetSwitch(&ifilter_engineeringSP, NULL);)
+    IDSetSwitch(&ifilter_engineeringSP, NULL);
   } else if (! strcmp(name, ifilterSP.name)) {
     execute_ifilter_switches(states, names, n);
     IUResetSwitch(&ifilterSP);
@@ -1209,7 +1209,6 @@ void execute_ifilter_switches(ISState states[], char *names[], int n) {
         busy = false;
       }
       ifilterS[1].s = ISS_OFF;
-    }
 
     /* process 'iFilter ReadWheel' - NB: it's up to the higher-level software to check telemetry */
     } else if (sp == &ifilterS[2]) {
@@ -1226,7 +1225,7 @@ void execute_ifilter_switches(ISState states[], char *names[], int n) {
         } else {
           IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_filtrd(), gstat=%d", gstat);
         }
-        ifilterS.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
+        ifilterSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
         busy = false;
       }
       ifilterS[2].s = ISS_OFF;
