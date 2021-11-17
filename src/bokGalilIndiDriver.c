@@ -186,7 +186,7 @@ static ITextVectorProperty gfilterTP = {
 
 /* gfocus group */
 static INumber gfocus_distN[] = {
-  {"distgcam", "-100.0 <= Focus <= +100.0", "%5.0f", -100.0, 100.0, 1.0, 0.0, 0, 0, 0}
+  {"Focus", "%5.0f", -100.0, 100.0, 1.0, 0.0, 0, 0, 0}
 };
 static INumberVectorProperty gfocus_distNP = {
   GALIL_DEVICE, "GFOCUS_DIST", "Change Focus", GFOCUS_GROUP, IP_WO, 0.0, IPS_IDLE, gfocus_distN, NARRAY(gfocus_distN), "", 0
@@ -1463,20 +1463,20 @@ static void execute_timer(void *p) {
   IDSetText(&telemetry_referenceTP, NULL);
 
   /* set and update light(s)*/
-  telemetry_connectionL[0].s = (tcp_val.simulate == 0) ? IPS_BUSY : ISS_OFF;
-  telemetry_connectionL[1].s = (udp_val.simulate == 0) ? ISS_ON : ISS_OFF;
-  telemetry_lightsL[0].s = (busy == true ) ? ISS_OFF : ISS_OFF;
-  telemetry_lightsL[1].s = (IS_BIT_SET(tcp_val.status, 7)) ? ISS_ON : ISS_OFF;
-  telemetry_gfilterwheelL[0].s = (udp_val.haxis_moving == 1) ? ISS_ON : ISS_OFF;
-  telemetry_ifilterwheelL[0].s = (tcp_val.lv.filtisin == 1.0) ? ISS_ON : ISS_OFF;
-  telemetry_ifilterwheelL[1].s = (udp_val.faxis_moving == 1) ? ISS_ON : ISS_OFF;
-  telemetry_ifilterwheelL[2].s = (udp_val.gaxis_moving == 1) ? ISS_ON : ISS_OFF;
-  telemetry_ifilterwheelL[3].s = (tcp_val.lv.errfilt == 1.0) ? ISS_ON : ISS_OFF;
+  telemetry_connectionL[0].s = (tcp_val.simulate == 0) ? IPS_OK : IPS_ALERT;
+  telemetry_connectionL[1].s = (udp_val.simulate == 0) ? IPS_OK : IPS_ALERT;
+  telemetry_lightsL[0].s = (busy == true ) ? IPS_BUSY : IPS_IDLE;
+  telemetry_lightsL[1].s = (IS_BIT_SET(tcp_val.status, 7)) ? IPS_BUSY : IPS_IDLE;
+  telemetry_gfilterwheelL[0].s = (udp_val.haxis_moving == 1) ? IPS_BUSY : IPS_IDLE;
+  telemetry_ifilterwheelL[0].s = (tcp_val.lv.filtisin == 1.0) ? IPS_OK : IPS_IDLE;
+  telemetry_ifilterwheelL[1].s = (udp_val.faxis_moving == 1) ? IPS_BUSY : IPS_IDLE;
+  telemetry_ifilterwheelL[2].s = (udp_val.gaxis_moving == 1) ? IPS_BUSY : IPS_IDLE;
+  telemetry_ifilterwheelL[3].s = (tcp_val.lv.errfilt == 1.0) ? IPS_ALERT : IPS_IDLE;
 
-  telemetry_connectionLP.s = IPS_OK;
-  telemetry_lightsLP.s   = IPS_OK;
-  telemetry_ifilterwheelLP.s = IPS_OK;
-  telemetry_gfilterwheelLP.s = IPS_OK;
+  telemetry_connectionLP.s = IPS_IDLE;
+  telemetry_lightsLP.s   = IPS_IDLE;
+  telemetry_ifilterwheelLP.s = IPS_IDLE;
+  telemetry_gfilterwheelLP.s = IPS_IDLE;
   IDSetLight(&telemetry_connectionLP, NULL);
   IDSetLight(&telemetry_lightsLP, NULL);
   IDSetLight(&telemetry_ifilterwheelLP, NULL);
