@@ -528,6 +528,7 @@ void ISNewSwitch(const char *dev, const char *name, ISState *states, char *names
   } else if (! strcmp(name, gfilter_changeSP.name)) {
     execute_gfilter_change(states, names, n);
     IUResetSwitch(&gfilter_changeSP);
+    IDSetSwitch(&gfilter_changeSP, NULL);
   } else if (! strcmp(name, ifocus_referenceSP.name)) {
     execute_ifocus_reference_switches(states, names, n);
     IUResetSwitch(&ifocus_referenceSP);
