@@ -562,7 +562,6 @@ static void driver_init(void) {
     if (strlen(bok_ifilters[j].code)>0 && strlen(bok_ifilters[j].name)>0) {
       (void) fprintf(stderr, "instrument filters> index=%d, code='%s', name='%s'\n", j, bok_ifilters[j].code, bok_ifilters[j].name);
       (void) fflush(stderr);
-      IDMessage(GALIL_DEVICE, "instrument filters> index=%d, code='%s', name='%s'\n", j, bok_ifilters[j].code, bok_ifilters[j].name);
     }
   }
 
@@ -573,7 +572,6 @@ static void driver_init(void) {
     if (strlen(bok_gfilters[j].code)>0 && strlen(bok_gfilters[j].name)>0) {
       (void) fprintf(stderr, "guider filters> index=%d, code='%s', name='%s'\n", j, bok_gfilters[j].code, bok_gfilters[j].name);
       (void) fflush(stderr);
-      IDMessage(GALIL_DEVICE, "guider filters> index=%d, code='%s', name='%s'\n", j, bok_gfilters[j].code, bok_gfilters[j].name);
       
     }
   }
@@ -1358,6 +1356,7 @@ static void execute_timer(void *p) {
   } else {
     (void) sprintf(gfilter_names.filter_6, "%s", bok_gfilters[6].name);
   }
+  IDMessage(GALIL_DEVICE, "guider index=%d", _gfiln);
   gfilter_changeS[_gfiltn].s = ISS_ON; // Subtract one since zero based
   IDSetSwitch(&gfilter_changeSP, NULL);
   IDSetText(&gfilterTP, NULL);
@@ -1395,6 +1394,7 @@ static void execute_timer(void *p) {
   } else {
     (void) sprintf(ifilter_names.filter_6, "%s", bok_ifilters[(int)round(tcp_val.filtvals[5])].name);
   }
+  IDMessage(GALIL_DEVICE, "filter index=%d", _ifiln);
   ifilter_changeS[_ifiltn].s = ISS_ON;
   IDSetSwitch(&ifilter_changeSP, NULL);
   IDSetText(&ifilterTP, NULL);
