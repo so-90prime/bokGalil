@@ -519,12 +519,15 @@ void ISNewSwitch(const char *dev, const char *name, ISState *states, char *names
   if (! strcmp(name, ifilterSP.name)) {
     execute_ifilter_switches(states, names, n);
     IUResetSwitch(&ifilterSP);
+    IDSetSwitch(&ifilterSP, NULL);
   } else if (! strcmp(name, ifilter_changeSP.name)) {
     execute_ifilter_change(states, names, n);
     IUResetSwitch(&ifilter_changeSP);
+    IDSetSwitch(&ifilter_changeSP, NULL);
   } else if (! strcmp(name, gfilterSP.name)) {
     execute_gfilter_switches(states, names, n);
     IUResetSwitch(&gfilterSP);
+    IDSetSwitch(&gfilterSP, NULL);
   } else if (! strcmp(name, gfilter_changeSP.name)) {
     execute_gfilter_change(states, names, n);
     IUResetSwitch(&gfilter_changeSP);
@@ -532,6 +535,7 @@ void ISNewSwitch(const char *dev, const char *name, ISState *states, char *names
   } else if (! strcmp(name, ifocus_referenceSP.name)) {
     execute_ifocus_reference_switches(states, names, n);
     IUResetSwitch(&ifocus_referenceSP);
+    IDSetSwitch(&ifocus_referenceSP, NULL);
   }
 }
 
@@ -609,9 +613,6 @@ void execute_gfilter_change(ISState states[], char *names[], int n) {
     state_change = state != sp->s;
     
     if (! state_change) { continue; }
-
-    // Reset switches here
-    gfilter_changeS[i].s = ISS_OFF;
 
     /* process 'gFilter 1' */
     if (sp == &gfilter_changeS[0]) {
@@ -777,11 +778,7 @@ void execute_gfilter_change(ISState states[], char *names[], int n) {
     }
   }
 
-  for (int i=0; i < n; i++) {
-    gfilter_changeS[i].s = ISS_OFF;
-  }
-
-    /* reset */
+  /* reset */
   IUResetSwitch(&gfilter_changeSP);
   IDSetSwitch(&gfilter_changeSP, NULL);
 }
@@ -1364,11 +1361,9 @@ static void execute_timer(void *p) {
   } else {
     (void) sprintf(gfilter_names.filter_6, "%s", bok_gfilters[6].name);
   }
-  IDMessage(GALIL_DEVICE, "guider index=%d", _gfiltn);
-  IUResetSwitch(&gfilter_changeSP);
+  IUResetSwitch(&gfilter_changeSP); // Reset the switches to OFF
   gfilter_changeS[_gfiltn - 1].s = ISS_ON; // Subtract one since zero based
-
-  IDSetSwitch(&gfilter_changeSP, NULL);
+  IDSetSwitch(&gfilter_changeSP, NULL); // Update the switches
   IDSetText(&gfilterTP, NULL);
 
   /* update ifilter(s) */
@@ -1404,10 +1399,11 @@ static void execute_timer(void *p) {
   } else {
     (void) sprintf(ifilter_names.filter_6, "%s", bok_ifilters[(int)round(tcp_val.filtvals[5])].name);
   }
-  /* IDMessage(GALIL_DEVICE, "filter index=%d", _ifiltn - 1);
-  ifilter_changeS[_ifiltn].s = ISS_ON;
+  IDMessage(GALIL_DEVICE, "filter index=%d", _ifiltn - 1);
+  IUResetSwitch(&ifilter_changeSP); // Reset the switches to OFF
+  ifilter_changeS[_ifiltn - 1].s = ISS_ON; // Subtract one since zero based
   IDSetSwitch(&ifilter_changeSP, NULL);
-  IDSetText(&ifilterTP, NULL); */
+  IDSetText(&ifilterTP, NULL);
 
   /* update values */
   ifoci.enca = tcp_val.position[0];
