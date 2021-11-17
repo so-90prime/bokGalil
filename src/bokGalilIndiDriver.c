@@ -153,16 +153,16 @@ telemetry_t telemetrys;
  ******************************************************************************/
 /* gfilter group */
 static ISwitch gfilterS[] = {
-  {"g_initfw",   "gFilter Initialize ", ISS_OFF, 0, 0},
-  {"g_slot_1",   "gFilter 1          ", ISS_OFF, 0, 0},
-  {"g_slot_2",   "gFilter 2          ", ISS_OFF, 0, 0},
-  {"g_slot_3",   "gFilter 3          ", ISS_OFF, 0, 0},
-  {"g_slot_4",   "gFilter 4          ", ISS_OFF, 0, 0},
-  {"g_slot_5",   "gFilter 5          ", ISS_OFF, 0, 0},
-  {"g_slot_6",   "gFilter 6          ", ISS_OFF, 0, 0}
+  {"g_initfw", "gFilter Initialize", ISS_OFF, 0, 0},
+  {"g_slot_1",   "gFilter 1", ISS_OFF, 0, 0},
+  {"g_slot_2",   "gFilter 2", ISS_OFF, 0, 0},
+  {"g_slot_3",   "gFilter 3", ISS_OFF, 0, 0},
+  {"g_slot_4",   "gFilter 4", ISS_OFF, 0, 0},
+  {"g_slot_5",   "gFilter 5", ISS_OFF, 0, 0},
+  {"g_slot_6",   "gFilter 6", ISS_OFF, 0, 0}
 };
 ISwitchVectorProperty gfilterSP = {
-  GALIL_DEVICE, "GFILTER_ACTION", "Actions", GFILTER_GROUP, IP_RW, ISR_1OFMANY, 0.0, IPS_IDLE, gfilterS, NARRAY(gfilterS), "", 0
+  GALIL_DEVICE, "GFILTER_CHANGE", "Change Filter", GFILTER_GROUP, IP_RW, ISR_1OFMANY, 0.0, IPS_IDLE, gfilterS, NARRAY(gfilterS), "", 0
 };
 
 static IText gfilterT[] = {
@@ -174,35 +174,34 @@ static IText gfilterT[] = {
   {"gfilter_6", "gFilter 6", gfilter_names.filter_6, 0, 0, 0}
 };
 static ITextVectorProperty gfilterTP = {
-  GALIL_DEVICE, "GFILTER_NAMES", "Scientific Names", GFILTER_GROUP, IP_RO, 0.0, IPS_IDLE, gfilterT, NARRAY(gfilterT), "", 0
+  GALIL_DEVICE, "GFILTER_NAMES", "Filter Names", GFILTER_GROUP, IP_RO, 0.0, IPS_IDLE, gfilterT, NARRAY(gfilterT), "", 0
 };
-
 
 /* gfocus group */
 static INumber gfocus_distN[] = {
-  {"distgcam", "-100.0 <= distgcam <= +100.0", "%5.0f", -100.0, 100.0, 1.0, 0.0, 0, 0, 0}
+  {"distgcam", "-100.0 <= Focus <= +100.0", "%5.0f", -100.0, 100.0, 1.0, 0.0, 0, 0, 0}
 };
 static INumberVectorProperty gfocus_distNP = {
-  GALIL_DEVICE, "GFOCUS_DIST", "gFocus Distance", GFOCUS_GROUP, IP_RW, 0.0, IPS_IDLE, gfocus_distN, NARRAY(gfocus_distN), "", 0
+  GALIL_DEVICE, "GFOCUS_DIST", "Change Focus", GFOCUS_GROUP, IP_WO, 0.0, IPS_IDLE, gfocus_distN, NARRAY(gfocus_distN), "", 0
 };
 
 /* ifilter group */
 static ISwitch ifilterS[] = {
-  {"i_populate", "iFilter Populate   ", ISS_OFF, 0, 0},
-  {"i_popdone",  "iFilter PopDone    ", ISS_OFF, 0, 0},
-  {"i_readfw",   "iFilter ReadWheel  ", ISS_OFF, 0, 0},
-  {"i_initfw",   "iFilter Initialize ", ISS_OFF, 0, 0},
-  {"i_load",     "iFilter Load       ", ISS_OFF, 0, 0},
-  {"i_unload",   "iFilter Unload     ", ISS_OFF, 0, 0},
-  {"i_slot_1",   "iFilter 1          ", ISS_OFF, 0, 0},
-  {"i_slot_2",   "iFilter 2          ", ISS_OFF, 0, 0},
-  {"i_slot_3",   "iFilter 3          ", ISS_OFF, 0, 0},
-  {"i_slot_4",   "iFilter 4          ", ISS_OFF, 0, 0},
-  {"i_slot_5",   "iFilter 5          ", ISS_OFF, 0, 0},
-  {"i_slot_6",   "iFilter 6          ", ISS_OFF, 0, 0}
+  {"i_populate", "Populate", ISS_OFF, 0, 0},
+  {"i_popdone",  "PopDone", ISS_OFF, 0, 0},
+  {"i_readfw",   "Read Filters", ISS_OFF, 0, 0},
+  {"i_initfw",   "FW Initialize", ISS_OFF, 0, 0},
+  {"i_load",     "Load Filter", ISS_OFF, 0, 0},
+  {"i_unload",   "Unload Filter", ISS_OFF, 0, 0},
+  {"i_slot_1",   "iFilter 1", ISS_OFF, 0, 0},
+  {"i_slot_2",   "iFilter 2", ISS_OFF, 0, 0},
+  {"i_slot_3",   "iFilter 3", ISS_OFF, 0, 0},
+  {"i_slot_4",   "iFilter 4", ISS_OFF, 0, 0},
+  {"i_slot_5",   "iFilter 5", ISS_OFF, 0, 0},
+  {"i_slot_6",   "iFilter 6", ISS_OFF, 0, 0}
 };
 ISwitchVectorProperty ifilterSP = {
-  GALIL_DEVICE, "IFILTER_ACTION", "Actions", IFILTER_GROUP, IP_RW, ISR_1OFMANY, 0.0, IPS_IDLE, ifilterS, NARRAY(ifilterS), "", 0
+  GALIL_DEVICE, "IFILTER_CHANGE", "Change Filter", IFILTER_GROUP, IP_RW, ISR_1OFMANY, 0.0, IPS_IDLE, ifilterS, NARRAY(ifilterS), "", 0
 };
 
 static IText ifilterT[] = {
@@ -214,46 +213,45 @@ static IText ifilterT[] = {
   {"ifilter_6", "iFilter 6", ifilter_names.filter_6, 0, 0, 0}
 };
 static ITextVectorProperty ifilterTP = {
-  GALIL_DEVICE, "IFILTER_NAMES", "Scientific Names", IFILTER_GROUP, IP_RO, 0.0, IPS_IDLE, ifilterT, NARRAY(ifilterT), "", 0
+  GALIL_DEVICE, "IFILTER_NAMES", "Filter Names", IFILTER_GROUP, IP_RO, 0.0, IPS_IDLE, ifilterT, NARRAY(ifilterT), "", 0
 };
 
 
 /* ifocus group */
 static ISwitch ifocus_referenceS[] = {
-  {"savfoc", "Save Focus Reference      ", ISS_OFF, 0, 0},
-  {"resfoc", "Restore Focus Reference   ", ISS_OFF, 0, 0},
-  {"savnom", "Save Nominal Plane        ", ISS_OFF, 0, 0},
-  {"resnom", "Restore Nominal Plane     ", ISS_OFF, 0, 0}
+  {"savfoc", "Save Reference", ISS_OFF, 0, 0},
+  {"resfoc", "Restore Reference", ISS_OFF, 0, 0},
+  {"savnom", "Save Nominal Plane", ISS_OFF, 0, 0},
+  {"resnom", "Restore Nominal Plane", ISS_OFF, 0, 0}
 };
 ISwitchVectorProperty ifocus_referenceSP = {
   GALIL_DEVICE, "IFOCUS_REFERENCE", "References", IFOCUS_GROUP, IP_RW, ISR_ATMOST1, 0.0, IPS_IDLE, ifocus_referenceS, NARRAY(ifocus_referenceS), "", 0
 };
 
 static INumber ifocus_distN[] = {
-  {"dista", "-290.0 <= dista <= +2500.0", "%5.0f", -290.0, 2500.0, 1.0, 0.0, 0, 0, 0},
-  {"distb", "-290.0 <= distb <= +2500.0", "%5.0f", -290.0, 2500.0, 1.0, 0.0, 0, 0, 0},
-  {"distc", "-290.0 <= distc <= +2500.0", "%5.0f", -290.0, 2500.0, 1.0, 0.0, 0, 0, 0}
+  {"dista", "Focus A", "%5.0f", -290.0, 2500.0, 1.0, 0.0, 0, 0, 0},
+  {"distb", "Focus B", "%5.0f", -290.0, 2500.0, 1.0, 0.0, 0, 0, 0},
+  {"distc", "Focus C", "%5.0f", -290.0, 2500.0, 1.0, 0.0, 0, 0, 0}
 };
 static INumberVectorProperty ifocus_distNP = {
-  GALIL_DEVICE, "IFOCUS_DIST", "iFocus Relative Distance", IFOCUS_GROUP, IP_RW, 0.0, IPS_IDLE, ifocus_distN, NARRAY(ifocus_distN), "", 0
+  GALIL_DEVICE, "IFOCUS_DIST", "Relative Goto Individual", IFOCUS_GROUP, IP_WO, 0.0, IPS_IDLE, ifocus_distN, NARRAY(ifocus_distN), "", 0
 };
 
 static INumber ifocus_distallN[] = {
-  {"distall", "-290.0 <= distall <= +2500.0", "%5.0f", -290.0, 2500.0, 1.0, 0.0, 0, 0, 0}
+  {"distall", "Focus All", "%5.0f", -290.0, 2500.0, 1.0, 0.0, 0, 0, 0}
 };
 static INumberVectorProperty ifocus_distallNP = {
-  GALIL_DEVICE, "IFOCUS_DISTALL", "iFocus Relative Distance All", IFOCUS_GROUP, IP_RW, 0.0, IPS_IDLE, ifocus_distallN, NARRAY(ifocus_distallN), "", 0
+  GALIL_DEVICE, "IFOCUS_DISTALL", "Relative Goto All", IFOCUS_GROUP, IP_WO, 0.0, IPS_IDLE, ifocus_distallN, NARRAY(ifocus_distallN), "", 0
 };
 
 static INumber ifocus_lvdtN[] = {
-  {"lvdta",   "-290.0 <= lvdta <= +2500.0", "%5.0f", -290.0, 2500.0, 1.0, 0.0, 0, 0, 0},
-  {"lvdtb",   "-290.0 <= lvdtb <= +2500.0", "%5.0f", -290.0, 2500.0, 1.0, 0.0, 0, 0, 0},
-  {"lvdtc",   "-290.0 <= lvdtc <= +2500.0", "%5.0f", -290.0, 2500.0, 1.0, 0.0, 0, 0, 0}
+  {"lvdta", "LVDT A", "%5.0f", -290.0, 2500.0, 1.0, 0.0, 0, 0, 0},
+  {"lvdtb", "LVDT B", "%5.0f", -290.0, 2500.0, 1.0, 0.0, 0, 0, 0},
+  {"lvdtc", "LVDT C", "%5.0f", -290.0, 2500.0, 1.0, 0.0, 0, 0, 0}
 };
 static INumberVectorProperty ifocus_lvdtNP = {
-  GALIL_DEVICE, "IFOCUS_LVDT", "iFocus LVDT Values", IFOCUS_GROUP, IP_RW, 0.0, IPS_IDLE, ifocus_lvdtN, NARRAY(ifocus_lvdtN), "", 0
+  GALIL_DEVICE, "IFOCUS_LVDT", "Goto LVDT Values", IFOCUS_GROUP, IP_WO, 0.0, IPS_IDLE, ifocus_lvdtN, NARRAY(ifocus_lvdtN), "", 0
 };
-
 
 /* support group */
 static IText supportT[] = {
@@ -268,6 +266,18 @@ static ITextVectorProperty supportTP = {
 
 
 /* telemetry group */
+// Wanted to break up into different groups for display purposes
+static IText telemetry_referenceT[] = {
+  {"a_reference",  "A Focus Reference", telemetrys.a_reference,  0, 0, 0},
+  {"b_reference",  "B Focus Reference", telemetrys.b_reference,  0, 0, 0},
+  {"c_reference",  "C Focus Reference", telemetrys.c_reference,  0, 0, 0},
+};
+static ITextVectorProperty telemetryTP = {
+  GALIL_DEVICE, "TELEMETRY_REFERENCE", "Current Reference", TELEMETRY_GROUP, IP_RO, 0, IPS_IDLE, telemetry_referenceT, NARRAY(telemetry_referenceT), "", 0
+};
+
+static IText telemetry_a
+
 static IText telemetryT[] = {
   {"hardware",     "Hardware Version                  ", telemetrys.hardware,     0, 0, 0},
   {"software",     "Software Version                  ", telemetrys.software,     0, 0, 0},
@@ -311,19 +321,38 @@ static ITextVectorProperty telemetryTP = {
   GALIL_DEVICE, "Telemetry", "Telemetry",  TELEMETRY_GROUP, IP_RO, 0, IPS_IDLE, telemetryT, NARRAY(telemetryT), "", 0
 };
 
+static ILight telemetry_ifilterwheelL[] = {
+  {"fin", "Filter In", ISS_OFF, 0, 0},
+  {"frot", "FW Rotating", ISS_OFF, 0, 0},
+  {"flin", "Filter Translating", ISS_OFF, 0, 0},
+  {"ferr", "FW Error", ISS_OFF, 0, 0},
+};
+ILightVectorProperty telemetry_ifilterwheelLP = {
+  GALIL_DEVICE, "FW_LIGHTS", "Filterwheel Status", TELEMETRY_GROUP, IPS_IDLE, telemetry_ifilterwheelL, NARRAY(telemetry_ifilterwheelL), "", 0
+};
+
+static ILight telemetry_gfilterwheelL[] = {
+  {"grot",   "GW Rotating", ISS_OFF, 0, 0}
+};
+ILightVectorProperty telemetry_gfilterwheelLP = {
+  GALIL_DEVICE, "GW_LIGHTS", "Guiderwheel Status", TELEMETRY_GROUP, IPS_IDLE, telemetry_gfilterwheelL, NARRAY(telemetry_gfilterwheelL), "", 0
+};
+
+static ILight telemetry_connectionL[] = {
+  {"tcp",    "TCP Shared Memory", ISS_OFF, 0, 0},
+  {"udp",    "UDP Shared Memory", ISS_OFF, 0, 0},
+};
+ILightVectorProperty telemetry_connectionLP = {
+  GALIL_DEVICE, "SHARED_MEMORY_LIGHTS", "Shared Memory", TELEMETRY_GROUP, IPS_IDLE, telemetry_connectionL, NARRAY(telemetry_connectionL), "", 0
+};
+
 static ILight telemetry_lightsL[] = {
-  {"tcp",    "TCP Shared Memory Connection ", ISS_OFF, 0, 0},
-  {"udp",    "UDP Shared Memory Connection ", ISS_OFF, 0, 0},
   {"swbusy", "Software Executing Procedure ", ISS_OFF, 0, 0},
-  {"hwbusy", "Hardware Executing Procedure ", ISS_OFF, 0, 0},
-  {"fin",    "Instrument Filter In Beam    ", ISS_OFF, 0, 0},
-  {"frot",   "Instrument Filter Rotating   ", ISS_OFF, 0, 0},
-  {"flin",   "Instrument Filter Translating", ISS_OFF, 0, 0},
-  {"ferr",   "Instrument Filter Error      ", ISS_OFF, 0, 0},
-  {"grot",   "Guider Filter Rotating       ", ISS_OFF, 0, 0}
+  {"hwbusy", "Hardware Executing Procedure ", ISS_OFF, 0, 0}
+  
 };
 ILightVectorProperty telemetry_lightsLP = {
-  GALIL_DEVICE, "TELEMETRY", "Telemetry Indicators", TELEMETRY_GROUP, IPS_IDLE, telemetry_lightsL, NARRAY(telemetry_lightsL), "", 0
+  GALIL_DEVICE, "TELEMETRY", "Galil Status", TELEMETRY_GROUP, IPS_IDLE, telemetry_lightsL, NARRAY(telemetry_lightsL), "", 0
 };
 
 
@@ -336,7 +365,10 @@ void ISGetProperties(const char *dev) {
   if (dev && strcmp(GALIL_DEVICE, dev)) return;
 
   /* define widget(s) */
+  IDDefLight(&telemetry_connectionLP, NULL);
+  IDDefLight(&telemetry_gfilterwheelLP, NULL);
   IDDefLight(&telemetry_lightsLP, NULL);
+  IDDefLight(&telemetry_ifilterwheelLP, NULL);
   IDDefText(&telemetryTP, NULL);
   IDDefSwitch(&ifilterSP, NULL);
   IDDefText(&ifilterTP, NULL);
@@ -344,6 +376,7 @@ void ISGetProperties(const char *dev) {
   IDDefNumber(&ifocus_distNP, NULL);
   IDDefNumber(&ifocus_distallNP, NULL);
   IDDefNumber(&ifocus_lvdtNP, NULL);
+  IDDefSwitch(&gfilter_actionsSP, NULL);
   IDDefSwitch(&gfilterSP, NULL);
   IDDefText(&gfilterTP, NULL);
   IDDefNumber(&gfocus_distNP, NULL);
@@ -1349,18 +1382,24 @@ static void execute_timer(void *p) {
   IDSetText(&telemetryTP, NULL);
 
   /* set and update light(s)*/
-  telemetry_lightsL[0].s = (tcp_val.simulate == 0) ? ISS_ON : ISS_OFF;
-  telemetry_lightsL[1].s = (udp_val.simulate == 0) ? ISS_ON : ISS_OFF;
-  telemetry_lightsL[2].s = (busy == true ) ? ISS_ON : ISS_OFF;
-  telemetry_lightsL[3].s = (IS_BIT_SET(tcp_val.status, 7)) ? ISS_ON : ISS_OFF;
-  telemetry_lightsL[4].s = (tcp_val.lv.filtisin == 1.0) ? ISS_ON : ISS_OFF;
-  telemetry_lightsL[5].s = (udp_val.faxis_moving == 1) ? ISS_ON : ISS_OFF;
-  telemetry_lightsL[6].s = (udp_val.gaxis_moving == 1) ? ISS_ON : ISS_OFF;
-  telemetry_lightsL[7].s = (tcp_val.lv.errfilt == 1.0) ? ISS_ON : ISS_OFF;
-  telemetry_lightsL[8].s = (udp_val.haxis_moving == 1) ? ISS_ON : ISS_OFF;
+  telemetry_connectionL[0].s = (tcp_val.simulate == 0) ? ISS_ON : ISS_OFF;
+  telemetry_connection[1].s = (udp_val.simulate == 0) ? ISS_ON : ISS_OFF;
+  telemetry_lightsL[0].s = (busy == true ) ? ISS_ON : ISS_OFF;
+  telemetry_lightsL[1].s = (IS_BIT_SET(tcp_val.status, 7)) ? ISS_ON : ISS_OFF;
+  telemetry_gfilterwheelL[0].s = (udp_val.haxis_moving == 1) ? ISS_ON : ISS_OFF;
+  telemetry_ifilterwheelL[0].s = (tcp_val.lv.filtisin == 1.0) ? ISS_ON : ISS_OFF;
+  telemetry_ifilterwheelL[1].s = (udp_val.faxis_moving == 1) ? ISS_ON : ISS_OFF;
+  telemetry_ifilterwheelL[2].s = (udp_val.gaxis_moving == 1) ? ISS_ON : ISS_OFF;
+  telemetry_ifilterwheelL[3].s = (tcp_val.lv.errfilt == 1.0) ? ISS_ON : ISS_OFF;
 
+  telemetry_connectionLP.s = IPS_OK;
   telemetry_lightsLP.s   = IPS_OK;
+  telemetry_ifilterwheelLP.s = IPS_OK;
+  telemetry_gfilterwheelLP.s = IPS_OK;
+  IDSetLight(&telemetry_connectionLP, NULL);
   IDSetLight(&telemetry_lightsLP, NULL);
+  IDSetLight(&telemetry_ifilterwheelLP, NULL);
+  IDSetLight(&telemetry_gfilterwheelLP, NULL);
 
   /* re-schedule */
   IEAddTimer(BOK_TCP_DELAY_MS, execute_timer, NULL);
@@ -1401,21 +1440,28 @@ static void zero_telemetry(void) {
   (void) sprintf(supports.email,   "%s", _EMAIL_);
   (void) sprintf(supports.version, "%s", _VERSION_);
 
+  telemetry_connectionL[0].s = ISS_OFF;
+  telemetry_connection[1].s = ISS_OFF;
   telemetry_lightsL[0].s = ISS_OFF;
   telemetry_lightsL[1].s = ISS_OFF;
-  telemetry_lightsL[2].s = ISS_OFF;
-  telemetry_lightsL[3].s = ISS_OFF;
-  telemetry_lightsL[4].s = ISS_OFF;
-  telemetry_lightsL[5].s = ISS_OFF;
-  telemetry_lightsL[6].s = ISS_OFF;
-  telemetry_lightsL[7].s = ISS_OFF;
-  telemetry_lightsL[8].s = ISS_OFF;
+  telemetry_gfilterwheelL[0].s = ISS_OFF;
+  telemetry_ifilterwheelL[0].s = ISS_OFF;
+  telemetry_ifilterwheelL[1].s = ISS_OFF;
+  telemetry_ifilterwheelL[2].s = ISS_OFF;
+  telemetry_ifilterwheelL[3].s = ISS_OFF;
+
+  telemetry_connectionLP.s = IPS_IDLE;
   telemetry_lightsLP.s   = IPS_IDLE;
+  telemetry_gfilterwheelLP.s = IPS_IDLE;
+  telemetry_ifilterwheelLP.s = IPS_IDLE;
 
   /* initialize indi structure(s) */
   IDSetText(&ifilterTP, NULL);
   IDSetText(&gfilterTP, NULL);
   IDSetText(&supportTP, NULL);
   IDSetText(&telemetryTP, NULL);
+  IDSetLight(&telemetry_connectionLP, NULL);
   IDSetLight(&telemetry_lightsLP, NULL);
+  IDSetLight(&telemetry_gfilterwheelLP, NULL);
+  IDSetLight(&telemetry_ifilterwheelLP, NULL);
 }
