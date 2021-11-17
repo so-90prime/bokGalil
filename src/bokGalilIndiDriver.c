@@ -1469,9 +1469,9 @@ static void execute_timer(void *p) {
   (void) sprintf(telemetrys.a_reference,  "%.3f",           ifoci.refa);
   (void) sprintf(telemetrys.b_reference,  "%.3f",           ifoci.refb);
   (void) sprintf(telemetrys.c_reference,  "%.3f",           ifoci.refc);
-  (void) sprintf(telemetrys.lvdta,        "%08d",           ifoci.vala * 1000);
-  (void) sprintf(telemetrys.lvdtb,        "%08d",           ifoci.valb * 1000);
-  (void) sprintf(telemetrys.lvdtc,        "%08d",           ifoci.valc * 1000);
+  (void) sprintf(telemetrys.lvdta,        "%08f",           ifoci.vala * 1000);
+  (void) sprintf(telemetrys.lvdtb,        "%08f",           ifoci.valb * 1000);
+  (void) sprintf(telemetrys.lvdtc,        "%08f",           ifoci.valc * 1000);
   (void) sprintf(telemetrys.distall,      "%08.1f",         tcp_val.lv.distall);
   (void) sprintf(telemetrys.dista,        "%08.1f",         tcp_val.lv.dista);
   (void) sprintf(telemetrys.distb,        "%08.1f",         tcp_val.lv.distb);
