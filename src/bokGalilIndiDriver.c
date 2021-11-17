@@ -378,19 +378,18 @@ ILightVectorProperty telemetry_gfilterwheelLP = {
   GALIL_DEVICE, "GW_LIGHTS", "Guiderwheel Status", TELEMETRY_GROUP, IPS_IDLE, telemetry_gfilterwheelL, NARRAY(telemetry_gfilterwheelL), "", 0
 };
 
-static ILight telemetry_connectionL[] = {
+static ILight telemetry_engineeringL[] = {
   {"tcp",    "TCP Shared Memory", ISS_OFF, 0, 0},
   {"udp",    "UDP Shared Memory", ISS_OFF, 0, 0},
+  {"populatebusy", "Populate", ISS_OFF, 0, 0}
 };
-ILightVectorProperty telemetry_connectionLP = {
-  GALIL_DEVICE, "SHARED_MEMORY_LIGHTS", "Shared Memory", TELEMETRY_GROUP, IPS_IDLE, telemetry_connectionL, NARRAY(telemetry_connectionL), "", 0
+ILightVectorProperty telemetry_engineeringLP = {
+  GALIL_DEVICE, "ENGINEERING_LIGHTS", "Engineering", TELEMETRY_GROUP, IPS_IDLE, telemetry_engineeringL, NARRAY(telemetry_engineeringL), "", 0
 };
 
 static ILight telemetry_lightsL[] = {
   {"swbusy", "Software Busy", ISS_OFF, 0, 0},
-  {"hwbusy", "Hardware Busy", ISS_OFF, 0, 0},
-  {"populatebusy", "Populate", ISS_OFF, 0, 0}
-  
+  {"hwbusy", "Hardware Busy", ISS_OFF, 0, 0},  
 };
 ILightVectorProperty telemetry_lightsLP = {
   GALIL_DEVICE, "TELEMETRY", "Galil Status", TELEMETRY_GROUP, IPS_IDLE, telemetry_lightsL, NARRAY(telemetry_lightsL), "", 0
@@ -406,7 +405,7 @@ void ISGetProperties(const char *dev) {
   if (dev && strcmp(GALIL_DEVICE, dev)) return;
 
   /* define widget(s) */
-  IDDefLight(&telemetry_connectionLP, NULL);
+  IDDefLight(&telemetry_engineeringLP, NULL);
   IDDefLight(&telemetry_gfilterwheelLP, NULL);
   IDDefLight(&telemetry_lightsLP, NULL);
   IDDefLight(&telemetry_ifilterwheelLP, NULL);
@@ -897,8 +896,8 @@ void execute_ifilter_engineering(ISState states[], char *names[], int n) {
           IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_filtldm(), gstat=%d", gstat);
         }
         ifilter_engineeringSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
-        telemetry_lightsL[2].s = gstat == G_NO_ERROR ? IPS_BUSY : IPS_ALERT;
-        IDSetLight(&telemetry_lightsLP, NULL);
+        telemetry_engineeringL[2].s = gstat == G_NO_ERROR ? IPS_BUSY : IPS_ALERT;
+        IDSetLight(&telemetry_engineeringLP, NULL);
 
         busy = false;
       }
@@ -917,8 +916,8 @@ void execute_ifilter_engineering(ISState states[], char *names[], int n) {
       }
       busy = false;
       ifilter_engineeringSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
-      telemetry_lightsL[2].s = gstat == G_NO_ERROR ? IPS_IDLE : IPS_ALERT;
-      IDSetLight(&telemetry_lightsLP, NULL);
+      telemetry_engineeringL[2].s = gstat == G_NO_ERROR ? IPS_IDLE : IPS_ALERT;
+      IDSetLight(&telemetry_engineeringLP, NULL);
       ifilter_engineeringS[1].s = ISS_OFF;
 
     /* process 'iFilter Initialize' - NB: it's up to the higher-level software to check telemetry */
@@ -1515,8 +1514,8 @@ static void execute_timer(void *p) {
   IDSetText(&telemetry_gfocusTP, NULL);
 
   /* set and update light(s)*/
-  telemetry_connectionL[0].s = (tcp_val.simulate == 0) ? IPS_OK : IPS_ALERT;
-  telemetry_connectionL[1].s = (udp_val.simulate == 0) ? IPS_OK : IPS_ALERT;
+  telemetry_engineeringL[0].s = (tcp_val.simulate == 0) ? IPS_OK : IPS_ALERT;
+  telemetry_engineeringL[1].s = (udp_val.simulate == 0) ? IPS_OK : IPS_ALERT;
   telemetry_lightsL[0].s = (busy == true ) ? IPS_BUSY : IPS_IDLE;
   telemetry_lightsL[1].s = (IS_BIT_SET(tcp_val.status, 7)) ? IPS_BUSY : IPS_IDLE;
   telemetry_gfilterwheelL[0].s = (udp_val.haxis_moving == 1) ? IPS_BUSY : IPS_IDLE;
@@ -1526,11 +1525,11 @@ static void execute_timer(void *p) {
   telemetry_ifilterwheelL[3].s = (tcp_val.lv.filtisin == 1.0) ? IPS_OK : IPS_IDLE;
   telemetry_ifilterwheelL[4].s = (tcp_val.lv.errfilt == 1.0) ? IPS_ALERT : IPS_IDLE;
 
-  telemetry_connectionLP.s = IPS_IDLE;
+  telemetry_engineeringLP.s = IPS_IDLE;
   telemetry_lightsLP.s   = IPS_IDLE;
   telemetry_ifilterwheelLP.s = IPS_IDLE;
   telemetry_gfilterwheelLP.s = IPS_IDLE;
-  IDSetLight(&telemetry_connectionLP, NULL);
+  IDSetLight(&telemetry_engineeringLP, NULL);
   IDSetLight(&telemetry_lightsLP, NULL);
   IDSetLight(&telemetry_ifilterwheelLP, NULL);
   IDSetLight(&telemetry_gfilterwheelLP, NULL);
@@ -1574,8 +1573,8 @@ static void zero_telemetry(void) {
   (void) sprintf(supports.email,   "%s", _EMAIL_);
   (void) sprintf(supports.version, "%s", _VERSION_);
 
-  telemetry_connectionL[0].s = ISS_OFF;
-  telemetry_connectionL[1].s = ISS_OFF;
+  telemetry_engineeringL[0].s = ISS_OFF;
+  telemetry_engineeringL[1].s = ISS_OFF;
   telemetry_lightsL[0].s = ISS_OFF;
   telemetry_lightsL[1].s = ISS_OFF;
   telemetry_gfilterwheelL[0].s = ISS_OFF;
@@ -1584,7 +1583,7 @@ static void zero_telemetry(void) {
   telemetry_ifilterwheelL[2].s = ISS_OFF;
   telemetry_ifilterwheelL[3].s = ISS_OFF;
 
-  telemetry_connectionLP.s = IPS_IDLE;
+  telemetry_engineeringLP.s = IPS_IDLE;
   telemetry_lightsLP.s   = IPS_IDLE;
   telemetry_gfilterwheelLP.s = IPS_IDLE;
   telemetry_ifilterwheelLP.s = IPS_IDLE;
@@ -1594,7 +1593,7 @@ static void zero_telemetry(void) {
   IDSetText(&gfilterTP, NULL);
   IDSetText(&supportTP, NULL);
   IDSetText(&telemetryTP, NULL);
-  IDSetLight(&telemetry_connectionLP, NULL);
+  IDSetLight(&telemetry_engineeringLP, NULL);
   IDSetLight(&telemetry_lightsLP, NULL);
   IDSetLight(&telemetry_gfilterwheelLP, NULL);
   IDSetLight(&telemetry_ifilterwheelLP, NULL);
