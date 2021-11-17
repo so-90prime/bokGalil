@@ -1019,7 +1019,6 @@ void execute_ifilter_change(ISState states[], char *names[], int n) {
   IUResetSwitch(&ifilter_changeSP);
   IDSetSwitch(&ifilter_changeSP, NULL);
 }
-}
 /*******************************************************************************
  * action: execute_ifilter_switches()
  ******************************************************************************/
