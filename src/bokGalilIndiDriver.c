@@ -124,7 +124,6 @@ static void driver_init(void);
 static void execute_gfilter_switches(ISState [], char *[], int);
 static void execute_gfilter_change(ISState [], char *[], int);
 static void execute_ifilter_engineering(ISState [], char *[], int);
-static void execute_ifilter_startup(ISState [], char *[], int);
 static void execute_ifilter_switches(ISState [], char *[], int);
 static void execute_ifilter_change(ISState [], char *[], int);
 static void execute_ifocus_reference_switches(ISState [], char *[], int);
@@ -1214,7 +1213,7 @@ void execute_ifilter_switches(ISState states[], char *names[], int n) {
     } else if (sp == &ifilterS[2]) {
       if (tcp_val.lv.filtisin == 1.0) {
         IDMessage(GALIL_DEVICE, "Cannot read wheel whilst the filter is in the beam!");
-        ifilterS.s = IPS_OK;
+        ifilterSP.s = IPS_OK;
       } else {
         IDMessage(GALIL_DEVICE, "Executing 'iFilter ReadWheel'");
         IDMessage(GALIL_DEVICE, "Calling xq_filtrd()");
