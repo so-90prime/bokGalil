@@ -89,6 +89,9 @@ typedef struct telemetrydata {
   char a_reference[BOK_STR_32];
   char b_reference[BOK_STR_32];
   char c_reference[BOK_STR_32];
+  char lvdta[BOK_STR_32];
+  char lvdtb[BOK_STR_32];
+  char lvdtc[BOK_STR_32];
   char distall[BOK_STR_32];
   char dista[BOK_STR_32];
   char distb[BOK_STR_32];
@@ -253,7 +256,7 @@ static INumber ifocus_distN[] = {
   {"distc", "Focus C", "%5.0f", -290.0, 2500.0, 1.0, 0.0, 0, 0, 0}
 };
 static INumberVectorProperty ifocus_distNP = {
-  GALIL_DEVICE, "IFOCUS_DIST", "Relative Goto Individual", IFOCUS_GROUP, IP_WO, 0.0, IPS_IDLE, ifocus_distN, NARRAY(ifocus_distN), "", 0
+  GALIL_DEVICE, "IFOCUS_DIST", "Relative Goto", IFOCUS_GROUP, IP_WO, 0.0, IPS_IDLE, ifocus_distN, NARRAY(ifocus_distN), "", 0
 };
 
 static INumber ifocus_distallN[] = {
@@ -269,7 +272,7 @@ static INumber ifocus_lvdtN[] = {
   {"lvdtc", "LVDT C", "%5.0f", -290.0, 2500.0, 1.0, 0.0, 0, 0, 0}
 };
 static INumberVectorProperty ifocus_lvdtNP = {
-  GALIL_DEVICE, "IFOCUS_LVDT", "Goto LVDT Values", IFOCUS_GROUP, IP_WO, 0.0, IPS_IDLE, ifocus_lvdtN, NARRAY(ifocus_lvdtN), "", 0
+  GALIL_DEVICE, "IFOCUS_LVDT", "Goto LVDT Value", IFOCUS_GROUP, IP_WO, 0.0, IPS_IDLE, ifocus_lvdtN, NARRAY(ifocus_lvdtN), "", 0
 };
 
 /* support group */
@@ -293,9 +296,9 @@ static ITextVectorProperty telemetry_referenceTP = {
 };
 
 static IText telemetry_lvdtT[] = {
-  {"a_position",  "LVDT A", telemetrys.a_position,  0, 0, 0},
-  {"b_position",  "LVDT B", telemetrys.b_position,  0, 0, 0},
-  {"c_position",  "LVDT C", telemetrys.c_position,  0, 0, 0}
+  {"lvdta",  "LVDT A", telemetrys.lvdta,  0, 0, 0},
+  {"lvdtb",  "LVDT B", telemetrys.lvdtb,  0, 0, 0},
+  {"lvdtc",  "LVDT C", telemetrys.lvdtc,  0, 0, 0}
 };
 static ITextVectorProperty telemetry_lvdtTP = {
   GALIL_DEVICE, "TELEMETRY_LVDT", "Current LVDT", TELEMETRY_GROUP, IP_RO, 0, IPS_IDLE, telemetry_lvdtT, NARRAY(telemetry_lvdtT), "", 0
@@ -320,6 +323,9 @@ static IText telemetryT[] = {
   {"a_reference",  "A Focus Reference                 ", telemetrys.a_reference,  0, 0, 0},
   {"b_reference",  "B Focus Reference                 ", telemetrys.b_reference,  0, 0, 0},
   {"c_reference",  "C Focus Reference                 ", telemetrys.c_reference,  0, 0, 0},
+  {"lvdta",  "LVDT A", telemetrys.lvdta,  0, 0, 0},
+  {"lvdtb",  "LVDT B", telemetrys.lvdtb,  0, 0, 0},
+  {"lvdtc",  "LVDT C", telemetrys.lvdtc,  0, 0, 0},
   {"distall",      "distall                           ", telemetrys.distall,      0, 0, 0},
   {"dista",        "dista                             ", telemetrys.dista,        0, 0, 0},
   {"distb",        "distb                             ", telemetrys.distb,        0, 0, 0},
@@ -1463,6 +1469,9 @@ static void execute_timer(void *p) {
   (void) sprintf(telemetrys.a_reference,  "%.3f",           ifoci.refa);
   (void) sprintf(telemetrys.b_reference,  "%.3f",           ifoci.refb);
   (void) sprintf(telemetrys.c_reference,  "%.3f",           ifoci.refc);
+  (void) sprintf(telemetrys.lvdta,        "%08d",           ifoci.vala * 1000);
+  (void) sprintf(telemetrys.lvdtb,        "%08d",           ifoci.valb * 1000);
+  (void) sprintf(telemetrys.lvdtc,        "%08d",           ifoci.valc * 1000);
   (void) sprintf(telemetrys.distall,      "%08.1f",         tcp_val.lv.distall);
   (void) sprintf(telemetrys.dista,        "%08.1f",         tcp_val.lv.dista);
   (void) sprintf(telemetrys.distb,        "%08.1f",         tcp_val.lv.distb);
