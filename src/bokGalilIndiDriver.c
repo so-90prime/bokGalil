@@ -264,20 +264,8 @@ static ITextVectorProperty supportTP = {
   GALIL_DEVICE, "SUPPORT", "Support Available From", SUPPORT_GROUP, IP_RO, 0, IPS_IDLE, supportT, NARRAY(supportT), "", 0
 };
 
-
 /* telemetry group */
 // Wanted to break up into different groups for display purposes
-static IText telemetry_referenceT[] = {
-  {"a_reference",  "A Focus Reference", telemetrys.a_reference,  0, 0, 0},
-  {"b_reference",  "B Focus Reference", telemetrys.b_reference,  0, 0, 0},
-  {"c_reference",  "C Focus Reference", telemetrys.c_reference,  0, 0, 0},
-};
-static ITextVectorProperty telemetryTP = {
-  GALIL_DEVICE, "TELEMETRY_REFERENCE", "Current Reference", TELEMETRY_GROUP, IP_RO, 0, IPS_IDLE, telemetry_referenceT, NARRAY(telemetry_referenceT), "", 0
-};
-
-static IText telemetry_a
-
 static IText telemetryT[] = {
   {"hardware",     "Hardware Version                  ", telemetrys.hardware,     0, 0, 0},
   {"software",     "Software Version                  ", telemetrys.software,     0, 0, 0},
@@ -376,7 +364,6 @@ void ISGetProperties(const char *dev) {
   IDDefNumber(&ifocus_distNP, NULL);
   IDDefNumber(&ifocus_distallNP, NULL);
   IDDefNumber(&ifocus_lvdtNP, NULL);
-  IDDefSwitch(&gfilter_actionsSP, NULL);
   IDDefSwitch(&gfilterSP, NULL);
   IDDefText(&gfilterTP, NULL);
   IDDefNumber(&gfocus_distNP, NULL);
@@ -1383,7 +1370,7 @@ static void execute_timer(void *p) {
 
   /* set and update light(s)*/
   telemetry_connectionL[0].s = (tcp_val.simulate == 0) ? ISS_ON : ISS_OFF;
-  telemetry_connection[1].s = (udp_val.simulate == 0) ? ISS_ON : ISS_OFF;
+  telemetry_connectionL[1].s = (udp_val.simulate == 0) ? ISS_ON : ISS_OFF;
   telemetry_lightsL[0].s = (busy == true ) ? ISS_ON : ISS_OFF;
   telemetry_lightsL[1].s = (IS_BIT_SET(tcp_val.status, 7)) ? ISS_ON : ISS_OFF;
   telemetry_gfilterwheelL[0].s = (udp_val.haxis_moving == 1) ? ISS_ON : ISS_OFF;
@@ -1441,7 +1428,7 @@ static void zero_telemetry(void) {
   (void) sprintf(supports.version, "%s", _VERSION_);
 
   telemetry_connectionL[0].s = ISS_OFF;
-  telemetry_connection[1].s = ISS_OFF;
+  telemetry_connectionL[1].s = ISS_OFF;
   telemetry_lightsL[0].s = ISS_OFF;
   telemetry_lightsL[1].s = ISS_OFF;
   telemetry_gfilterwheelL[0].s = ISS_OFF;
