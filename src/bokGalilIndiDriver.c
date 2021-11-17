@@ -287,9 +287,9 @@ static ITextVectorProperty supportTP = {
 };
 
 static IText telemetry_referenceT[] = {
-  {"a_reference",  "A Focus Reference", telemetrys.a_reference,  0, 0, 0},
-  {"b_reference",  "B Focus Reference", telemetrys.b_reference,  0, 0, 0},
-  {"c_reference",  "C Focus Reference", telemetrys.c_reference,  0, 0, 0}
+  {"a_reference",  "A Reference", telemetrys.a_reference,  0, 0, 0},
+  {"b_reference",  "B Reference", telemetrys.b_reference,  0, 0, 0},
+  {"c_reference",  "C Reference", telemetrys.c_reference,  0, 0, 0}
 };
 static ITextVectorProperty telemetry_referenceTP = {
   GALIL_DEVICE, "TELEMETRY_REFERENCE", "References", TELEMETRY_GROUP, IP_RO, 0, IPS_IDLE, telemetry_referenceT, NARRAY(telemetry_referenceT), "", 0
@@ -490,9 +490,9 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
 
   /* focus lvdt value(s) */
   } else if (!strcmp(name, ifocus_lvdtNP.name)) {
-    float dista = round((values[0]*1000.0 + ifoci.vala) * BOK_LVDT_ATOD);
-    float distb = round((values[1]*1000.0 + ifoci.valb) * BOK_LVDT_ATOD);
-    float distc = round((values[2]*1000.0 + ifoci.valc) * BOK_LVDT_ATOD);
+    float dista = round((values[0] / 1000.0 + ifoci.vala) * BOK_LVDT_ATOD);
+    float distb = round((values[1] / 1000.0 + ifoci.valb) * BOK_LVDT_ATOD);
+    float distc = round((values[2] / 1000.0 + ifoci.valc) * BOK_LVDT_ATOD);
     busy = true;
     IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", dista, distb, distc);
     if ((gstat=xq_focusind(dista, distb, distc)) == G_NO_ERROR) {
