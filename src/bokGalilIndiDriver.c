@@ -584,7 +584,7 @@ static void driver_init(void) {
 /*******************************************************************************
  * action: execute_gfilter_change()
  ******************************************************************************/
-void execute_filter_change(ISState states[], char *names[], int n) {
+void execute_gfilter_change(ISState states[], char *names[], int n) {
   /* declare some variables and initialize them */
   GReturn gstat = (GReturn)0;
   ISwitch *sp = (ISwitch *)NULL;
