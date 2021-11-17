@@ -606,7 +606,11 @@ void execute_gfilter_change(ISState states[], char *names[], int n) {
     sp = IUFindSwitch(&gfilter_changeSP, names[i]);
     state = states[i];
     state_change = state != sp->s;
+    
     if (! state_change) { continue; }
+
+    // Reset switches here
+    gfilter_changeS[i].s = ISS_OFF;
 
     /* process 'gFilter 1' */
     if (sp == &gfilter_changeS[0]) {
