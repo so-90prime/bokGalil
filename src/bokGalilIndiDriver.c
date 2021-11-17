@@ -1367,41 +1367,46 @@ static void execute_timer(void *p) {
   IDSetText(&gfilterTP, NULL);
 
   /* update ifilter(s) */
+  // ifilter is different, it used the filter codes from bar reader not 0-5
+  IUResetSwitch(&ifilter_changeSP); // Reset the switches to OFF
   (void) memset((void *)&ifilter_names, 0, sizeof(ifilter_names));
   _ifiltn = (int)round(tcp_val.lv.filtval);
   if (_ifiltn == (int)round(tcp_val.filtvals[0])) {
     (void) sprintf(ifilter_names.filter_1, "| %s |", bok_ifilters[(int)round(tcp_val.filtvals[0])].name);
+    ifilter_changeS[0].s = ISS_ON;
   } else {
     (void) sprintf(ifilter_names.filter_1, "%s", bok_ifilters[(int)round(tcp_val.filtvals[0])].name);
   }
   if (_ifiltn == (int)round(tcp_val.filtvals[1])) {
     (void) sprintf(ifilter_names.filter_2, "| %s |", bok_ifilters[(int)round(tcp_val.filtvals[1])].name);
+    ifilter_changeS[1].s = ISS_ON;
   } else {
     (void) sprintf(ifilter_names.filter_2, "%s", bok_ifilters[(int)round(tcp_val.filtvals[1])].name);
   }
   if (_ifiltn == (int)round(tcp_val.filtvals[2])) {
     (void) sprintf(ifilter_names.filter_3, "| %s |", bok_ifilters[(int)round(tcp_val.filtvals[2])].name);
+    ifilter_changeS[2].s = ISS_ON;
   } else {
     (void) sprintf(ifilter_names.filter_3, "%s", bok_ifilters[(int)round(tcp_val.filtvals[2])].name);
   }
   if (_ifiltn == (int)round(tcp_val.filtvals[3])) {
     (void) sprintf(ifilter_names.filter_4, "| %s |", bok_ifilters[(int)round(tcp_val.filtvals[3])].name);
+    ifilter_changeS[3].s = ISS_ON;
   } else {
     (void) sprintf(ifilter_names.filter_4, "%s", bok_ifilters[(int)round(tcp_val.filtvals[3])].name);
   }
   if (_ifiltn == (int)round(tcp_val.filtvals[4])) {
     (void) sprintf(ifilter_names.filter_5, "| %s |", bok_ifilters[(int)round(tcp_val.filtvals[4])].name);
+    ifilter_changeS[4].s = ISS_ON;
   } else {
     (void) sprintf(ifilter_names.filter_5, "%s", bok_ifilters[(int)round(tcp_val.filtvals[4])].name);
   }
   if (_ifiltn == (int)round(tcp_val.filtvals[5])) {
     (void) sprintf(ifilter_names.filter_6, "| %s | ", bok_ifilters[(int)round(tcp_val.filtvals[5])].name);
+    ifilter_changeS[5].s = ISS_ON;
   } else {
     (void) sprintf(ifilter_names.filter_6, "%s", bok_ifilters[(int)round(tcp_val.filtvals[5])].name);
   }
-  IDMessage(GALIL_DEVICE, "filter index=%d", _ifiltn - 1);
-  IUResetSwitch(&ifilter_changeSP); // Reset the switches to OFF
-  ifilter_changeS[_ifiltn - 1].s = ISS_ON; // Subtract one since zero based
   IDSetSwitch(&ifilter_changeSP, NULL);
   IDSetText(&ifilterTP, NULL);
 
