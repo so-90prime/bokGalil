@@ -1364,6 +1364,7 @@ static void execute_timer(void *p) {
   /* update ifilter(s) */
   (void) memset((void *)&ifilter_names, 0, sizeof(ifilter_names));
   _ifiltn = (int)round(tcp_val.lv.filtval);
+  IDMessage(GALIL_DEVICE, "%s" tcp_val.filtvals[0]);
   if (_ifiltn == (int)round(tcp_val.filtvals[0])) {
     (void) sprintf(ifilter_names.filter_1, "| %s |", bok_ifilters[(int)round(tcp_val.filtvals[0])].name);
   } else {
@@ -1390,7 +1391,7 @@ static void execute_timer(void *p) {
     (void) sprintf(ifilter_names.filter_5, "%s", bok_ifilters[(int)round(tcp_val.filtvals[4])].name);
   }
   if (_ifiltn == (int)round(tcp_val.filtvals[5])) {
-    (void) sprintf(ifilter_names.filter_6, "| %s| ", bok_ifilters[(int)round(tcp_val.filtvals[5])].name);
+    (void) sprintf(ifilter_names.filter_6, "| %s | ", bok_ifilters[(int)round(tcp_val.filtvals[5])].name);
   } else {
     (void) sprintf(ifilter_names.filter_6, "%s", bok_ifilters[(int)round(tcp_val.filtvals[5])].name);
   }
