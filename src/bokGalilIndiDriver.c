@@ -1324,6 +1324,9 @@ static void execute_timer(void *p) {
   } else {
     (void) sprintf(gfilter_names.filter_6, "%s", bok_gfilters[6].name);
   }
+  gfilter_changeS[_gfiltn].s = ISS_ON;
+  IDSetSwitch(&gfilter_changeSP, NULL);
+
   IDSetText(&gfilterTP, NULL);
 
   /* update ifilter(s) */
