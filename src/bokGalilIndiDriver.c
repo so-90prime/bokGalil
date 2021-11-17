@@ -166,9 +166,9 @@ static ISwitch gfilter_changeS[] = {
   {"g_slot_4",   "gFilter 4", ISS_OFF, 0, 0},
   {"g_slot_5",   "gFilter 5", ISS_OFF, 0, 0},
   {"g_slot_6",   "gFilter 6", ISS_OFF, 0, 0}
-}
+};
 ISwitchVectorProperty gfilter_changeSP = {
-  GALIL_DEVICE, "GFILTER_CHANGE", "Change Filter", GFILTER_GROUP, IP_RW, ISR_1OFMANY, 0.0, IPS_IDLE, gfilter_changeSP, NARRAY(gfilter_changeSP), "", 0
+  GALIL_DEVICE, "GFILTER_CHANGE", "Change Filter", GFILTER_GROUP, IP_RW, ISR_1OFMANY, 0.0, IPS_IDLE, gfilter_changeS, NARRAY(gfilter_changeS), "", 0
 };
 
 static IText gfilterT[] = {
