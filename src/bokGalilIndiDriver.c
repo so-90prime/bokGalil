@@ -123,6 +123,7 @@ typedef struct telemetrydata {
 static void driver_init(void);
 static void execute_gfilter_switches(ISState [], char *[], int);
 static void execute_gfilter_change(ISState [], char *[], int);
+static void execute_ifilter_engineering(ISState [], char *[], int);
 static void execute_ifilter_startup(ISState [], char *[], int);
 static void execute_ifilter_switches(ISState [], char *[], int);
 static void execute_ifilter_change(ISState [], char *[], int);
@@ -197,19 +198,19 @@ static INumberVectorProperty gfocus_distNP = {
 };
 
 /* ifilter group */
-static ISwitch ifilter_startupS[] = {
+static ISwitch ifilter_engineeringS[] = {
   {"i_populate", "Populate", ISS_OFF, 0, 0},
   {"i_popdone",  "PopDone", ISS_OFF, 0, 0},
-  {"i_readfw",   "Read Filters", ISS_OFF, 0, 0},
   {"i_initfw",   "FW Initialize", ISS_OFF, 0, 0}
 };
-ISwitchVectorProperty ifilter_startupSP = {
-  GALIL_DEVICE, "IFILTER_STARTUP", "FW Startup", IFILTER_GROUP, IP_RW, ISR_1OFMANY, 0.0, IPS_IDLE, ifilter_startupS, NARRAY(ifilter_startupS), "", 0
+ISwitchVectorProperty ifilter_engineeringSP = {
+  GALIL_DEVICE, "IFILTER_ENGINEERING", "FW Engineering", IFILTER_GROUP, IP_RW, ISR_1OFMANY, 0.0, IPS_IDLE, ifilter_engineeringS, NARRAY(ifilter_engineeringS), "", 0
 };
 
 static ISwitch ifilterS[] = {
   {"i_load",     "Load Filter", ISS_OFF, 0, 0},
-  {"i_unload",   "Unload Filter", ISS_OFF, 0, 0}
+  {"i_unload",   "Unload Filter", ISS_OFF, 0, 0},
+  {"i_readfw",   "Read Filters", ISS_OFF, 0, 0}
 };
 ISwitchVectorProperty ifilterSP = {
   GALIL_DEVICE, "IFILTER_ACTIONS", "Actions", IFILTER_GROUP, IP_RW, ISR_1OFMANY, 0.0, IPS_IDLE, ifilterS, NARRAY(ifilterS), "", 0
@@ -413,7 +414,7 @@ void ISGetProperties(const char *dev) {
   IDDefText(&telemetry_referenceTP, NULL);
   IDDefText(&telemetry_lvdtTP, NULL);
   IDDefText(&telemetryTP, NULL);
-  IDDefSwitch(&ifilter_startupSP, NULL);
+  IDDefText(&ifilter_engineeringSP, NULL);
   IDDefSwitch(&ifilterSP, NULL);
   IDDefSwitch(&ifilter_changeSP, NULL);
   IDDefText(&ifilterTP, NULL);
@@ -555,10 +556,10 @@ void ISNewSwitch(const char *dev, const char *name, ISState *states, char *names
   if (dev && strcmp(GALIL_DEVICE, dev)) return;
 
   /* which switch was pressed? */
-  if (! strcmp(name, ifilter_startupSP.name)) {
-    execute_ifilter_startup(states, names, n);
-    IUResetSwitch(&ifilter_startupSP);
-    IDSetSwitch(&ifilter_startupSP, NULL);
+  if (! strcmp(name, ifilter_engineeringSP.name)) {
+    execute_ifilter_engineering(states, names, n);
+    IUResetSwitch(&ifilter_engineeringSP);
+    IDSetSwitch(&ifilter_engineeringSP, NULL);)
   } else if (! strcmp(name, ifilterSP.name)) {
     execute_ifilter_switches(states, names, n);
     IUResetSwitch(&ifilterSP);
@@ -866,6 +867,88 @@ void execute_gfilter_switches(ISState states[], char *names[], int n) {
 }
 
 /*******************************************************************************
+ * action: execute_ifilter_engineering()
+ ******************************************************************************/
+void execute_ifilter_engineering(ISState states[], char *names[], int n) {
+  /* declare some variables and initialize them */
+  GReturn gstat = (GReturn)0;
+  ISwitch *sp = (ISwitch *)NULL;
+  ISState state = (ISState)NULL;
+  bool state_change = false;
+
+  for (int i=0; i < n; i++) {
+    sp = IUFindSwitch(&ifilter_engineeringSP, names[i]);
+    state = states[i];
+    state_change = state != sp->s;
+    if (! state_change) { continue; }
+
+    /* process 'iFilter Populate' - NB: it's up to the higher-level software to check telemetry */
+    if (sp == &ifilter_engineeringS[0]) {
+      if (tcp_val.lv.filtisin == 1.0) {
+        IDMessage(GALIL_DEVICE, "Cannot populate whilst the filter is in the beam!");
+        ifilter_engineeringSP.s = IPS_OK;
+      } else {
+        IDMessage(GALIL_DEVICE, "Executing 'iFilter Populate'");
+        IDMessage(GALIL_DEVICE, "Calling xq_filtldm()");
+        busy = true;
+        if ((gstat=xq_filtldm()) == G_NO_ERROR) {
+          IDMessage(GALIL_DEVICE, "Called xq_filtldm() OK");
+          IDMessage(GALIL_DEVICE, "Executed 'iFilter Populate' OK");
+        } else {
+          IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_filtldm(), gstat=%d", gstat);
+        }
+        ifilter_engineeringSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
+        telemetry_lightsL[2].s = gstat == G_NO_ERROR ? IPS_BUSY : IPS_ALERT;
+        IDSetLight(&telemetry_lightsLP, NULL);
+
+        busy = false;
+      }
+      ifilter_engineeringS[0].s = ISS_OFF;
+
+    /* process 'iFilter PopDone' - NB: it's up to the higher-level software to check telemetry */
+    } else if (sp == &ifilter_engineeringS[1]) {
+      IDMessage(GALIL_DEVICE, "Executing 'iFilter PopDone'");
+      IDMessage(GALIL_DEVICE, "Calling xq_hx()");
+      busy = true;
+      if ((gstat=xq_hx()) == G_NO_ERROR) {
+        IDMessage(GALIL_DEVICE, "Called xq_hx() OK");
+        IDMessage(GALIL_DEVICE, "Executing 'iFilter PopDone' OK");
+      } else {
+        IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_hx(), gstat=%d", gstat);
+      }
+      busy = false;
+      ifilter_engineeringSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
+      telemetry_lightsL[2].s = gstat == G_NO_ERROR ? IPS_IDLE : IPS_ALERT;
+      IDSetLight(&telemetry_lightsLP, NULL);
+      ifilter_engineeringS[1].s = ISS_OFF;
+
+    /* process 'iFilter Initialize' - NB: it's up to the higher-level software to check telemetry */
+    } else if (sp == &ifilter_engineeringS[2]) {
+      if (tcp_val.lv.filtisin == 1.0) {
+        IDMessage(GALIL_DEVICE, "Cannot initialize whilst the filter is in the beam!");
+        ifilter_engineeringSP.s = IPS_OK;
+      } else {
+        IDMessage(GALIL_DEVICE, "Executing 'iFilter Initialize'");
+        IDMessage(GALIL_DEVICE, "Calling xq_filtrd()");
+        busy = true;
+        if ((gstat=xq_filtrd()) == G_NO_ERROR) {
+          IDMessage(GALIL_DEVICE, "Called xq_filtrd() OK");
+          IDMessage(GALIL_DEVICE, "Executed 'iFilter Initialize' OK");
+        } else {
+          IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_filtrd(), gstat=%d", gstat);
+        }
+        ifilter_engineeringSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
+        busy = false;
+      }
+      ifilter_engineeringS[2].s = ISS_OFF;
+    }
+  }
+  /* reset */
+  IUResetSwitch(&ifilter_engineeringSP);
+  IDSetSwitch(&ifilter_engineeringSP, NULL);
+}
+
+/*******************************************************************************
  * action: execute_ifilter_change()
  ******************************************************************************/
 void execute_ifilter_change(ISState states[], char *names[], int n) {
@@ -1068,110 +1151,7 @@ void execute_ifilter_change(ISState states[], char *names[], int n) {
   IUResetSwitch(&ifilter_changeSP);
   IDSetSwitch(&ifilter_changeSP, NULL);
 }
-/*******************************************************************************
- * action: execute_ifilter_startup()
- ******************************************************************************/
-void execute_ifilter_startup(ISState states[], char *names[], int n) {
 
-  /* declare some variables and initialize them */
-  GReturn gstat = (GReturn)0;
-  ISwitch *sp = (ISwitch *)NULL;
-  ISState state = (ISState)NULL;
-  bool state_change = false;
-
-  /* find switches with the passed names in the ifilter_startupSP property */
-  for (int i=0; i < n; i++) {
-    sp = IUFindSwitch(&ifilter_startupSP, names[i]);
-    state = states[i];
-    state_change = state != sp->s;
-    if (! state_change) { continue; }
-
-    /* process 'iFilter Populate' - NB: it's up to the higher-level software to check telemetry */
-    if (sp == &ifilter_startupS[0]) {
-      if (tcp_val.lv.filtisin == 1.0) {
-        IDMessage(GALIL_DEVICE, "Cannot populate whilst the filter is in the beam!");
-        ifilter_startupSP.s = IPS_OK;
-      } else {
-        IDMessage(GALIL_DEVICE, "Executing 'iFilter Populate'");
-        IDMessage(GALIL_DEVICE, "Calling xq_filtldm()");
-        busy = true;
-        if ((gstat=xq_filtldm()) == G_NO_ERROR) {
-          IDMessage(GALIL_DEVICE, "Called xq_filtldm() OK");
-          IDMessage(GALIL_DEVICE, "Executed 'iFilter Populate' OK");
-        } else {
-          IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_filtldm(), gstat=%d", gstat);
-        }
-        ifilter_startupSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
-        telemetry_lightsL[2].s = gstat == G_NO_ERROR ? IPS_BUSY : IPS_ALERT;
-        IDSetLight(&telemetry_lightsLP, NULL);
-
-        busy = false;
-      }
-      ifilter_startupS[0].s = ISS_OFF;
-
-    /* process 'iFilter PopDone' - NB: it's up to the higher-level software to check telemetry */
-    } else if (sp == &ifilter_startupS[1]) {
-      IDMessage(GALIL_DEVICE, "Executing 'iFilter PopDone'");
-      IDMessage(GALIL_DEVICE, "Calling xq_hx()");
-      busy = true;
-      if ((gstat=xq_hx()) == G_NO_ERROR) {
-        IDMessage(GALIL_DEVICE, "Called xq_hx() OK");
-        IDMessage(GALIL_DEVICE, "Executing 'iFilter PopDone' OK");
-      } else {
-        IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_hx(), gstat=%d", gstat);
-      }
-      busy = false;
-      ifilter_startupSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
-      telemetry_lightsL[2].s = gstat == G_NO_ERROR ? IPS_IDLE : IPS_ALERT;
-      IDSetLight(&telemetry_lightsLP, NULL);
-      ifilter_startupS[1].s = ISS_OFF;
-
-    /* process 'iFilter ReadWheel' - NB: it's up to the higher-level software to check telemetry */
-    } else if (sp == &ifilter_startupS[2]) {
-      if (tcp_val.lv.filtisin == 1.0) {
-        IDMessage(GALIL_DEVICE, "Cannot read wheel whilst the filter is in the beam!");
-        ifilter_startupSP.s = IPS_OK;
-      } else {
-        IDMessage(GALIL_DEVICE, "Executing 'iFilter ReadWheel'");
-        IDMessage(GALIL_DEVICE, "Calling xq_filtrd()");
-        busy = true;
-        if ((gstat=xq_filtrd()) == G_NO_ERROR) {
-          IDMessage(GALIL_DEVICE, "Called xq_filtrd() OK");
-          IDMessage(GALIL_DEVICE, "Executed 'iFilter ReadWheel' OK");
-        } else {
-          IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_filtrd(), gstat=%d", gstat);
-        }
-        ifilter_startupSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
-        busy = false;
-      }
-      ifilter_startupS[2].s = ISS_OFF;
-
-    /* process 'iFilter Initialize' - NB: it's up to the higher-level software to check telemetry */
-    } else if (sp == &ifilter_startupS[3]) {
-      if (tcp_val.lv.filtisin == 1.0) {
-        IDMessage(GALIL_DEVICE, "Cannot initialize whilst the filter is in the beam!");
-        ifilter_startupSP.s = IPS_OK;
-      } else {
-        IDMessage(GALIL_DEVICE, "Executing 'iFilter Initialize'");
-        IDMessage(GALIL_DEVICE, "Calling xq_filtrd()");
-        busy = true;
-        if ((gstat=xq_filtrd()) == G_NO_ERROR) {
-          IDMessage(GALIL_DEVICE, "Called xq_filtrd() OK");
-          IDMessage(GALIL_DEVICE, "Executed 'iFilter Initialize' OK");
-        } else {
-          IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_filtrd(), gstat=%d", gstat);
-        }
-        ifilter_startupSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
-        busy = false;
-      }
-      ifilter_startupS[3].s = ISS_OFF;
-    }
-  }
-
-  /* reset */
-  IUResetSwitch(&ifilter_startupSP);
-  IDSetSwitch(&ifilter_startupSP, NULL);
-}
 /*******************************************************************************
  * action: execute_ifilter_switches()
  ******************************************************************************/
@@ -1229,6 +1209,27 @@ void execute_ifilter_switches(ISState states[], char *names[], int n) {
         busy = false;
       }
       ifilterS[1].s = ISS_OFF;
+    }
+
+    /* process 'iFilter ReadWheel' - NB: it's up to the higher-level software to check telemetry */
+    } else if (sp == &ifilterS[2]) {
+      if (tcp_val.lv.filtisin == 1.0) {
+        IDMessage(GALIL_DEVICE, "Cannot read wheel whilst the filter is in the beam!");
+        ifilterS.s = IPS_OK;
+      } else {
+        IDMessage(GALIL_DEVICE, "Executing 'iFilter ReadWheel'");
+        IDMessage(GALIL_DEVICE, "Calling xq_filtrd()");
+        busy = true;
+        if ((gstat=xq_filtrd()) == G_NO_ERROR) {
+          IDMessage(GALIL_DEVICE, "Called xq_filtrd() OK");
+          IDMessage(GALIL_DEVICE, "Executed 'iFilter ReadWheel' OK");
+        } else {
+          IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_filtrd(), gstat=%d", gstat);
+        }
+        ifilterS.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
+        busy = false;
+      }
+      ifilterS[2].s = ISS_OFF;
     }
   }
 
