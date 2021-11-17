@@ -1395,10 +1395,10 @@ static void execute_timer(void *p) {
   } else {
     (void) sprintf(ifilter_names.filter_6, "%s", bok_ifilters[(int)round(tcp_val.filtvals[5])].name);
   }
-  IDMessage(GALIL_DEVICE, "filter index=%d", _ifiltn - 1);
+  /* IDMessage(GALIL_DEVICE, "filter index=%d", _ifiltn - 1);
   ifilter_changeS[_ifiltn].s = ISS_ON;
   IDSetSwitch(&ifilter_changeSP, NULL);
-  IDSetText(&ifilterTP, NULL);
+  IDSetText(&ifilterTP, NULL); */
 
   /* update values */
   ifoci.enca = tcp_val.position[0];
