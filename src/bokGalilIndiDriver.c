@@ -161,7 +161,7 @@ static ISwitch gfilterS[] = {
   {"g_initfw", "Initialize", ISS_OFF, 0, 0},
 };
 ISwitchVectorProperty gfilterSP = {
-  GALIL_DEVICE, "GFILTER_ACTIONS", "G-FW Startup", GFILTER_GROUP, IP_RW, ISR_1OFMANY, 0.0, IPS_IDLE, gfilterS, NARRAY(gfilterS), "", 0
+  GALIL_DEVICE, "GFILTER_ACTIONS", "Guider FW Startup", GFILTER_GROUP, IP_RW, ISR_1OFMANY, 0.0, IPS_IDLE, gfilterS, NARRAY(gfilterS), "", 0
 };
 
 static ISwitch gfilter_changeS[] = {
@@ -190,10 +190,10 @@ static ITextVectorProperty gfilterTP = {
 
 /* gfocus group */
 static INumber gfocus_distN[] = {
-  {"distgcam", "Focus", "%5.0f", -100.0, 100.0, 1.0, 0.0, 0, 0, 0}
+  {"distgcam", "Goto", "%5.0f", -100.0, 100.0, 1.0, 0.0, 0, 0, 0}
 };
 static INumberVectorProperty gfocus_distNP = {
-  GALIL_DEVICE, "GFOCUS_DIST", "Change Focus", GFOCUS_GROUP, IP_WO, 0.0, IPS_IDLE, gfocus_distN, NARRAY(gfocus_distN), "", 0
+  GALIL_DEVICE, "GFOCUS_DIST", "Guider Focus", GFOCUS_GROUP, IP_WO, 0.0, IPS_IDLE, gfocus_distN, NARRAY(gfocus_distN), "", 0
 };
 
 /* ifilter group */
@@ -247,7 +247,7 @@ static ISwitch ifocus_referenceS[] = {
   {"resnom", "Restore Nominal Plane", ISS_OFF, 0, 0}
 };
 ISwitchVectorProperty ifocus_referenceSP = {
-  GALIL_DEVICE, "IFOCUS_REFERENCE", "References", IFOCUS_GROUP, IP_RW, ISR_ATMOST1, 0.0, IPS_IDLE, ifocus_referenceS, NARRAY(ifocus_referenceS), "", 0
+  GALIL_DEVICE, "IFOCUS_REFERENCE", "Reference Actions", IFOCUS_GROUP, IP_RW, ISR_ATMOST1, 0.0, IPS_IDLE, ifocus_referenceS, NARRAY(ifocus_referenceS), "", 0
 };
 
 static INumber ifocus_distN[] = {
@@ -1466,12 +1466,12 @@ static void execute_timer(void *p) {
   (void) sprintf(telemetrys.a_position,   "%05d / %08.3f",  udp_val.baxis_analog_in, ifoci.vala);
   (void) sprintf(telemetrys.b_position,   "%05d / %08.3f",  udp_val.daxis_analog_in, ifoci.valb);
   (void) sprintf(telemetrys.c_position,   "%05d / %08.3f",  udp_val.faxis_analog_in, ifoci.valc);
-  (void) sprintf(telemetrys.a_reference,  "%04.0f",           ifoci.refa == 123456792.000 ? 0. : ifoci.refa * 1000);
-  (void) sprintf(telemetrys.b_reference,  "%04.0f",           ifoci.refb == 123456792.000 ? 0. : ifoci.refb * 1000);
-  (void) sprintf(telemetrys.c_reference,  "%04.0f",           ifoci.refc == 123456792.000 ? 0. : ifoci.refc * 1000);
-  (void) sprintf(telemetrys.lvdta,        "%04.0f",         ifoci.vala * 1000);
-  (void) sprintf(telemetrys.lvdtb,        "%04.0f",         ifoci.valb * 1000);
-  (void) sprintf(telemetrys.lvdtc,        "%04.0f",         ifoci.valc * 1000);
+  (void) sprintf(telemetrys.a_reference,  "%.0f",           ifoci.refa == 123456792.000 ? 0. : ifoci.refa * 1000);
+  (void) sprintf(telemetrys.b_reference,  "%.0f",           ifoci.refb == 123456792.000 ? 0. : ifoci.refb * 1000);
+  (void) sprintf(telemetrys.c_reference,  "%.0f",           ifoci.refc == 123456792.000 ? 0. : ifoci.refc * 1000);
+  (void) sprintf(telemetrys.lvdta,        "%.0f",           ifoci.vala * 1000);
+  (void) sprintf(telemetrys.lvdtb,        "%.0f",           ifoci.valb * 1000);
+  (void) sprintf(telemetrys.lvdtc,        "%.0f",           ifoci.valc * 1000);
   (void) sprintf(telemetrys.distall,      "%08.1f",         tcp_val.lv.distall);
   (void) sprintf(telemetrys.dista,        "%08.1f",         tcp_val.lv.dista);
   (void) sprintf(telemetrys.distb,        "%08.1f",         tcp_val.lv.distb);
