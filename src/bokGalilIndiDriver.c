@@ -1097,7 +1097,7 @@ void execute_ifilter_startup(ISState states[], char *names[], int n) {
           IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_filtldm(), gstat=%d", gstat);
         }
         ifilter_startupSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
-        telemetry_lightsLP[0].s = gstat == G_NO_ERROR ? IPS_BUSY : IPS_ALERT;
+        telemetry_lightsL[0].s = gstat == G_NO_ERROR ? IPS_BUSY : IPS_ALERT;
         IDSetLight(&telemetry_lightsLP, NULL);
 
         busy = false;
