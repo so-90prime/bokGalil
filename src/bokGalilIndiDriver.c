@@ -304,6 +304,13 @@ static ITextVectorProperty telemetry_lvdtTP = {
   GALIL_DEVICE, "TELEMETRY_LVDT", "Current LVDT", TELEMETRY_GROUP, IP_RO, 0, IPS_IDLE, telemetry_lvdtT, NARRAY(telemetry_lvdtT), "", 0
 };
 
+static IText telemetry_gfocusT[] = {
+  {"gfocus_telemetry", "Guider Focus", telemetrys.distgcam, 0, 0, 0}
+};
+static ITextVectorProperty telemetry_gfocusTP = {
+  GALIL_DEVICE, "TELEMETRY_GFOCUS", "Current Guider Focus", TELEMETRY_GROUP, IP_RO, 0, IPS_IDLE, telemetry_gfocusT, NARRAY(telemetry_gfocusT), "", 0
+};
+
 
 /* telemetry group */
 // Wanted to break up into different groups for display purposes
@@ -381,7 +388,8 @@ ILightVectorProperty telemetry_connectionLP = {
 
 static ILight telemetry_lightsL[] = {
   {"swbusy", "Software Busy", ISS_OFF, 0, 0},
-  {"hwbusy", "Hardware Busy", ISS_OFF, 0, 0}
+  {"hwbusy", "Hardware Busy", ISS_OFF, 0, 0},
+  {"populatebusy", "Populate", ISS_OFF, 0, 0}
   
 };
 ILightVectorProperty telemetry_lightsLP = {
@@ -1089,6 +1097,9 @@ void execute_ifilter_startup(ISState states[], char *names[], int n) {
           IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_filtldm(), gstat=%d", gstat);
         }
         ifilter_startupSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
+        telemetry_lightsLP[0].s = gstat == G_NO_ERROR ? IPS_BUSY : IPS_ALERT;
+        IDSetLight(&telemetry_lightsLP, NULL);
+
         busy = false;
       }
       ifilter_startupS[0].s = ISS_OFF;
@@ -1106,6 +1117,8 @@ void execute_ifilter_startup(ISState states[], char *names[], int n) {
       }
       busy = false;
       ifilter_startupSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
+      telemetry_lightsLP[0].s = gstat == G_NO_ERROR ? IPS_IDLE : IPS_ALERT;
+      IDSetLight(&telemetry_lightsLP, NULL);
       ifilter_startupS[1].s = ISS_OFF;
 
     /* process 'iFilter ReadWheel' - NB: it's up to the higher-level software to check telemetry */
@@ -1495,6 +1508,7 @@ static void execute_timer(void *p) {
   IDSetText(&telemetryTP, NULL);
   IDSetText(&telemetry_referenceTP, NULL);
   IDSetText(&telemetry_lvdtTP, NULL);
+  IDSetText(&telemetry_gfocusTP, NULL);
 
   /* set and update light(s)*/
   telemetry_connectionL[0].s = (tcp_val.simulate == 0) ? IPS_OK : IPS_ALERT;
