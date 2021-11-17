@@ -1041,7 +1041,7 @@ void execute_ifilter_change(ISState states[], char *names[], int n) {
 /*******************************************************************************
  * action: execute_ifilter_startup()
  ******************************************************************************/
-void execute_ifilter_switches(ISState states[], char *names[], int n) {
+void execute_ifilter_startup(ISState states[], char *names[], int n) {
 
   /* declare some variables and initialize them */
   GReturn gstat = (GReturn)0;
