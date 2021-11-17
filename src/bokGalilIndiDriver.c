@@ -1463,9 +1463,9 @@ static void execute_timer(void *p) {
   IDSetText(&telemetry_referenceTP, NULL);
 
   /* set and update light(s)*/
-  telemetry_connectionL[0].s = (tcp_val.simulate == 0) ? ISS_ON : ISS_OFF;
+  telemetry_connectionL[0].s = (tcp_val.simulate == 0) ? IPS_BUSY : ISS_OFF;
   telemetry_connectionL[1].s = (udp_val.simulate == 0) ? ISS_ON : ISS_OFF;
-  telemetry_lightsL[0].s = (busy == true ) ? ISS_ON : ISS_OFF;
+  telemetry_lightsL[0].s = (busy == true ) ? ISS_OFF : ISS_OFF;
   telemetry_lightsL[1].s = (IS_BIT_SET(tcp_val.status, 7)) ? ISS_ON : ISS_OFF;
   telemetry_gfilterwheelL[0].s = (udp_val.haxis_moving == 1) ? ISS_ON : ISS_OFF;
   telemetry_ifilterwheelL[0].s = (tcp_val.lv.filtisin == 1.0) ? ISS_ON : ISS_OFF;
