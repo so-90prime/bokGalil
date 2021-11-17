@@ -308,7 +308,7 @@ static IText telemetry_gfocusT[] = {
   {"gfocus_telemetry", "Guider Focus", telemetrys.distgcam, 0, 0, 0}
 };
 static ITextVectorProperty telemetry_gfocusTP = {
-  GALIL_DEVICE, "TELEMETRY_GFOCUS", "Current Guider Focus", TELEMETRY_GROUP, IP_RO, 0, IPS_IDLE, telemetry_gfocusT, NARRAY(telemetry_gfocusT), "", 0
+  GALIL_DEVICE, "TELEMETRY_GFOCUS", "Current Guider Focus", GFOCUS_GROUP, IP_RO, 0, IPS_IDLE, telemetry_gfocusT, NARRAY(telemetry_gfocusT), "", 0
 };
 
 
