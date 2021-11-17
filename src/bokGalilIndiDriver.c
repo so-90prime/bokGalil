@@ -1466,12 +1466,12 @@ static void execute_timer(void *p) {
   (void) sprintf(telemetrys.a_position,   "%05d / %08.3f",  udp_val.baxis_analog_in, ifoci.vala);
   (void) sprintf(telemetrys.b_position,   "%05d / %08.3f",  udp_val.daxis_analog_in, ifoci.valb);
   (void) sprintf(telemetrys.c_position,   "%05d / %08.3f",  udp_val.faxis_analog_in, ifoci.valc);
-  (void) sprintf(telemetrys.a_reference,  "%.3f",           ifoci.refa);
-  (void) sprintf(telemetrys.b_reference,  "%.3f",           ifoci.refb);
-  (void) sprintf(telemetrys.c_reference,  "%.3f",           ifoci.refc);
-  (void) sprintf(telemetrys.lvdta,        "%08f",           ifoci.vala * 1000);
-  (void) sprintf(telemetrys.lvdtb,        "%08f",           ifoci.valb * 1000);
-  (void) sprintf(telemetrys.lvdtc,        "%08f",           ifoci.valc * 1000);
+  (void) sprintf(telemetrys.a_reference,  "%04.0f",           ifoci.refa == 123456792.000 ? 0. : ifoci.refa * 1000);
+  (void) sprintf(telemetrys.b_reference,  "%04.0f",           ifoci.refb == 123456792.000 ? 0. : ifoci.refb * 1000);
+  (void) sprintf(telemetrys.c_reference,  "%04.0f",           ifoci.refc == 123456792.000 ? 0. : ifoci.refc * 1000);
+  (void) sprintf(telemetrys.lvdta,        "%04.0f",         ifoci.vala * 1000);
+  (void) sprintf(telemetrys.lvdtb,        "%04.0f",         ifoci.valb * 1000);
+  (void) sprintf(telemetrys.lvdtc,        "%04.0f",         ifoci.valc * 1000);
   (void) sprintf(telemetrys.distall,      "%08.1f",         tcp_val.lv.distall);
   (void) sprintf(telemetrys.dista,        "%08.1f",         tcp_val.lv.dista);
   (void) sprintf(telemetrys.distb,        "%08.1f",         tcp_val.lv.distb);
