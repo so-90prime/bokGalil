@@ -331,10 +331,10 @@ static ITextVectorProperty telemetryTP = {
 };
 
 static ILight telemetry_ifilterwheelL[] = {
-  {"fou", "Filter Out", ISS_OFF, 0, 0},
+  {"fout", "Filter Out", ISS_OFF, 0, 0},
   {"frot", "tFW Rotating", ISS_OFF, 0, 0},
   {"flin", "Filter Translating", ISS_OFF, 0, 0},
-  ("fin", "Filter In", ISS_OFF, 0, 0},
+  {"fin", "Filter In", ISS_OFF, 0, 0},
   {"ferr", "FW Error", ISS_OFF, 0, 0}
 };
 ILightVectorProperty telemetry_ifilterwheelLP = {
