@@ -562,6 +562,7 @@ static void driver_init(void) {
     if (strlen(bok_ifilters[j].code)>0 && strlen(bok_ifilters[j].name)>0) {
       (void) fprintf(stderr, "instrument filters> index=%d, code='%s', name='%s'\n", j, bok_ifilters[j].code, bok_ifilters[j].name);
       (void) fflush(stderr);
+      IDMessage(GALIL_DEVICE, "instrument filters> index=%d, code='%s', name='%s'\n", j, bok_ifilters[j].code, bok_ifilters[j].name);
     }
   }
 
@@ -572,6 +573,8 @@ static void driver_init(void) {
     if (strlen(bok_gfilters[j].code)>0 && strlen(bok_gfilters[j].name)>0) {
       (void) fprintf(stderr, "guider filters> index=%d, code='%s', name='%s'\n", j, bok_gfilters[j].code, bok_gfilters[j].name);
       (void) fflush(stderr);
+      IDMessage(GALIL_DEVICE, "guider filters> index=%d, code='%s', name='%s'\n", j, bok_gfilters[j].code, bok_gfilters[j].name);
+      
     }
   }
 
@@ -826,7 +829,7 @@ void execute_ifilter_change(ISState states[], char *names[], int n) {
   ISState state = (ISState)NULL;
   bool state_change = false;
 
-  /* find switches with the passed names in the ifilterSP property */
+  /* find switches with the passed names in the ifilter_changeSP property */
   for (int i=0; i < n; i++) {
     sp = IUFindSwitch(&ifilter_changeSP, names[i]);
     state = states[i];
@@ -1355,7 +1358,7 @@ static void execute_timer(void *p) {
   } else {
     (void) sprintf(gfilter_names.filter_6, "%s", bok_gfilters[6].name);
   }
-  gfilter_changeS[_gfiltn - 1].s = ISS_ON; // Subtract one since zero based
+  gfilter_changeS[_gfiltn].s = ISS_ON; // Subtract one since zero based
   IDSetSwitch(&gfilter_changeSP, NULL);
   IDSetText(&gfilterTP, NULL);
 
@@ -1392,7 +1395,7 @@ static void execute_timer(void *p) {
   } else {
     (void) sprintf(ifilter_names.filter_6, "%s", bok_ifilters[(int)round(tcp_val.filtvals[5])].name);
   }
-  ifilter_changeS[_ifiltn - 1].s = ISS_ON;
+  ifilter_changeS[_ifiltn].s = ISS_ON;
   IDSetSwitch(&ifilter_changeSP, NULL);
   IDSetText(&ifilterTP, NULL);
 
