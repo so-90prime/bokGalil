@@ -1365,6 +1365,7 @@ static void execute_timer(void *p) {
     (void) sprintf(gfilter_names.filter_6, "%s", bok_gfilters[6].name);
   }
   IDMessage(GALIL_DEVICE, "guider index=%d", _gfiltn);
+  IUResetSwitch(&gfilter_changeSP);
   gfilter_changeS[_gfiltn - 1].s = ISS_ON; // Subtract one since zero based
 
   IDSetSwitch(&gfilter_changeSP, NULL);
