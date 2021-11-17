@@ -498,9 +498,11 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
 
   /* focus lvdt value(s) */
   } else if (!strcmp(name, ifocus_lvdtNP.name)) {
-    float dista = round((values[0] / 1000.0 + ifoci.vala) * BOK_LVDT_ATOD);
-    float distb = round((values[1] / 1000.0 + ifoci.valb) * BOK_LVDT_ATOD);
-    float distc = round((values[2] / 1000.0 + ifoci.valc) * BOK_LVDT_ATOD);
+    float dista = round((values[0] + ifoci.vala) * BOK_LVDT_ATOD);
+    float distb = round((values[1] + ifoci.valb) * BOK_LVDT_ATOD);
+    float distc = round((values[2] + ifoci.valc) * BOK_LVDT_ATOD);
+    IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", dista, distb, distc);
+    /* 
     busy = true;
     IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", dista, distb, distc);
     if ((gstat=xq_focusind(dista, distb, distc)) == G_NO_ERROR) {
@@ -514,6 +516,7 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
     ifocus_lvdtNP.np[1].value = values[1];
     ifocus_lvdtNP.np[2].value = values[2];
     IDSetNumber(&ifocus_lvdtNP, NULL);
+    */
 
   /* gfocus dist value */
   } else if (!strcmp(name, gfocus_distNP.name)) {
@@ -1509,6 +1512,8 @@ static void execute_timer(void *p) {
   IDSetText(&telemetry_referenceTP, NULL);
   IDSetText(&telemetry_lvdtTP, NULL);
   IDSetText(&telemetry_gfocusTP, NULL);
+
+  IDMessage("GALIL_DEVICE", "test");
 
   /* set and update light(s)*/
   telemetry_connectionL[0].s = (tcp_val.simulate == 0) ? IPS_OK : IPS_ALERT;
