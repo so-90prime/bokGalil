@@ -1357,7 +1357,8 @@ static void execute_timer(void *p) {
     (void) sprintf(gfilter_names.filter_6, "%s", bok_gfilters[6].name);
   }
   IDMessage(GALIL_DEVICE, "guider index=%d", _gfiltn);
-  gfilter_changeS[_gfiltn].s = ISS_ON; // Subtract one since zero based
+  gfilter_changeS[_gfiltn - 1].s = ISS_ON; // Subtract one since zero based
+
   IDSetSwitch(&gfilter_changeSP, NULL);
   IDSetText(&gfilterTP, NULL);
 
@@ -1394,7 +1395,7 @@ static void execute_timer(void *p) {
   } else {
     (void) sprintf(ifilter_names.filter_6, "%s", bok_ifilters[(int)round(tcp_val.filtvals[5])].name);
   }
-  IDMessage(GALIL_DEVICE, "filter index=%d", _ifiltn);
+  IDMessage(GALIL_DEVICE, "filter index=%d", _ifiltn - 1);
   ifilter_changeS[_ifiltn].s = ISS_ON;
   IDSetSwitch(&ifilter_changeSP, NULL);
   IDSetText(&ifilterTP, NULL);
