@@ -1513,7 +1513,7 @@ static void execute_timer(void *p) {
   IDSetText(&telemetry_lvdtTP, NULL);
   IDSetText(&telemetry_gfocusTP, NULL);
 
-  IDMessage("GALIL_DEVICE", "test");
+  IDMessage(GALIL_DEVICE, "test");
 
   /* set and update light(s)*/
   telemetry_connectionL[0].s = (tcp_val.simulate == 0) ? IPS_OK : IPS_ALERT;
