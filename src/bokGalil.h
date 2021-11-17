@@ -67,9 +67,9 @@
 #define BOK_STR_2048         2048
 #define BOK_TCP_ADDR         "10.30.3.31"
 #define BOK_TCP_PORT         23
-#define BOK_TCP_DELAY_MS     1000
+#define BOK_TCP_DELAY_MS     500
 #define BOK_TIME_STAMP       26
-#define BOK_UDP_DELAY_MS     1000
+#define BOK_UDP_DELAY_MS     500
 #define BOK_UDP_ADDR         "10.30.1.2"
 #define BOK_UDP_FAUCET_ON    "DR0;IHE=>-3;IHE=192,168,0,1<5078>1;DR1000,4;"
 #define BOK_UDP_FAUCET_OFF   "DR0;IHE=>-3;"

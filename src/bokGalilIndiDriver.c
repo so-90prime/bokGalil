@@ -155,10 +155,10 @@ telemetry_t telemetrys;
  ******************************************************************************/
 /* gfilter group */
 static ISwitch gfilterS[] = {
-  {"g_initfw", "gFilter Initialize", ISS_OFF, 0, 0},
+  {"g_initfw", "Initialize", ISS_OFF, 0, 0},
 };
 ISwitchVectorProperty gfilterSP = {
-  GALIL_DEVICE, "GFILTER_ACTIONS", "Actions", GFILTER_GROUP, IP_RW, ISR_1OFMANY, 0.0, IPS_IDLE, gfilterS, NARRAY(gfilterS), "", 0
+  GALIL_DEVICE, "GFILTER_ACTIONS", "G-FW Startup", GFILTER_GROUP, IP_RW, ISR_1OFMANY, 0.0, IPS_IDLE, gfilterS, NARRAY(gfilterS), "", 0
 };
 
 static ISwitch gfilter_changeS[] = {
@@ -364,8 +364,8 @@ ILightVectorProperty telemetry_connectionLP = {
 };
 
 static ILight telemetry_lightsL[] = {
-  {"swbusy", "Software Executing Procedure ", ISS_OFF, 0, 0},
-  {"hwbusy", "Hardware Executing Procedure ", ISS_OFF, 0, 0}
+  {"swbusy", "Software Busy", ISS_OFF, 0, 0},
+  {"hwbusy", "Hardware Busy", ISS_OFF, 0, 0}
   
 };
 ILightVectorProperty telemetry_lightsLP = {
@@ -1486,8 +1486,6 @@ static void execute_timer(void *p) {
   telemetry_ifilterwheelL[2].s = (udp_val.gaxis_moving == 1) ? IPS_BUSY : IPS_IDLE;
   telemetry_ifilterwheelL[3].s = (tcp_val.lv.filtisin == 1.0) ? IPS_OK : IPS_IDLE;
   telemetry_ifilterwheelL[4].s = (tcp_val.lv.errfilt == 1.0) ? IPS_ALERT : IPS_IDLE;
-
-  IDMessage(GALIL_DEVICE, "%d", udp_val.faxis_moving);
 
   telemetry_connectionLP.s = IPS_IDLE;
   telemetry_lightsLP.s   = IPS_IDLE;
