@@ -277,9 +277,9 @@ static INumberVectorProperty ifocus_distallNP = {
 };
 
 static INumber ifocus_lvdtN[] = {
-  {"lvdta", "Focus A", "%5.0f", -230.0, 2500.0, 1.0, 0.0, 0, 0, 0}, // Documented by Joe and Bruce limit test for LVDT
-  {"lvdtb", "Focus B", "%5.0f", -230.0, 2500.0, 1.0, 0.0, 0, 0, 0}, // they got the range from -250 to 2850
-  {"lvdtc", "Focus C", "%5.0f", -230.0, 2500.0, 1.0, 0.0, 0, 0, 0} // I included some buffer. There is an official email
+  {"lvdta", "Focus A", "%5.0f", BOK_MIN_LVDT, BOK_MAX_LVDT, 1.0, 0.0, 0, 0, 0}, // Documented by Joe and Bruce limit test for LVDT
+  {"lvdtb", "Focus B", "%5.0f", BOK_MIN_LVDT, BOK_MAX_LVDT, 1.0, 0.0, 0, 0, 0}, // they got the range from -250 to 2850
+  {"lvdtc", "Focus C", "%5.0f", BOK_MIN_LVDT, BOK_MAX_LVDT, 1.0, 0.0, 0, 0, 0} // I included some buffer. There is an official email
 };
 static INumberVectorProperty ifocus_lvdtNP = {
   GALIL_DEVICE, "IFOCUS_LVDT", "Main Focus", IFOCUS_GROUP, IP_RW, 0.0, IPS_IDLE, ifocus_lvdtN, NARRAY(ifocus_lvdtN), "", 0
@@ -516,7 +516,7 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
   /* focus lvdt value(s) */
   } else if (!strcmp(name, ifocus_lvdtNP.name)) {
     // Check if in range of each other
-    if (abs(values[0] - values[1]) > 100 || abs(values[1] - values[2]) > 100 || abs(values[2] - values[0]) > 100) {
+    if (abs(values[0] - values[1]) > BOK_MAX_LVDT_DIFF || abs(values[1] - values[2]) > BOK_MAX_LVDT_DIFF || abs(values[2] - values[0]) > BOK_MAX_LVDT_DIFF) {
       IDMessage(GALIL_DEVICE, "<ERROR> lvdt input values differ more than 100 units");
       return;
     }
