@@ -540,7 +540,7 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
     }
 
     // Figure out what name to do 
-    IDMessage(GALIL_DEVICE, names[0]);
+    IDMessage(GALIL_DEVICE, "%s", names[0]);
     
     /* float dista = round((values[0] / 1000 - ifoci.vala) * BOK_LVDT_ATOD);
     float distb = round((values[1] / 1000 - ifoci.valb) * BOK_LVDT_ATOD);
