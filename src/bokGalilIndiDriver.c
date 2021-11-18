@@ -161,7 +161,7 @@ static ISwitch gfilterS[] = {
   {"g_initfw", "Initialize", ISS_OFF, 0, 0},
 };
 ISwitchVectorProperty gfilterSP = {
-  GALIL_DEVICE, "GFILTER_ACTIONS", "Guider FW Startup", GFILTER_GROUP, IP_RW, ISR_1OFMANY, 0.0, IPS_IDLE, gfilterS, NARRAY(gfilterS), "", 0
+  GALIL_DEVICE, "GFILTER_ACTIONS", "Guider FW Actions", GFILTER_GROUP, IP_RW, ISR_1OFMANY, 0.0, IPS_IDLE, gfilterS, NARRAY(gfilterS), "", 0
 };
 
 static ISwitch gfilter_changeS[] = {
@@ -173,7 +173,7 @@ static ISwitch gfilter_changeS[] = {
   {"g_slot_6",   "gFilter 6", ISS_OFF, 0, 0}
 };
 ISwitchVectorProperty gfilter_changeSP = {
-  GALIL_DEVICE, "GFILTER_CHANGE", "Change Filter", GFILTER_GROUP, IP_RW, ISR_1OFMANY, 0.0, IPS_IDLE, gfilter_changeS, NARRAY(gfilter_changeS), "", 0
+  GALIL_DEVICE, "GFILTER_CHANGE", "Change Guider Filter", GFILTER_GROUP, IP_RW, ISR_1OFMANY, 0.0, IPS_IDLE, gfilter_changeS, NARRAY(gfilter_changeS), "", 0
 };
 
 static IText gfilterT[] = {
@@ -185,12 +185,12 @@ static IText gfilterT[] = {
   {"gfilter_6", "gFilter 6", gfilter_names.filter_6, 0, 0, 0}
 };
 static ITextVectorProperty gfilterTP = {
-  GALIL_DEVICE, "GFILTER_NAMES", "Filter Names", GFILTER_GROUP, IP_RO, 0.0, IPS_IDLE, gfilterT, NARRAY(gfilterT), "", 0
+  GALIL_DEVICE, "GFILTER_NAMES", "Guider Filter Names", GFILTER_GROUP, IP_RO, 0.0, IPS_IDLE, gfilterT, NARRAY(gfilterT), "", 0
 };
 
 /* gfocus group */
 static INumber gfocus_distN[] = {
-  {"distgcam", "Goto", "%5.0f", -100.0, 100.0, 1.0, 0.0, 0, 0, 0}
+  {"distgcam", "Guider Encoder Steps", "%5.0f", -100.0, 100.0, 1.0, 0.0, 0, 0, 0}
 };
 static INumberVectorProperty gfocus_distNP = {
   GALIL_DEVICE, "GFOCUS_DIST", "Guider Focus", GFOCUS_GROUP, IP_WO, 0.0, IPS_IDLE, gfocus_distN, NARRAY(gfocus_distN), "", 0
@@ -212,7 +212,7 @@ static ISwitch ifilterS[] = {
   {"i_readfw",   "Read Filters", ISS_OFF, 0, 0}
 };
 ISwitchVectorProperty ifilterSP = {
-  GALIL_DEVICE, "IFILTER_ACTIONS", "Actions", IFILTER_GROUP, IP_RW, ISR_1OFMANY, 0.0, IPS_IDLE, ifilterS, NARRAY(ifilterS), "", 0
+  GALIL_DEVICE, "IFILTER_ACTIONS", "FW Actions", IFILTER_GROUP, IP_RW, ISR_1OFMANY, 0.0, IPS_IDLE, ifilterS, NARRAY(ifilterS), "", 0
 };
 
 static ISwitch ifilter_changeS[] = {
@@ -251,19 +251,19 @@ ISwitchVectorProperty ifocus_referenceSP = {
 };
 
 static INumber ifocus_distN[] = {
-  {"dista", "Encoder A", "%5.0f", -500.0, 500.0, 1.0, 0.0, 0, 0, 0}, // These limits came from nowhere
-  {"distb", "Encoder B", "%5.0f", -500.0, 500.0, 1.0, 0.0, 0, 0, 0}, // we should calculate it when we have tim
-  {"distc", "Encoder C", "%5.0f", -500.0, 500.0, 1.0, 0.0, 0, 0, 0}
+  {"dista", "Encoder A", "%5.0f", -100.0, 100.0, 1.0, 0.0, 0, 0, 0}, // These limits came from nowhere
+  {"distb", "Encoder B", "%5.0f", -100.0, 100.0, 1.0, 0.0, 0, 0, 0}, // we should calculate it when we have tim
+  {"distc", "Encoder C", "%5.0f", -100.0, 100.0, 1.0, 0.0, 0, 0, 0}
 };
 static INumberVectorProperty ifocus_distNP = {
-  GALIL_DEVICE, "IFOCUS_DIST", "Relative Encoder Steps Goto", IFOCUS_GROUP, IP_WO, 0.0, IPS_IDLE, ifocus_distN, NARRAY(ifocus_distN), "", 0
+  GALIL_DEVICE, "IFOCUS_DIST", "Encoder Steps", IFOCUS_GROUP, IP_WO, 0.0, IPS_IDLE, ifocus_distN, NARRAY(ifocus_distN), "", 0
 };
 
 static INumber ifocus_distallN[] = {
-  {"distall", "All Encoders", "%5.0f", -500.0, 500.0, 1.0, 0.0, 0, 0, 0} // Same as the ifocus_distN limits
+  {"distall", "All Encoders", "%5.0f", -100.0, 100.0, 1.0, 0.0, 0, 0, 0} // Same as the ifocus_distN limits
 };
 static INumberVectorProperty ifocus_distallNP = {
-  GALIL_DEVICE, "IFOCUS_DISTALL", "Relative Encoder Steps Goto All", IFOCUS_GROUP, IP_WO, 0.0, IPS_IDLE, ifocus_distallN, NARRAY(ifocus_distallN), "", 0
+  GALIL_DEVICE, "IFOCUS_DISTALL", "Encoder Steps Move All", IFOCUS_GROUP, IP_WO, 0.0, IPS_IDLE, ifocus_distallN, NARRAY(ifocus_distallN), "", 0
 };
 
 static INumber ifocus_lvdtN[] = {
@@ -292,7 +292,7 @@ static IText telemetry_referenceT[] = {
   {"c_reference",  "C Reference", telemetrys.c_reference,  0, 0, 0}
 };
 static ITextVectorProperty telemetry_referenceTP = {
-  GALIL_DEVICE, "TELEMETRY_REFERENCE", "References", TELEMETRY_GROUP, IP_RO, 0, IPS_IDLE, telemetry_referenceT, NARRAY(telemetry_referenceT), "", 0
+  GALIL_DEVICE, "TELEMETRY_REFERENCE", "LVDT References", TELEMETRY_GROUP, IP_RO, 0, IPS_IDLE, telemetry_referenceT, NARRAY(telemetry_referenceT), "", 0
 };
 
 static IText telemetry_lvdtT[] = {
@@ -301,14 +301,14 @@ static IText telemetry_lvdtT[] = {
   {"lvdtc",  "LVDT C", telemetrys.lvdtc,  0, 0, 0}
 };
 static ITextVectorProperty telemetry_lvdtTP = {
-  GALIL_DEVICE, "TELEMETRY_LVDT", "Current LVDT", TELEMETRY_GROUP, IP_RO, 0, IPS_IDLE, telemetry_lvdtT, NARRAY(telemetry_lvdtT), "", 0
+  GALIL_DEVICE, "TELEMETRY_LVDT", "LVDT Telemetry", TELEMETRY_GROUP, IP_RO, 0, IPS_IDLE, telemetry_lvdtT, NARRAY(telemetry_lvdtT), "", 0
 };
 
 static IText telemetry_gfocusT[] = {
   {"gfocus_telemetry", "Guider Focus", telemetrys.distgcam, 0, 0, 0}
 };
 static ITextVectorProperty telemetry_gfocusTP = {
-  GALIL_DEVICE, "TELEMETRY_GFOCUS", "Current Guider Focus", GFOCUS_GROUP, IP_RO, 0, IPS_IDLE, telemetry_gfocusT, NARRAY(telemetry_gfocusT), "", 0
+  GALIL_DEVICE, "TELEMETRY_GFOCUS", "Guider Focus", GFOCUS_GROUP, IP_RO, 0, IPS_IDLE, telemetry_gfocusT, NARRAY(telemetry_gfocusT), "", 0
 };
 
 
@@ -368,14 +368,14 @@ static ILight telemetry_ifilterwheelL[] = {
   {"ferr", "FW Error", ISS_OFF, 0, 0}
 };
 ILightVectorProperty telemetry_ifilterwheelLP = {
-  GALIL_DEVICE, "FW_LIGHTS", "Filterwheel Status", TELEMETRY_GROUP, IPS_IDLE, telemetry_ifilterwheelL, NARRAY(telemetry_ifilterwheelL), "", 0
+  GALIL_DEVICE, "FW_LIGHTS", "FW Status", TELEMETRY_GROUP, IPS_IDLE, telemetry_ifilterwheelL, NARRAY(telemetry_ifilterwheelL), "", 0
 };
 
 static ILight telemetry_gfilterwheelL[] = {
   {"grot",   "GW Rotating", ISS_OFF, 0, 0}
 };
 ILightVectorProperty telemetry_gfilterwheelLP = {
-  GALIL_DEVICE, "GW_LIGHTS", "Guiderwheel Status", TELEMETRY_GROUP, IPS_IDLE, telemetry_gfilterwheelL, NARRAY(telemetry_gfilterwheelL), "", 0
+  GALIL_DEVICE, "GW_LIGHTS", "Guider FW Status", TELEMETRY_GROUP, IPS_IDLE, telemetry_gfilterwheelL, NARRAY(telemetry_gfilterwheelL), "", 0
 };
 
 static ILight telemetry_engineeringL[] = {
