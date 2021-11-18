@@ -305,7 +305,7 @@ static ITextVectorProperty telemetry_lvdtTP = {
 };
 
 static IText telemetry_gfocusT[] = {
-  {"gfocus_telemetry", "Guider Focus", telemetrys.distgcam, 0, 0, 0}
+  {"gfocus_telemetry", "Guider Focus", telemetrys.gfiltn, 0, 0, 0}
 };
 static ITextVectorProperty telemetry_gfocusTP = {
   GALIL_DEVICE, "TELEMETRY_GFOCUS", "Guider Focus", GFOCUS_GROUP, IP_RO, 0, IPS_IDLE, telemetry_gfocusT, NARRAY(telemetry_gfocusT), "", 0
@@ -1524,10 +1524,10 @@ static void execute_timer(void *p) {
   telemetry_lightsL[0].s = (busy == true ) ? IPS_BUSY : IPS_IDLE;
   telemetry_lightsL[1].s = (IS_BIT_SET(tcp_val.status, 7)) ? IPS_BUSY : IPS_IDLE;
   telemetry_gfilterwheelL[0].s = (udp_val.haxis_moving == 1) ? IPS_BUSY : IPS_IDLE;
-  telemetry_ifilterwheelL[0].s = (tcp_val.lv.filtisin == 1.0) ? IPS_IDLE : IPS_BUSY;
+  telemetry_ifilterwheelL[0].s = (tcp_val.lv.filtisin == 1.0) ? IPS_IDLE : IPS_OK;
   telemetry_ifilterwheelL[1].s = (udp_val.faxis_moving == 1) ? IPS_BUSY : IPS_IDLE;
   telemetry_ifilterwheelL[2].s = (udp_val.gaxis_moving == 1) ? IPS_BUSY : IPS_IDLE;
-  telemetry_ifilterwheelL[3].s = (tcp_val.lv.filtisin == 1.0) ? IPS_OK : IPS_IDLE;
+  telemetry_ifilterwheelL[3].s = (tcp_val.lv.filtisin == 1.0) ? IPS_BUSY : IPS_IDLE;
   telemetry_ifilterwheelL[4].s = (tcp_val.lv.errfilt == 1.0) ? IPS_ALERT : IPS_IDLE;
 
   telemetry_engineeringLP.s = IPS_IDLE;
