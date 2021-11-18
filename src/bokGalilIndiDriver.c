@@ -114,6 +114,8 @@ typedef struct telemetrydata {
   char gfilter_4[BOK_STR_64];
   char gfilter_5[BOK_STR_64];
   char gfilter_6[BOK_STR_64];
+  char gfocus_position[BOK_STR_32];
+  char gfocus_limit[BOK_STR_32];
 } telemetry_t, *telemetry_p, **telemetry_s;
 
 
@@ -305,7 +307,7 @@ static ITextVectorProperty telemetry_lvdtTP = {
 };
 
 static IText telemetry_gfocusT[] = {
-  {"gfocus_telemetry", "Guider Focus", telemetrys.gfiltn, 0, 0, 0}
+  {"gfocus_telemetry", "Guider Focus", telemetrys.gfocus_position, 0, 0, 0}
 };
 static ITextVectorProperty telemetry_gfocusTP = {
   GALIL_DEVICE, "TELEMETRY_GFOCUS", "Guider Focus", GFOCUS_GROUP, IP_RO, 0, IPS_IDLE, telemetry_gfocusT, NARRAY(telemetry_gfocusT), "", 0
@@ -354,7 +356,9 @@ static IText telemetryT[] = {
   {"gfilter_3",    "gFilter 3                         ", telemetrys.gfilter_3,    0, 0, 0},
   {"gfilter_4",    "gFilter 4                         ", telemetrys.gfilter_4,    0, 0, 0},
   {"gfilter_5",    "gFilter 5                         ", telemetrys.gfilter_5,    0, 0, 0},
-  {"gfilter_6",    "gFilter 6                         ", telemetrys.gfilter_6,    0, 0, 0}
+  {"gfilter_6",    "gFilter 6                         ", telemetrys.gfilter_6,    0, 0, 0},
+  {"gfocus_position",    "gFocus Position             ", telemetrys.gfocus_position,    0, 0, 0},
+  {"gfocus_limit",    "gFocus Limit                   ", telemetrys.gfocus_limit,    0, 0, 0},
 };
 static ITextVectorProperty telemetryTP = {
   GALIL_DEVICE, "Telemetry", "Telemetry",  TELEMETRY_GROUP, IP_RO, 0, IPS_IDLE, telemetryT, NARRAY(telemetryT), "", 0
@@ -1513,6 +1517,8 @@ static void execute_timer(void *p) {
   (void) sprintf(telemetrys.gfilter_4,    "%s (4)",         gfilter_names.filter_4);
   (void) sprintf(telemetrys.gfilter_5,    "%s (5)",         gfilter_names.filter_5);
   (void) sprintf(telemetrys.gfilter_6,    "%s (6)",         gfilter_names.filter_6);
+  (void) sprintf(telemetrys.gfocus_position "%.0f",         udp_val.eaxis_reference_position);
+  (void) sprintf(telemetrys.gfocus_limit  "%d",             (int)round(udp_val.eaxis_stop_code));
   IDSetText(&telemetryTP, NULL);
   IDSetText(&telemetry_referenceTP, NULL);
   IDSetText(&telemetry_lvdtTP, NULL);
