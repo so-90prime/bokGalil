@@ -193,7 +193,7 @@ static ITextVectorProperty gfilterTP = {
 
 /* gfocus group */
 static INumber gfocus_distN[] = {
-  {"distgcam", "Motor Steps", "%5.0f", -500.0, 500.0, 1.0, 0.0, 0, 0, 0}
+  {"distgcam", "Motor Steps", "%5.0f", -1000.0, 1000.0, 1.0, 0.0, 0, 0, 0}
 };
 static INumberVectorProperty gfocus_distNP = {
   GALIL_DEVICE, "GFOCUS_DIST", "Guider Focus", GFOCUS_GROUP, IP_RW, 0.0, IPS_IDLE, gfocus_distN, NARRAY(gfocus_distN), "", 0
