@@ -251,25 +251,25 @@ ISwitchVectorProperty ifocus_referenceSP = {
 };
 
 static INumber ifocus_distN[] = {
-  {"dista", "Focus A", "%5.0f", -290.0, 2500.0, 1.0, 0.0, 0, 0, 0},
-  {"distb", "Focus B", "%5.0f", -290.0, 2500.0, 1.0, 0.0, 0, 0, 0},
-  {"distc", "Focus C", "%5.0f", -290.0, 2500.0, 1.0, 0.0, 0, 0, 0}
+  {"dista", "Encoder A", "%5.0f", -500.0, 500.0, 1.0, 0.0, 0, 0, 0}, // These limits came from nowhere
+  {"distb", "Encoder B", "%5.0f", -500.0, 500.0, 1.0, 0.0, 0, 0, 0}, // we should calculate it when we have tim
+  {"distc", "Encoder C", "%5.0f", -500.0, 500.0, 1.0, 0.0, 0, 0, 0}
 };
 static INumberVectorProperty ifocus_distNP = {
-  GALIL_DEVICE, "IFOCUS_DIST", "Relative Goto", IFOCUS_GROUP, IP_WO, 0.0, IPS_IDLE, ifocus_distN, NARRAY(ifocus_distN), "", 0
+  GALIL_DEVICE, "IFOCUS_DIST", "Relative Encoder Steps Goto", IFOCUS_GROUP, IP_WO, 0.0, IPS_IDLE, ifocus_distN, NARRAY(ifocus_distN), "", 0
 };
 
 static INumber ifocus_distallN[] = {
-  {"distall", "Focus All", "%5.0f", -290.0, 2500.0, 1.0, 0.0, 0, 0, 0}
+  {"distall", "All Encoders", "%5.0f", -500.0, 500.0, 1.0, 0.0, 0, 0, 0} // Same as the ifocus_distN limits
 };
 static INumberVectorProperty ifocus_distallNP = {
-  GALIL_DEVICE, "IFOCUS_DISTALL", "Relative Goto All", IFOCUS_GROUP, IP_WO, 0.0, IPS_IDLE, ifocus_distallN, NARRAY(ifocus_distallN), "", 0
+  GALIL_DEVICE, "IFOCUS_DISTALL", "Relative Encoder Steps Goto All", IFOCUS_GROUP, IP_WO, 0.0, IPS_IDLE, ifocus_distallN, NARRAY(ifocus_distallN), "", 0
 };
 
 static INumber ifocus_lvdtN[] = {
-  {"lvdta", "LVDT A", "%5.0f", -290.0, 2500.0, 1.0, 0.0, 0, 0, 0},
-  {"lvdtb", "LVDT B", "%5.0f", -290.0, 2500.0, 1.0, 0.0, 0, 0, 0},
-  {"lvdtc", "LVDT C", "%5.0f", -290.0, 2500.0, 1.0, 0.0, 0, 0, 0}
+  {"lvdta", "LVDT A", "%5.0f", -230.0, 2500.0, 1.0, 0.0, 0, 0, 0}, // Documented by Joe and Bruce limit test for LVDT
+  {"lvdtb", "LVDT B", "%5.0f", -230.0, 2500.0, 1.0, 0.0, 0, 0, 0}, // they got the range from -250 to 2850
+  {"lvdtc", "LVDT C", "%5.0f", -230.0, 2500.0, 1.0, 0.0, 0, 0, 0} // I included some buffer. There is an official email
 };
 static INumberVectorProperty ifocus_lvdtNP = {
   GALIL_DEVICE, "IFOCUS_LVDT", "Goto LVDT Value", IFOCUS_GROUP, IP_WO, 0.0, IPS_IDLE, ifocus_lvdtN, NARRAY(ifocus_lvdtN), "", 0
