@@ -1530,7 +1530,7 @@ static void execute_timer(void *p) {
   ifocus_lvdtN[0].value = (double)telemetrys.lvdta;
   ifocus_lvdtN[1].value = (double)telemetrys.lvdtb;
   ifocus_lvdtN[2].value = (double)telemetrys.lvdtc;
-  IDSetNumber(ifocus_lvdtNP, NULL);
+  IDSetNumber(&ifocus_lvdtNP, NULL);
 
 
   IDSetText(&telemetryTP, NULL);
