@@ -1392,6 +1392,7 @@ void execute_ifocus_reference_switches(ISState states[], char *names[], int n) {
       } else {
         // nominal plane is offset from B position
         IDMessage(GALIL_DEVICE, "Executing 'Restore Nominal Plane' a=%.3f, b=%.3f, c=%.3f", ifoci.noma, ifoci.nomb, ifoci.nomc);
+        /* 
         ifoci.nomb += ifoci.valb;
         ifoci.noma += ifoci.nomb;
         ifoci.nomc += ifoci.nomb;
@@ -1401,15 +1402,25 @@ void execute_ifocus_reference_switches(ISState states[], char *names[], int n) {
         delta_b = (ifoci.valb - ifoci.nomb) * BOK_LVDT_ATOD;
         delta_b = round((delta_b <= 0.0) ? delta_b : -1.0 * delta_b);
         delta_c = (ifoci.valc - ifoci.nomc) * BOK_LVDT_ATOD;
-        delta_c = round((delta_c <= 0.0) ? delta_c : -1.0 * delta_c);
+        delta_c = round((delta_c <= 0.0) ? delta_c : -1.0 * delta_c); 
+        */
+        delta_a = ifoci.vala - ifoci.valb;
+        delta_b = ifoci.valb - ifoci.valb;
+        delta_c = ifoci.valc - ifoci.valb;
+        float dista = round(ifoci.noma - delta_a);
+        float distb = round(ifoci.nomb - delta_b);
+        float distc = round(ifoci.nomc - delta_c);
+
         busy = true;
-        IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", delta_a, delta_b, delta_c);
-        if ((gstat=xq_focusind(delta_a, delta_b, delta_c)) == G_NO_ERROR) {
-          IDMessage(GALIL_DEVICE, "Called xq_focusind(a=%.1f, b=%.1f, c=%.1f) OK", delta_a, delta_b, delta_c);
+        IDMessage(GALIL_DEVICE, "Calculated nominal plane delta a=%.1f, b=%.1f, c=%.1f", delta_a, delta_b, delta_c);
+        IDMessage(GALIL_DEVICE, "Called xq_focusind(a=%.1f, b=%.1f, c=%.1f) OK", dista, distb, distc);
+
+        /* if ((gstat=xq_focusind(delta_a, delta_b, delta_c)) == G_NO_ERROR) {
+          IDMessage(GALIL_DEVICE, "Called xq_focusind(a=%.1f, b=%.1f, c=%.1f) OK", dista, distb, distc);
           IDMessage(GALIL_DEVICE, "Executing 'Restore Nominal Plane' OK");
         } else {
-          IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", delta_a, delta_b, delta_c);
-        }
+          IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", dista, distb, distc);
+        } */
         busy = false;
       }
       ifocus_referenceSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
