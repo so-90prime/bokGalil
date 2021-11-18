@@ -289,7 +289,7 @@ static INumber ifocus_lvdtallN[] = {
   {"lvdtall", "Focus All", "%5.0f", BOK_MIN_LVDT, BOK_MAX_LVDT, 1.0, 0.0, 0, 0, 0}
 };
 static INumberVectorProperty ifocus_lvdtallNP = {
-  GALIL_DEVICE, "IFOCUS_LVDTALL", "Main Focus", IFOCUS_GROUP, IP_RW, 0.0, IPS_IDLE, ifocus_lvdtallN, NARRAY(ifocus_lvdtallN), "", 0
+  GALIL_DEVICE, "IFOCUS_LVDTALL", "Main Focus All", IFOCUS_GROUP, IP_RW, 0.0, IPS_IDLE, ifocus_lvdtallN, NARRAY(ifocus_lvdtallN), "", 0
 };
 
 /* support group */
@@ -450,6 +450,7 @@ void ISGetProperties(const char *dev) {
   IDDefNumber(&ifocus_distNP, NULL);
   IDDefNumber(&ifocus_distallNP, NULL);
   IDDefNumber(&ifocus_lvdtNP, NULL);
+  IDDefNumber(&ifocus_lvdtallNP, NULL);
   IDDefSwitch(&gfilterSP, NULL);
   IDDefSwitch(&gfilter_changeSP, NULL);
   IDDefText(&gfilterTP, NULL);
