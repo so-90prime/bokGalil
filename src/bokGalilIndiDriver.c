@@ -535,7 +535,7 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
       } else {
         IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", dista, distb, distc);
       }
-      sleep(1)
+      sleep(1);
       busy = false;
       
     }
