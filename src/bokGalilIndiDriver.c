@@ -410,6 +410,7 @@ void ISGetProperties(const char *dev) {
   IDDefLight(&telemetry_lightsLP, NULL);
   IDDefLight(&telemetry_ifilterwheelLP, NULL);
   IDDefText(&telemetry_referenceTP, NULL);
+  IDDefText(&telemetry_gfocusTP, NULL);
   IDDefText(&telemetry_lvdtTP, NULL);
   IDDefText(&telemetryTP, NULL);
   IDDefSwitch(&ifilter_engineeringSP, NULL);
