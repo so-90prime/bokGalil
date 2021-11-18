@@ -500,8 +500,8 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
     float dista = round((values[0] / 1000 - ifoci.vala) * BOK_LVDT_ATOD);
     float distb = round((values[1] / 1000 - ifoci.valb) * BOK_LVDT_ATOD);
     float distc = round((values[2] / 1000 - ifoci.valc) * BOK_LVDT_ATOD);
-    IDMessage(GALIL_DEVICE, "lvdt input values a=%04.3f, b=%04.3f, c=%04.3f", values[0], values[1], values[2]);
-    IDMessage(GALIL_DEVICE, "lvdt current values a=%04.3f, b=%04.3f, c=%04.3f", ifoci.vala, ifoci.valb, ifoci.valc);
+    IDMessage(GALIL_DEVICE, "lvdt input values a=%.1f, b=%.1f, c=%.1f", values[0], values[1], values[2]);
+    IDMessage(GALIL_DEVICE, "lvdt current values a=%.3f, b=%.3f, c=%.3f", ifoci.vala, ifoci.valb, ifoci.valc);
     IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", dista, distb, distc);
     /* 
     busy = true;
