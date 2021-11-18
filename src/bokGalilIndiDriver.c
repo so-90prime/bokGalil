@@ -190,7 +190,7 @@ static ITextVectorProperty gfilterTP = {
 
 /* gfocus group */
 static INumber gfocus_distN[] = {
-  {"distgcam", "Guider Encoder Steps", "%5.0f", -100.0, 100.0, 1.0, 0.0, 0, 0, 0}
+  {"distgcam", "Encoder Guider", "%5.0f", -100.0, 100.0, 1.0, 0.0, 0, 0, 0}
 };
 static INumberVectorProperty gfocus_distNP = {
   GALIL_DEVICE, "GFOCUS_DIST", "Guider Focus", GFOCUS_GROUP, IP_WO, 0.0, IPS_IDLE, gfocus_distN, NARRAY(gfocus_distN), "", 0
@@ -247,7 +247,7 @@ static ISwitch ifocus_referenceS[] = {
   {"resnom", "Restore Nominal Plane", ISS_OFF, 0, 0}
 };
 ISwitchVectorProperty ifocus_referenceSP = {
-  GALIL_DEVICE, "IFOCUS_REFERENCE", "Reference Actions", IFOCUS_GROUP, IP_RW, ISR_ATMOST1, 0.0, IPS_IDLE, ifocus_referenceS, NARRAY(ifocus_referenceS), "", 0
+  GALIL_DEVICE, "IFOCUS_REFERENCE", "Focus Actions", IFOCUS_GROUP, IP_RW, ISR_ATMOST1, 0.0, IPS_IDLE, ifocus_referenceS, NARRAY(ifocus_referenceS), "", 0
 };
 
 static INumber ifocus_distN[] = {
