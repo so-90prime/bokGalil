@@ -1527,9 +1527,9 @@ static void execute_timer(void *p) {
   (void) sprintf(telemetrys.gfocus_limit,  "%d",            (int)round(udp_val.eaxis_stop_code));
   
   // Update LVDT
-  ifocus_lvdtN[0].value = (double)telemetrys.lvdta;
-  ifocus_lvdtN[1].value = (double)telemetrys.lvdtb;
-  ifocus_lvdtN[2].value = (double)telemetrys.lvdtc;
+  ifocus_lvdtN[0].value = ifoci.vala * 1000;
+  ifocus_lvdtN[1].value = ifoci.valb * 1000;
+  ifocus_lvdtN[2].value = ifoci.valc * 1000;
   IDSetNumber(&ifocus_lvdtNP, NULL);
 
 
