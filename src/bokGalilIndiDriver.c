@@ -285,6 +285,13 @@ static INumberVectorProperty ifocus_lvdtNP = {
   GALIL_DEVICE, "IFOCUS_LVDT", "Main Focus", IFOCUS_GROUP, IP_RW, 0.0, IPS_IDLE, ifocus_lvdtN, NARRAY(ifocus_lvdtN), "", 0
 };
 
+static INumber ifocus_lvdtallN[] = {
+  {"lvdtall", "Focus All", "%5.0f", BOK_MIN_LVDT, BOK_MAX_LVDT, 1.0, 0.0, 0, 0, 0}
+};
+static INumberVectorProperty ifocus_lvdtallNP = {
+  GALIL_DEVICE, "IFOCUS_LVDTALL", "Main Focus", IFOCUS_GROUP, IP_RW, 0.0, IPS_IDLE, ifocus_lvdtallN, NARRAY(ifocus_lvdtallN), "", 0
+};
+
 /* support group */
 static IText supportT[] = {
   {"author",  "Author",  supports.author,  0, 0, 0},
@@ -535,7 +542,6 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
     float distc = round((values[2] / 1000 - ifoci.valc) * BOK_LVDT_ATOD);
     IDMessage(GALIL_DEVICE, "lvdt input values a=%.1f, b=%.1f, c=%.1f", values[0], values[1], values[2]);
     IDMessage(GALIL_DEVICE, "lvdt current values a=%.3f, b=%.3f, c=%.3f", ifoci.vala, ifoci.valb, ifoci.valc);
-    IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", dista, distb, distc);
     
     busy = true;
     IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", dista, distb, distc);
@@ -550,6 +556,25 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
     ifocus_lvdtNP.np[1].value = values[1];
     ifocus_lvdtNP.np[2].value = values[2];
     IDSetNumber(&ifocus_lvdtNP, NULL);
+
+  /* focus lvdtall value */
+  } else if (!strcmp(name, ifocus_lvdtallNP.name)) {
+    float dista = round((values[0] / 1000 - ifoci.vala) * BOK_LVDT_ATOD);
+    float distb = round((values[0] / 1000 - ifoci.valb) * BOK_LVDT_ATOD);
+    float distc = round((values[0] / 1000 - ifoci.valc) * BOK_LVDT_ATOD);
+    IDMessage(GALIL_DEVICE, "lvdt input values all=%.1f", values[0]);
+    IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", dista, distb, distc);
+    
+    /* busy = true;
+    IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", dista, distb, distc);
+    if ((gstat=xq_focusind(dista, distb, distc)) == G_NO_ERROR) {
+      IDMessage(GALIL_DEVICE, "Called xq_focusind(a=%.1f, b=%.1f, c=%.1f) OK", dista, distb, distc);
+    } else {
+      IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", dista, distb, distc);
+    }
+    busy = false; 
+    ifocus_lvdtallNP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
+    IDSetNumber(&ifocus_lvdtallNP, NULL); */
 
   /* gfocus dist value */
   } else if (!strcmp(name, gfocus_distNP.name)) {
