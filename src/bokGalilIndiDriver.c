@@ -289,7 +289,7 @@ static INumber ifocus_lvdtallN[] = {
   {"lvdtall", "Focus All", "%5.0f", BOK_MIN_LVDT, BOK_MAX_LVDT, 1.0, 0.0, 0, 0, 0}
 };
 static INumberVectorProperty ifocus_lvdtallNP = {
-  GALIL_DEVICE, "IFOCUS_LVDTALL", "Main Focus All", IFOCUS_GROUP, IP_RW, 0.0, IPS_IDLE, ifocus_lvdtallN, NARRAY(ifocus_lvdtallN), "", 0
+  GALIL_DEVICE, "IFOCUS_LVDTALL", "Main Focus All", IFOCUS_GROUP, IP_WO, 0.0, IPS_IDLE, ifocus_lvdtallN, NARRAY(ifocus_lvdtallN), "", 0
 };
 
 /* support group */
@@ -533,12 +533,16 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
   /* focus lvdt value(s) */
   } else if (!strcmp(name, ifocus_lvdtNP.name)) {
     // Check if in range of each other
-    if (abs(values[0] - values[1]) > BOK_MAX_LVDT_DIFF || abs(values[1] - values[2]) > BOK_MAX_LVDT_DIFF || abs(values[2] - values[0]) > BOK_MAX_LVDT_DIFF) {
+    if (abs(values[0] - ifoci.vala * 1000) > BOK_MAX_LVDT_DIFF || abs(values[0] - ifoci.valb * 1000) > BOK_MAX_LVDT_DIFF || abs(values[0] - ifoci.valc * 1000) > BOK_MAX_LVDT_DIFF)
+    //if (abs(values[0] - values[1]) > BOK_MAX_LVDT_DIFF || abs(values[1] - values[2]) > BOK_MAX_LVDT_DIFF || abs(values[2] - values[0]) > BOK_MAX_LVDT_DIFF) {
       IDMessage(GALIL_DEVICE, "<ERROR> lvdt input values differ more than %.0f units", BOK_MAX_LVDT_DIFF);
       return;
     }
+
+    // Figure out what name to do 
+    IDMessage(GALIL_DEVICE, names[0]);
     
-    float dista = round((values[0] / 1000 - ifoci.vala) * BOK_LVDT_ATOD);
+    /* float dista = round((values[0] / 1000 - ifoci.vala) * BOK_LVDT_ATOD);
     float distb = round((values[1] / 1000 - ifoci.valb) * BOK_LVDT_ATOD);
     float distc = round((values[2] / 1000 - ifoci.valc) * BOK_LVDT_ATOD);
     IDMessage(GALIL_DEVICE, "lvdt input values a=%.1f, b=%.1f, c=%.1f", values[0], values[1], values[2]);
@@ -556,7 +560,7 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
     ifocus_lvdtNP.np[0].value = values[0];
     ifocus_lvdtNP.np[1].value = values[1];
     ifocus_lvdtNP.np[2].value = values[2];
-    IDSetNumber(&ifocus_lvdtNP, NULL);
+    IDSetNumber(&ifocus_lvdtNP, NULL); */
 
   /* focus lvdtall value */
   } else if (!strcmp(name, ifocus_lvdtallNP.name)) {
