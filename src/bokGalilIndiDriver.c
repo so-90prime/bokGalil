@@ -274,7 +274,7 @@ static INumber ifocus_lvdtN[] = {
   {"lvdtc", "LVDT C", "%5.0f", -230.0, 2500.0, 1.0, 0.0, 0, 0, 0} // I included some buffer. There is an official email
 };
 static INumberVectorProperty ifocus_lvdtNP = {
-  GALIL_DEVICE, "IFOCUS_LVDT", "Goto LVDT Value", IFOCUS_GROUP, IP_WO, 0.0, IPS_IDLE, ifocus_lvdtN, NARRAY(ifocus_lvdtN), "", 0
+  GALIL_DEVICE, "IFOCUS_LVDT", "Goto LVDT Value", IFOCUS_GROUP, IP_RW, 0.0, IPS_IDLE, ifocus_lvdtN, NARRAY(ifocus_lvdtN), "", 0
 };
 
 /* support group */
@@ -982,6 +982,7 @@ void execute_ifilter_change(ISState states[], char *names[], int n) {
       if (tcp_val.lv.filtisin == 1.0) {
         IDMessage(GALIL_DEVICE, "Cannot change filter whilst another filter is in the beam!");
         ifilter_changeSP.s = IPS_BUSY;
+
       } else if (tcp_val.lv.filtval==tcp_val.lv.reqfilt && tcp_val.lv.reqfilt==tcp_val.filtvals[0]) {
         IDMessage(GALIL_DEVICE, "iFilter is already selected!");
         ifilter_changeSP.s = IPS_OK;
@@ -1524,6 +1525,14 @@ static void execute_timer(void *p) {
   (void) sprintf(telemetrys.gfilter_6,    "%s (6)",         gfilter_names.filter_6);
   (void) sprintf(telemetrys.gfocus_position, "%d",        udp_val.eaxis_reference_position);
   (void) sprintf(telemetrys.gfocus_limit,  "%d",            (int)round(udp_val.eaxis_stop_code));
+  
+  // Update LVDT
+  ifocus_lvdtN[0].value = telemetrys.lvdta;
+  ifocus_lvdtN[1].value = telemetrys.lvdta;
+  ifocus_lvdtN[2].value = telemetrys.lvdta;
+  IDSetNumber(ifocus_lvdtNP, NULL);
+
+
   IDSetText(&telemetryTP, NULL);
   IDSetText(&telemetry_referenceTP, NULL);
   IDSetText(&telemetry_lvdtTP, NULL);
