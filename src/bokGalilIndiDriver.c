@@ -272,7 +272,7 @@ static INumber ifocus_lvdtN[] = {
   {"lvdtc", "LVDT C", "%5.0f", -290.0, 2500.0, 1.0, 0.0, 0, 0, 0}
 };
 static INumberVectorProperty ifocus_lvdtNP = {
-  GALIL_DEVICE, "IFOCUS_LVDT", "Goto LVDT Value", IFOCUS_GROUP, IP_RW, 0.0, IPS_IDLE, ifocus_lvdtN, NARRAY(ifocus_lvdtN), "", 0
+  GALIL_DEVICE, "IFOCUS_LVDT", "Goto LVDT Value", IFOCUS_GROUP, IP_WO, 0.0, IPS_IDLE, ifocus_lvdtN, NARRAY(ifocus_lvdtN), "", 0
 };
 
 /* support group */
@@ -460,6 +460,11 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
 
   /* check device */
   if (dev && strcmp(GALIL_DEVICE, dev)) return;
+
+  for(int ii=0; ii<n; ii++) {
+      IDMessage(GALIL_DEVICE, "value[%i]=%04.3f", ii, values[ii]);
+    }
+  }
 
   /* focus dist value(s) */
   if (!strcmp(name, ifocus_distNP.name)) {
