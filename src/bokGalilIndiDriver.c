@@ -384,8 +384,8 @@ ILightVectorProperty telemetry_ifilterwheelLP = {
 };
 
 static ILight telemetry_glimitsL[] = {
-  {"glimitin",   "Limit In (-)", ISS_OFF, 0, 0},
-  {"glimitout", "Limit Out (+)", ISS_OFF, 0, 0}
+  {"glimitin",   "Limit In (+)", ISS_OFF, 0, 0},
+  {"glimitout", "Limit Out (-)", ISS_OFF, 0, 0}
 };
 ILightVectorProperty telemetry_glimitsLP = {
   GALIL_DEVICE, "GLIMITS_LIGHTS", "Guider Focus Limits", GFOCUS_GROUP, IPS_IDLE, telemetry_glimitsL, NARRAY(telemetry_glimitsL), "", 0
@@ -1607,8 +1607,8 @@ static void execute_timer(void *p) {
   (void) sprintf(telemetrys.gfocus_limit,  "%d",            (int)round(udp_val.eaxis_stop_code));
   
   // Update lights for guider limits
-  telemetry_glimitsL[0].s = ((int)round(udp_val.eaxis_stop_code)) == 3 ? IPS_ALERT : IPS_IDLE;
-  telemetry_glimitsL[1].s = ((int)round(udp_val.eaxis_stop_code)) == 2 ? IPS_ALERT : IPS_IDLE;
+  telemetry_glimitsL[0].s = ((int)round(udp_val.eaxis_stop_code)) == 2 ? IPS_ALERT : IPS_IDLE;
+  telemetry_glimitsL[1].s = ((int)round(udp_val.eaxis_stop_code)) == 3 ? IPS_ALERT : IPS_IDLE;
   IDSetLight(&telemetry_glimitsLP, NULL);
 
   // Update LVDT
