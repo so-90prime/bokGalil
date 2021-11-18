@@ -1376,6 +1376,7 @@ void execute_ifocus_reference_switches(ISState states[], char *names[], int n) {
       ifoci.noma = ifoci.vala - ifoci.valb;
       ifoci.nomb = ifoci.valb - ifoci.valb;
       ifoci.nomc = ifoci.valc - ifoci.valb;
+      IDMessage(GALIL_DEVICE, "Saving nominal plane a=%.1f" b="%.1f" c="%.1f");
       save_nominal_plane_to_file(BOK_NPLANE_FILE, ifoci.noma, ifoci.nomb, ifoci.nomc);
       ifocus_referenceSP.s = IPS_OK;
       ifocus_referenceS[2].s = ISS_OFF;
@@ -1407,9 +1408,9 @@ void execute_ifocus_reference_switches(ISState states[], char *names[], int n) {
         delta_a = ifoci.vala - ifoci.valb;
         delta_b = ifoci.valb - ifoci.valb;
         delta_c = ifoci.valc - ifoci.valb;
-        float dista = round(ifoci.noma - delta_a);
-        float distb = round(ifoci.nomb - delta_b);
-        float distc = round(ifoci.nomc - delta_c);
+        float dista = round((ifoci.noma - delta_a) * BOK_LVDT_ATOD);
+        float distb = round((ifoci.nomb - delta_b) * BOK_LVDT_ATOD);
+        float distc = round((ifoci.nomc - delta_c) * BOK_LVDT_ATOD);
 
         busy = true;
         IDMessage(GALIL_DEVICE, "Calculated nominal plane delta a=%.1f, b=%.1f, c=%.1f", delta_a, delta_b, delta_c);
