@@ -1517,7 +1517,7 @@ static void execute_timer(void *p) {
   (void) sprintf(telemetrys.gfilter_4,    "%s (4)",         gfilter_names.filter_4);
   (void) sprintf(telemetrys.gfilter_5,    "%s (5)",         gfilter_names.filter_5);
   (void) sprintf(telemetrys.gfilter_6,    "%s (6)",         gfilter_names.filter_6);
-  (void) sprintf(telemetrys.gfocus_position, "%.0f",        udp_val.eaxis_reference_position);
+  (void) sprintf(telemetrys.gfocus_position, "%d",        udp_val.eaxis_reference_position);
   (void) sprintf(telemetrys.gfocus_limit,  "%d",            (int)round(udp_val.eaxis_stop_code));
   IDSetText(&telemetryTP, NULL);
   IDSetText(&telemetry_referenceTP, NULL);
