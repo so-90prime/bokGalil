@@ -123,6 +123,7 @@ typedef struct telemetrydata {
  * prototype(s)
  ******************************************************************************/
 static void driver_init(void);
+static void execute_end_of_night(ISState [], char *[], int);
 static void execute_gfilter_switches(ISState [], char *[], int);
 static void execute_gfilter_change(ISState [], char *[], int);
 static void execute_ifilter_engineering(ISState [], char *[], int);
@@ -250,6 +251,13 @@ static ISwitch ifocus_referenceS[] = {
 };
 ISwitchVectorProperty ifocus_referenceSP = {
   GALIL_DEVICE, "IFOCUS_REFERENCE", "Focus Actions", IFOCUS_GROUP, IP_RW, ISR_ATMOST1, 0.0, IPS_IDLE, ifocus_referenceS, NARRAY(ifocus_referenceS), "", 0
+};
+
+static ISwitch endofnightS[] = {
+  {"watchhasended", "End of Night", ISS_OFF, 0, 0}
+};
+ISwitchVectorProperty endofnightSP = {
+  GALIL_DEVICE, "END_OF_NIGHT", "End of Night", IFILTER_GROUP, IP_RW, ISR_ATMOST1, 0.0, IPS_IDLE, endofnightS, NARRAY(endofnightS), "", 0
 };
 
 static INumber ifocus_distN[] = {
@@ -420,6 +428,7 @@ void ISGetProperties(const char *dev) {
   IDDefSwitch(&ifilter_engineeringSP, NULL);
   IDDefSwitch(&ifilterSP, NULL);
   IDDefSwitch(&ifilter_changeSP, NULL);
+  IDDefSwitch(&endofnightSP, NULL);
   IDDefText(&ifilterTP, NULL);
   IDDefSwitch(&ifocus_referenceSP, NULL);
   IDDefNumber(&ifocus_distNP, NULL);
@@ -592,6 +601,10 @@ void ISNewSwitch(const char *dev, const char *name, ISState *states, char *names
     execute_ifocus_reference_switches(states, names, n);
     IUResetSwitch(&ifocus_referenceSP);
     IDSetSwitch(&ifocus_referenceSP, NULL);
+  } else if (! strcmp(name, endofnightSP.name)) {
+    execute_end_of_night(states, names, n);
+    IUResetSwitch(&endofnightSP);
+    IDSetSwitch(&endofnightSP, NULL);
   }
 }
 
@@ -651,6 +664,52 @@ static void driver_init(void) {
 
   /* should we do a populate / popdone / read filter wheel / initialize guider filter wheel here? */
 }
+
+/*******************************************************************************
+ * action: execute_end_of_night()
+ ******************************************************************************/
+void execute_end_of_night(ISState states[], char *names[], int n) {
+
+  /* declare some variables and initialize them */
+  GReturn gstat = (GReturn)0;
+  ISwitch *sp = (ISwitch *)NULL;
+  ISState state = (ISState)NULL;
+  bool state_change = false;
+
+  /* find switches with the passed names in the ifilterSP property */
+  for (int i=0; i < n; i++) {
+    sp = IUFindSwitch(&endofnightSP, names[i]);
+    state = states[i];
+    state_change = state != sp->s;
+    if (! state_change) { continue; }
+
+    /* process 'iFilter Unload' - NB: it's up to the higher-level software to check telemetry */
+    if (sp == &endofnightS[0]) {
+      if (tcp_val.lv.filtisin == 0.0) {
+        IDMessage(GALIL_DEVICE, "Filter is already out of the beam!");
+        endofnightSP.s = IPS_OK;
+      } else {
+        IDMessage(GALIL_DEVICE, "Executing 'iFilter Unload'");
+        IDMessage(GALIL_DEVICE, "Calling xq_filtout()");
+        busy = true;
+        if ((gstat=xq_filtout()) == G_NO_ERROR) {
+          IDMessage(GALIL_DEVICE, "Called xq_filtout() OK");
+          IDMessage(GALIL_DEVICE, "Executed 'iFilter Unload' OK");
+        } else {
+          IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_filtout(), gstat=%d", gstat);
+        }
+        endofnightSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
+        busy = false;
+      }
+      endofnightS[0].s = ISS_OFF;
+      IDMessage(GALIL_DEVICE, "Your watch has ended, sleep well");
+    }
+  }
+  /* reset */
+  IUResetSwitch(&endofnightSP);
+  IDSetSwitch(&endofnightSP, NULL);
+}
+
 
 /*******************************************************************************
  * action: execute_gfilter_change()
