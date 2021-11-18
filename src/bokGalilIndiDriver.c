@@ -285,15 +285,6 @@ static INumberVectorProperty ifocus_lvdtNP = {
   GALIL_DEVICE, "IFOCUS_LVDT", "Main Focus", IFOCUS_GROUP, IP_RW, 0.0, IPS_IDLE, ifocus_lvdtN, NARRAY(ifocus_lvdtN), "", 0
 };
 
-static INumber ifocus_lvdtN[] = {
-  {"lvdta", "Focus A", "%5.0f", BOK_MIN_LVDT, BOK_MAX_LVDT, 1.0, 0.0, 0, 0, 0}, // Documented by Joe and Bruce limit test for LVDT
-  {"lvdtb", "Focus B", "%5.0f", BOK_MIN_LVDT, BOK_MAX_LVDT, 1.0, 0.0, 0, 0, 0}, // they got the range from -250 to 2850
-  {"lvdtc", "Focus C", "%5.0f", BOK_MIN_LVDT, BOK_MAX_LVDT, 1.0, 0.0, 0, 0, 0} // I included some buffer. There is an official email
-};
-static INumberVectorProperty ifocus_lvdtNP = {
-  GALIL_DEVICE, "IFOCUS_LVDT", "Main Focus", IFOCUS_GROUP, IP_RW, 0.0, IPS_IDLE, ifocus_lvdtN, NARRAY(ifocus_lvdtN), "", 0
-};
-
 /* support group */
 static IText supportT[] = {
   {"author",  "Author",  supports.author,  0, 0, 0},
