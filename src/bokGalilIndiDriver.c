@@ -193,10 +193,10 @@ static ITextVectorProperty gfilterTP = {
 
 /* gfocus group */
 static INumber gfocus_distN[] = {
-  {"distgcam", "Encoder Guider", "%5.0f", -100.0, 100.0, 1.0, 0.0, 0, 0, 0}
+  {"distgcam", "Motor Steps", "%5.0f", -100.0, 100.0, 1.0, 0.0, 0, 0, 0}
 };
 static INumberVectorProperty gfocus_distNP = {
-  GALIL_DEVICE, "GFOCUS_DIST", "Guider Focus Steps", GFOCUS_GROUP, IP_RW, 0.0, IPS_IDLE, gfocus_distN, NARRAY(gfocus_distN), "", 0
+  GALIL_DEVICE, "GFOCUS_DIST", "Guider Focus", GFOCUS_GROUP, IP_RW, 0.0, IPS_IDLE, gfocus_distN, NARRAY(gfocus_distN), "", 0
 };
 
 /* ifilter group */
@@ -277,12 +277,12 @@ static INumberVectorProperty ifocus_distallNP = {
 };
 
 static INumber ifocus_lvdtN[] = {
-  {"lvdta", "LVDT A", "%5.0f", -230.0, 2500.0, 1.0, 0.0, 0, 0, 0}, // Documented by Joe and Bruce limit test for LVDT
-  {"lvdtb", "LVDT B", "%5.0f", -230.0, 2500.0, 1.0, 0.0, 0, 0, 0}, // they got the range from -250 to 2850
-  {"lvdtc", "LVDT C", "%5.0f", -230.0, 2500.0, 1.0, 0.0, 0, 0, 0} // I included some buffer. There is an official email
+  {"lvdta", "Focus A", "%5.0f", -230.0, 2500.0, 1.0, 0.0, 0, 0, 0}, // Documented by Joe and Bruce limit test for LVDT
+  {"lvdtb", "Focus B", "%5.0f", -230.0, 2500.0, 1.0, 0.0, 0, 0, 0}, // they got the range from -250 to 2850
+  {"lvdtc", "Focus C", "%5.0f", -230.0, 2500.0, 1.0, 0.0, 0, 0, 0} // I included some buffer. There is an official email
 };
 static INumberVectorProperty ifocus_lvdtNP = {
-  GALIL_DEVICE, "IFOCUS_LVDT", "Goto LVDT Value", IFOCUS_GROUP, IP_RW, 0.0, IPS_IDLE, ifocus_lvdtN, NARRAY(ifocus_lvdtN), "", 0
+  GALIL_DEVICE, "IFOCUS_LVDT", "Main Focus", IFOCUS_GROUP, IP_RW, 0.0, IPS_IDLE, ifocus_lvdtN, NARRAY(ifocus_lvdtN), "", 0
 };
 
 /* support group */
@@ -297,12 +297,12 @@ static ITextVectorProperty supportTP = {
 };
 
 static IText telemetry_referenceT[] = {
-  {"a_reference",  "A Reference", telemetrys.a_reference,  0, 0, 0},
-  {"b_reference",  "B Reference", telemetrys.b_reference,  0, 0, 0},
-  {"c_reference",  "C Reference", telemetrys.c_reference,  0, 0, 0}
+  {"a_reference",  "Focus A", telemetrys.a_reference,  0, 0, 0},
+  {"b_reference",  "Focus B", telemetrys.b_reference,  0, 0, 0},
+  {"c_reference",  "Focus C", telemetrys.c_reference,  0, 0, 0}
 };
 static ITextVectorProperty telemetry_referenceTP = {
-  GALIL_DEVICE, "TELEMETRY_REFERENCE", "LVDT References", TELEMETRY_GROUP, IP_RO, 0, IPS_IDLE, telemetry_referenceT, NARRAY(telemetry_referenceT), "", 0
+  GALIL_DEVICE, "TELEMETRY_REFERENCE", "Main Focus References", TELEMETRY_GROUP, IP_RO, 0, IPS_IDLE, telemetry_referenceT, NARRAY(telemetry_referenceT), "", 0
 };
 
 static IText telemetry_lvdtT[] = {
@@ -527,7 +527,7 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
     IDMessage(GALIL_DEVICE, "lvdt current values a=%.3f, b=%.3f, c=%.3f", ifoci.vala, ifoci.valb, ifoci.valc);
     IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", dista, distb, distc);
     
-    /* busy = true;
+    busy = true;
     IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", dista, distb, distc);
     if ((gstat=xq_focusind(dista, distb, distc)) == G_NO_ERROR) {
       IDMessage(GALIL_DEVICE, "Called xq_focusind(a=%.1f, b=%.1f, c=%.1f) OK", dista, distb, distc);
@@ -539,7 +539,7 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
     ifocus_lvdtNP.np[0].value = values[0];
     ifocus_lvdtNP.np[1].value = values[1];
     ifocus_lvdtNP.np[2].value = values[2];
-    IDSetNumber(&ifocus_lvdtNP, NULL); */
+    IDSetNumber(&ifocus_lvdtNP, NULL);
     
 
   /* gfocus dist value */
@@ -1351,12 +1351,12 @@ void execute_ifocus_reference_switches(ISState states[], char *names[], int n) {
         IDMessage(GALIL_DEVICE, "Invalid focus C reference");
       } else {
         IDMessage(GALIL_DEVICE, "Executing 'Restore Focus Reference'");
-        delta_a = (ifoci.vala - ifoci.refa) * BOK_LVDT_ATOD;
-        delta_a = round((delta_a <= 0.0) ? delta_a : -1.0 * delta_a);
-        delta_b = (ifoci.valb - ifoci.refb) * BOK_LVDT_ATOD;
-        delta_b = round((delta_b <= 0.0) ? delta_b : -1.0 * delta_b);
-        delta_c = (ifoci.valc - ifoci.refc) * BOK_LVDT_ATOD;
-        delta_c = round((delta_c <= 0.0) ? delta_c : -1.0 * delta_c);
+        delta_a = round((ifoci.vala - ifoci.refa) * BOK_LVDT_ATOD);
+        //delta_a = round((delta_a <= 0.0) ? delta_a : -1.0 * delta_a);
+        delta_b = round((ifoci.valb - ifoci.refb) * BOK_LVDT_ATOD);
+        //delta_b = round((delta_b <= 0.0) ? delta_b : -1.0 * delta_b);
+        delta_c = round((ifoci.valc - ifoci.refc) * BOK_LVDT_ATOD);
+        //delta_c = round((delta_c <= 0.0) ? delta_c : -1.0 * delta_c);
         busy = true;
         IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", delta_a, delta_b, delta_c);
         if ((gstat=xq_focusind(delta_a, delta_b, delta_c)) == G_NO_ERROR) {
