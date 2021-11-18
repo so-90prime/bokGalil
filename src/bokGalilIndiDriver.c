@@ -537,7 +537,11 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
       }
       sleep(1);
       busy = false;
-      
+      ifocus_lvdtNP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
+      ifocus_lvdtNP.np[0].value = values[0];
+      ifocus_lvdtNP.np[1].value = values[1];
+      ifocus_lvdtNP.np[2].value = values[2];
+      IDSetNumber(&ifocus_lvdtNP, NULL);
     }
     /* float dista = round((values[0] / 1000 - ifoci.vala) * BOK_LVDT_ATOD);
     float distb = round((values[1] / 1000 - ifoci.valb) * BOK_LVDT_ATOD);
@@ -553,12 +557,12 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
     } else {
       IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", dista, distb, distc);
     }
-    busy = false; */
+    busy = false; 
     ifocus_lvdtNP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
     ifocus_lvdtNP.np[0].value = values[0];
     ifocus_lvdtNP.np[1].value = values[1];
     ifocus_lvdtNP.np[2].value = values[2];
-    IDSetNumber(&ifocus_lvdtNP, NULL);
+    IDSetNumber(&ifocus_lvdtNP, NULL); */
     
 
   /* gfocus dist value */
