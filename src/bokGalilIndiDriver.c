@@ -507,7 +507,7 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
   /* focus lvdt value(s) */
   } else if (!strcmp(name, ifocus_lvdtNP.name)) {
     // Check if in range of each other
-    if (abs(value[0] - value[1]) > 100 || abs(value[1] - value[2]) > 100 || abs(value[2] - value[0]) > 100) {
+    if (abs(values[0] - values[1]) > 100 || abs(values[1] - values[2]) > 100 || abs(values[2] - values[0]) > 100) {
       IDMessage(GALIL_DEVICE, "<ERROR> lvdt input values differ more than 100 units");
       return;
     }
