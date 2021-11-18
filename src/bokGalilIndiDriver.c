@@ -1463,7 +1463,7 @@ void execute_ifocus_reference_switches(ISState states[], char *names[], int n) {
         IDMessage(GALIL_DEVICE, "Calculated nominal plane delta a=%.1f, b=%.1f, c=%.1f", delta_a, delta_b, delta_c);
         IDMessage(GALIL_DEVICE, "Called xq_focusind(a=%.1f, b=%.1f, c=%.1f) OK", dista, distb, distc);
 
-        if ((gstat=xq_focusind(delta_a, delta_b, delta_c)) == G_NO_ERROR) {
+        if ((gstat=xq_focusind(dista, distb, distc)) == G_NO_ERROR) {
           IDMessage(GALIL_DEVICE, "Called xq_focusind(a=%.1f, b=%.1f, c=%.1f) OK", dista, distb, distc);
           IDMessage(GALIL_DEVICE, "Executing 'Restore Nominal Plane' OK");
         } else {
