@@ -1376,7 +1376,7 @@ void execute_ifocus_reference_switches(ISState states[], char *names[], int n) {
       ifoci.noma = ifoci.vala - ifoci.valb;
       ifoci.nomb = ifoci.valb - ifoci.valb;
       ifoci.nomc = ifoci.valc - ifoci.valb;
-      IDMessage(GALIL_DEVICE, "Saving nominal plane a=%.1f" b="%.1f" c="%.1f");
+      IDMessage(GALIL_DEVICE, "Saving nominal plane a=%.1f" b="%.1f" c="%.1f", ifoci.noma, ifoci.nomb, ifoci.nomc);
       save_nominal_plane_to_file(BOK_NPLANE_FILE, ifoci.noma, ifoci.nomb, ifoci.nomc);
       ifocus_referenceSP.s = IPS_OK;
       ifocus_referenceS[2].s = ISS_OFF;
