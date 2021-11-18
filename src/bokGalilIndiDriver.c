@@ -466,9 +466,9 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
     float dista = values[0];
     float distb = values[1];
     float distc = values[2];
-    busy = true;
+    //busy = true;
     IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", dista, distb, distc);
-    if ((gstat=xq_focusind(dista, distb, distc)) == G_NO_ERROR) {
+    /* if ((gstat=xq_focusind(dista, distb, distc)) == G_NO_ERROR) {
       IDMessage(GALIL_DEVICE, "Called xq_focusind(a=%.1f, b=%.1f, c=%.1f) OK", dista, distb, distc);
     } else {
       IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", dista, distb, distc);
@@ -478,14 +478,14 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
     ifocus_distNP.np[0].value = dista;
     ifocus_distNP.np[1].value = distb;
     ifocus_distNP.np[2].value = distc;
-    IDSetNumber(&ifocus_distNP, NULL);
+    IDSetNumber(&ifocus_distNP, NULL); */
 
   /* focus distall value(s) */
   } else if (!strcmp(name, ifocus_distallNP.name)) {
     float distall = values[0];
-    busy = true;
+    //busy = true;
     IDMessage(GALIL_DEVICE, "Calling xq_focusall(a=%.1f)", distall);
-    if ((gstat=xq_focusall(distall)) == G_NO_ERROR) {
+    /* if ((gstat=xq_focusall(distall)) == G_NO_ERROR) {
       IDMessage(GALIL_DEVICE, "Called xq_focusall(a=%.1f) OK", distall);
     } else {
       IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_focusall(a=%.1f)", distall);
@@ -493,7 +493,7 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
     busy = false;
     ifocus_distallNP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
     ifocus_distallNP.np[0].value = distall;
-    IDSetNumber(&ifocus_distallNP, NULL);
+    IDSetNumber(&ifocus_distallNP, NULL); */
 
   /* focus lvdt value(s) */
   } else if (!strcmp(name, ifocus_lvdtNP.name)) {
@@ -522,9 +522,9 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
   /* gfocus dist value */
   } else if (!strcmp(name, gfocus_distNP.name)) {
     float distgcam = values[0];
-    busy = true;
+    //busy = true;
     IDMessage(GALIL_DEVICE, "Calling xq_gfocus(a=%.1f)", distgcam);
-    if ((gstat=xq_gfocus(distgcam)) == G_NO_ERROR) {
+    /* if ((gstat=xq_gfocus(distgcam)) == G_NO_ERROR) {
       IDMessage(GALIL_DEVICE, "Called xq_gfocus(a=%.1f) OK", distgcam);
     } else {
       IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_gfocus(a=%.1f)", distgcam);
@@ -532,7 +532,7 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
     busy = false;
     gfocus_distNP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
     gfocus_distNP.np[0].value = distgcam;
-    IDSetNumber(&gfocus_distNP, NULL);
+    IDSetNumber(&gfocus_distNP, NULL); */
   }
 }
 
