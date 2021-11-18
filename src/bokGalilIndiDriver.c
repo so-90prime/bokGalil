@@ -193,7 +193,7 @@ static ITextVectorProperty gfilterTP = {
 
 /* gfocus group */
 static INumber gfocus_distN[] = {
-  {"distgcam", "Motor Steps", "%5.0f", -100.0, 100.0, 1.0, 0.0, 0, 0, 0}
+  {"distgcam", "Motor Steps", "%5.0f", -500.0, 500.0, 1.0, 0.0, 0, 0, 0}
 };
 static INumberVectorProperty gfocus_distNP = {
   GALIL_DEVICE, "GFOCUS_DIST", "Guider Focus", GFOCUS_GROUP, IP_RW, 0.0, IPS_IDLE, gfocus_distN, NARRAY(gfocus_distN), "", 0
@@ -274,6 +274,15 @@ static INumber ifocus_distallN[] = {
 };
 static INumberVectorProperty ifocus_distallNP = {
   GALIL_DEVICE, "IFOCUS_DISTALL", "Encoder Steps Move All", IFOCUS_GROUP, IP_WO, 0.0, IPS_IDLE, ifocus_distallN, NARRAY(ifocus_distallN), "", 0
+};
+
+static INumber ifocus_lvdtN[] = {
+  {"lvdta", "Focus A", "%5.0f", BOK_MIN_LVDT, BOK_MAX_LVDT, 1.0, 0.0, 0, 0, 0}, // Documented by Joe and Bruce limit test for LVDT
+  {"lvdtb", "Focus B", "%5.0f", BOK_MIN_LVDT, BOK_MAX_LVDT, 1.0, 0.0, 0, 0, 0}, // they got the range from -250 to 2850
+  {"lvdtc", "Focus C", "%5.0f", BOK_MIN_LVDT, BOK_MAX_LVDT, 1.0, 0.0, 0, 0, 0} // I included some buffer. There is an official email
+};
+static INumberVectorProperty ifocus_lvdtNP = {
+  GALIL_DEVICE, "IFOCUS_LVDT", "Main Focus", IFOCUS_GROUP, IP_RW, 0.0, IPS_IDLE, ifocus_lvdtN, NARRAY(ifocus_lvdtN), "", 0
 };
 
 static INumber ifocus_lvdtN[] = {
@@ -388,7 +397,7 @@ static ILight telemetry_glimitsL[] = {
   {"glimitout", "Limit Out (+)", ISS_OFF, 0, 0}
 };
 ILightVectorProperty telemetry_glimitsLP = {
-  GALIL_DEVICE, "GLIMITS_LIGHTS", "Guider Focus Limits", TELEMETRY_GROUP, IPS_IDLE, telemetry_glimitsL, NARRAY(telemetry_glimitsL), "", 0
+  GALIL_DEVICE, "GLIMITS_LIGHTS", "Guider Focus Limits", GFOCUS_GROUP, IPS_IDLE, telemetry_glimitsL, NARRAY(telemetry_glimitsL), "", 0
 };
 
 static ILight telemetry_gfilterwheelL[] = {
