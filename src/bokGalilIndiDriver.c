@@ -533,16 +533,24 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
   /* focus lvdt value(s) */
   } else if (!strcmp(name, ifocus_lvdtNP.name)) {
     // Check if in range of each other
-    if (abs(values[0] - ifoci.vala * 1000) > BOK_MAX_LVDT_DIFF || abs(values[0] - ifoci.valb * 1000) > BOK_MAX_LVDT_DIFF || abs(values[0] - ifoci.valc * 1000) > BOK_MAX_LVDT_DIFF) {
-    //if (abs(values[0] - values[1]) > BOK_MAX_LVDT_DIFF || abs(values[1] - values[2]) > BOK_MAX_LVDT_DIFF || abs(values[2] - values[0]) > BOK_MAX_LVDT_DIFF) {
+    //if (abs(values[0] - ifoci.vala * 1000) > BOK_MAX_LVDT_DIFF || abs(values[0] - ifoci.valb * 1000) > BOK_MAX_LVDT_DIFF || abs(values[0] - ifoci.valc * 1000) > BOK_MAX_LVDT_DIFF) {
+    if (abs(values[0] - values[1]) > BOK_MAX_LVDT_DIFF || abs(values[1] - values[2]) > BOK_MAX_LVDT_DIFF || abs(values[2] - values[0]) > BOK_MAX_LVDT_DIFF) {
       IDMessage(GALIL_DEVICE, "<ERROR> lvdt input values differ more than %.0f units", BOK_MAX_LVDT_DIFF);
       return;
     }
 
     // Figure out what name to do 
-    IDMessage(GALIL_DEVICE, "%s", names[0]);
+    /* IDMessage(GALIL_DEVICE, "%s", names[0]);
+    float dista = 0;
+    float distb;
+    float distc;
+    switch (names[0]) {
+      case "lvdta":
+
+        break;
+    } */
     
-    /* float dista = round((values[0] / 1000 - ifoci.vala) * BOK_LVDT_ATOD);
+    float dista = round((values[0] / 1000 - ifoci.vala) * BOK_LVDT_ATOD);
     float distb = round((values[1] / 1000 - ifoci.valb) * BOK_LVDT_ATOD);
     float distc = round((values[2] / 1000 - ifoci.valc) * BOK_LVDT_ATOD);
     IDMessage(GALIL_DEVICE, "lvdt input values a=%.1f, b=%.1f, c=%.1f", values[0], values[1], values[2]);
@@ -560,7 +568,7 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
     ifocus_lvdtNP.np[0].value = values[0];
     ifocus_lvdtNP.np[1].value = values[1];
     ifocus_lvdtNP.np[2].value = values[2];
-    IDSetNumber(&ifocus_lvdtNP, NULL); */
+    IDSetNumber(&ifocus_lvdtNP, NULL);
 
   /* focus lvdtall value */
   } else if (!strcmp(name, ifocus_lvdtallNP.name)) {
@@ -570,7 +578,7 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
     IDMessage(GALIL_DEVICE, "lvdt input values all=%.1f", values[0]);
     IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", dista, distb, distc);
     
-    /* busy = true;
+    busy = true;
     IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", dista, distb, distc);
     if ((gstat=xq_focusind(dista, distb, distc)) == G_NO_ERROR) {
       IDMessage(GALIL_DEVICE, "Called xq_focusind(a=%.1f, b=%.1f, c=%.1f) OK", dista, distb, distc);
@@ -579,7 +587,7 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
     }
     busy = false; 
     ifocus_lvdtallNP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
-    IDSetNumber(&ifocus_lvdtallNP, NULL); */
+    IDSetNumber(&ifocus_lvdtallNP, NULL);
 
   /* gfocus dist value */
   } else if (!strcmp(name, gfocus_distNP.name)) {
@@ -1455,12 +1463,12 @@ void execute_ifocus_reference_switches(ISState states[], char *names[], int n) {
         IDMessage(GALIL_DEVICE, "Calculated nominal plane delta a=%.1f, b=%.1f, c=%.1f", delta_a, delta_b, delta_c);
         IDMessage(GALIL_DEVICE, "Called xq_focusind(a=%.1f, b=%.1f, c=%.1f) OK", dista, distb, distc);
 
-        /* if ((gstat=xq_focusind(delta_a, delta_b, delta_c)) == G_NO_ERROR) {
+        if ((gstat=xq_focusind(delta_a, delta_b, delta_c)) == G_NO_ERROR) {
           IDMessage(GALIL_DEVICE, "Called xq_focusind(a=%.1f, b=%.1f, c=%.1f) OK", dista, distb, distc);
           IDMessage(GALIL_DEVICE, "Executing 'Restore Nominal Plane' OK");
         } else {
           IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", dista, distb, distc);
-        } */
+        }
         busy = false;
       }
       ifocus_referenceSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
