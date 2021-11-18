@@ -462,8 +462,7 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
   if (dev && strcmp(GALIL_DEVICE, dev)) return;
 
   for(int ii=0; ii<n; ii++) {
-      IDMessage(GALIL_DEVICE, "value[%i]=%04.3f", ii, values[ii]);
-    }
+    IDMessage(GALIL_DEVICE, "value[%i]=%04.3f", ii, values[ii]);
   }
 
   /* focus dist value(s) */
