@@ -520,30 +520,8 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
       IDMessage(GALIL_DEVICE, "<ERROR> lvdt input values differ more than %.0f units", BOK_MAX_LVDT_DIFF);
       return;
     }
-    for (int i = 0; i < 3; i++) {
-      float dista = round((values[0] / 1000 - ifoci.vala) * BOK_LVDT_ATOD);
-      float distb = round((values[1] / 1000 - ifoci.valb) * BOK_LVDT_ATOD);
-      float distc = round((values[2] / 1000 - ifoci.valc) * BOK_LVDT_ATOD);
-      IDMessage(GALIL_DEVICE, "lvdt input values a=%.1f, b=%.1f, c=%.1f", values[0], values[1], values[2]);
-      IDMessage(GALIL_DEVICE, "lvdt current values a=%.3f, b=%.3f, c=%.3f", ifoci.vala, ifoci.valb, ifoci.valc);
-      IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", dista, distb, distc);
-      
-      busy = true;
-      IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", dista, distb, distc);
-      if ((gstat=xq_focusind(dista, distb, distc)) == G_NO_ERROR) {
-        IDMessage(GALIL_DEVICE, "Called xq_focusind(a=%.1f, b=%.1f, c=%.1f) OK", dista, distb, distc);
-      } else {
-        IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", dista, distb, distc);
-      }
-      sleep(1);
-      busy = false;
-      ifocus_lvdtNP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
-      ifocus_lvdtNP.np[0].value = values[0];
-      ifocus_lvdtNP.np[1].value = values[1];
-      ifocus_lvdtNP.np[2].value = values[2];
-      IDSetNumber(&ifocus_lvdtNP, NULL);
-    }
-    /* float dista = round((values[0] / 1000 - ifoci.vala) * BOK_LVDT_ATOD);
+    
+    float dista = round((values[0] / 1000 - ifoci.vala) * BOK_LVDT_ATOD);
     float distb = round((values[1] / 1000 - ifoci.valb) * BOK_LVDT_ATOD);
     float distc = round((values[2] / 1000 - ifoci.valc) * BOK_LVDT_ATOD);
     IDMessage(GALIL_DEVICE, "lvdt input values a=%.1f, b=%.1f, c=%.1f", values[0], values[1], values[2]);
@@ -562,8 +540,7 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
     ifocus_lvdtNP.np[0].value = values[0];
     ifocus_lvdtNP.np[1].value = values[1];
     ifocus_lvdtNP.np[2].value = values[2];
-    IDSetNumber(&ifocus_lvdtNP, NULL); */
-    
+    IDSetNumber(&ifocus_lvdtNP, NULL);
 
   /* gfocus dist value */
   } else if (!strcmp(name, gfocus_distNP.name)) {
