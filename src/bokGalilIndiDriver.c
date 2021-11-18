@@ -420,9 +420,9 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
 
   /* focus lvdt value(s) */
   } else if (!strcmp(name, ifocus_lvdtNP.name)) {
-    float dista = round((values[0]*1000.0 + ifoci.vala) * BOK_LVDT_ATOD);
-    float distb = round((values[1]*1000.0 + ifoci.valb) * BOK_LVDT_ATOD);
-    float distc = round((values[2]*1000.0 + ifoci.valc) * BOK_LVDT_ATOD);
+    float dista = round((ifoci.vala - values[0]/1000.0) * BOK_LVDT_ATOD);
+    float distb = round((ifoci.valb - values[1]/1000.0) * BOK_LVDT_ATOD);
+    float distc = round((ifoci.valc - values[2]/1000.0) * BOK_LVDT_ATOD);
     busy = true;
     IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", dista, distb, distc);
     if ((gstat=xq_focusind(dista, distb, distc)) == G_NO_ERROR) {

@@ -48,7 +48,7 @@ FW-GUI shows (for example):
  - The 'B Encoder' value (+1337) is associated with the B axis motor position;
  - The 'C Encoder' value (-970) is associated with the C axis motor position;
  - The 'A' value (0.297) is associated with the B axis analog input multiplied by 10.0/32767.0;
- - The 'B' value (0.292) is associated with the E axis analog input multiplied by 10.0/32767.0;
+ - The 'B' value (0.292) is associated with the D axis analog input multiplied by 10.0/32767.0;
  - The 'C' value (0.307) is associated with the F axis analog input multiplied by 10.0/32767.0;
  
 Now, to change the instrument focus, we use the algorithm:
@@ -58,13 +58,13 @@ Now, to change the instrument focus, we use the algorithm:
      Eg, A=-200, B=-150, C=-100;
   2. Divide values by 1000.0:
      Eg, A/=1000.0=-0.2, B/=1000.0=-0.15, C/=1000.0=-0.1
-  3. Add to current values:
-     Eg A+=0.297=0.097, B+=0.292=0.142, C+=0.307=0.207
+  3. Subtract from current values:
+     Eg A-=0.2=0.097, B-=0.15=0.142, C-=0.1=0.207
   4. Multiply values by A/D conversion factor -1.0/0.00055=-1818.2
      Eg, A*=-1818.2=-176.37, B*=-1818.2=-258.18, C*=-1818.2=-376.37
   5. Send nearest integer value to galil DISTA, DISTB, DISTC values:
      Eg, DISTA=-176;DISTB=-258;DISTC=-376;
-  6. Execute the 'XQ #COORDMV;'
+  6. Execute the 'XQ #FOCIND;'
  ```
 
 --------------------------------------
