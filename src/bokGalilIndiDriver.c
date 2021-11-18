@@ -196,7 +196,7 @@ static INumber gfocus_distN[] = {
   {"distgcam", "Encoder Guider", "%5.0f", -100.0, 100.0, 1.0, 0.0, 0, 0, 0}
 };
 static INumberVectorProperty gfocus_distNP = {
-  GALIL_DEVICE, "GFOCUS_DIST", "Guider Focus Steps", GFOCUS_GROUP, IP_WO, 0.0, IPS_IDLE, gfocus_distN, NARRAY(gfocus_distN), "", 0
+  GALIL_DEVICE, "GFOCUS_DIST", "Guider Focus Steps", GFOCUS_GROUP, IP_RW, 0.0, IPS_IDLE, gfocus_distN, NARRAY(gfocus_distN), "", 0
 };
 
 /* ifilter group */
@@ -1582,7 +1582,7 @@ static void execute_timer(void *p) {
   (void) sprintf(telemetrys.gfilter_4,    "%s (4)",         gfilter_names.filter_4);
   (void) sprintf(telemetrys.gfilter_5,    "%s (5)",         gfilter_names.filter_5);
   (void) sprintf(telemetrys.gfilter_6,    "%s (6)",         gfilter_names.filter_6);
-  (void) sprintf(telemetrys.gfocus_position, "%d",        udp_val.eaxis_reference_position);
+  (void) sprintf(telemetrys.gfocus_position, "%d",          udp_val.eaxis_reference_position);
   (void) sprintf(telemetrys.gfocus_limit,  "%d",            (int)round(udp_val.eaxis_stop_code));
   
   // Update LVDT
@@ -1591,6 +1591,9 @@ static void execute_timer(void *p) {
   ifocus_lvdtN[2].value = ifoci.valc * 1000;
   IDSetNumber(&ifocus_lvdtNP, NULL);
 
+  // Update guider focus
+  gfocus_distN[0].value = udp_val.eaxis_reference_position;
+  IDSetNumber(&gfocus_distNP, NULL);
 
   IDSetText(&telemetryTP, NULL);
   IDSetText(&telemetry_referenceTP, NULL);
