@@ -383,6 +383,14 @@ ILightVectorProperty telemetry_ifilterwheelLP = {
   GALIL_DEVICE, "FW_LIGHTS", "FW Status", TELEMETRY_GROUP, IPS_IDLE, telemetry_ifilterwheelL, NARRAY(telemetry_ifilterwheelL), "", 0
 };
 
+static ILight telemetry_glimitsL[] = {
+  {"glimitin",   "Limit In (-)", ISS_OFF, 0, 0},
+  {"glimitout", "Limit Out (+)", ISS_OFF, 0, 0}
+};
+ILightVectorProperty telemetry_glimitsLP = {
+  GALIL_DEVICE, "GLIMITS_LIGHTS", "Guider Focus Limits", TELEMETRY_GROUP, IPS_IDLE, telemetry_glimitsL, NARRAY(telemetry_glimitsL), "", 0
+};
+
 static ILight telemetry_gfilterwheelL[] = {
   {"grot",   "GW Rotating", ISS_OFF, 0, 0}
 };
@@ -420,6 +428,7 @@ void ISGetProperties(const char *dev) {
   IDDefLight(&telemetry_engineeringLP, NULL);
   IDDefLight(&telemetry_gfilterwheelLP, NULL);
   IDDefLight(&telemetry_lightsLP, NULL);
+  IDDefLight(&telemetry_glimitsLP, NULL);
   IDDefLight(&telemetry_ifilterwheelLP, NULL);
   IDDefText(&telemetry_referenceTP, NULL);
   IDDefText(&telemetry_gfocusTP, NULL);
@@ -1597,6 +1606,11 @@ static void execute_timer(void *p) {
   (void) sprintf(telemetrys.gfocus_position, "%d",          udp_val.eaxis_reference_position);
   (void) sprintf(telemetrys.gfocus_limit,  "%d",            (int)round(udp_val.eaxis_stop_code));
   
+  // Update lights for guider limits
+  telemetry_glimitsL[0].s = ((int)round(udp_val.eaxis_stop_code)) == 3 ? IPS_ALERT : IPS_IDLE;
+  telemetry_glimitsL[1].s = ((int)round(udp_val.eaxis_stop_code)) == 2 ? IPS_ALERT : IPS_IDLE;
+  IDSetLight(&telemetry_glimitsLP, NULL);
+
   // Update LVDT
   ifocus_lvdtN[0].value = ifoci.vala * 1000;
   ifocus_lvdtN[1].value = ifoci.valb * 1000;
