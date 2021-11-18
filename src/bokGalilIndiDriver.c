@@ -1351,11 +1351,11 @@ void execute_ifocus_reference_switches(ISState states[], char *names[], int n) {
         IDMessage(GALIL_DEVICE, "Invalid focus C reference");
       } else {
         IDMessage(GALIL_DEVICE, "Executing 'Restore Focus Reference'");
-        delta_a = round((ifoci.vala - ifoci.refa) * BOK_LVDT_ATOD);
+        delta_a = round((ifoci.refa - ifoci.vala) * BOK_LVDT_ATOD);
         //delta_a = round((delta_a <= 0.0) ? delta_a : -1.0 * delta_a);
-        delta_b = round((ifoci.valb - ifoci.refb) * BOK_LVDT_ATOD);
+        delta_b = round((ifoci.refb - ifoci.valb) * BOK_LVDT_ATOD);
         //delta_b = round((delta_b <= 0.0) ? delta_b : -1.0 * delta_b);
-        delta_c = round((ifoci.valc - ifoci.refc) * BOK_LVDT_ATOD);
+        delta_c = round((ifoci.refc - ifoci.valc) * BOK_LVDT_ATOD);
         //delta_c = round((delta_c <= 0.0) ? delta_c : -1.0 * delta_c);
         busy = true;
         IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", delta_a, delta_b, delta_c);
