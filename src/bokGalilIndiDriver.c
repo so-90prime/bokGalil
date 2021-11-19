@@ -285,7 +285,7 @@ static INumberVectorProperty ifocus_lvdtNP = {
 };
 
 static INumber ifocus_lvdtallN[] = {
-  {"lvdtall", "Delta Focus All", "%5.0f", BOK_MIN_LVDT, BOK_MAX_LVDT, 1.0, 0.0, 0, 0, 0}
+  {"lvdtall", "Delta Focus All", "%5.0f", -500, 500, 1.0, 0.0, 0, 0, 0} // Just chose random numbers
 };
 static INumberVectorProperty ifocus_lvdtallNP = {
   GALIL_DEVICE, "IFOCUS_LVDTALL", "Main Focus All", IFOCUS_GROUP, IP_WO, 0.0, IPS_IDLE, ifocus_lvdtallN, NARRAY(ifocus_lvdtallN), "", 0
