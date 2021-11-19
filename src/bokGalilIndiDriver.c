@@ -533,30 +533,43 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
   /* focus lvdt value(s) */
   } else if (!strcmp(name, ifocus_lvdtNP.name)) {
     // Check if in range of each other
-    //if (abs(values[0] - ifoci.vala * 1000) > BOK_MAX_LVDT_DIFF || abs(values[0] - ifoci.valb * 1000) > BOK_MAX_LVDT_DIFF || abs(values[0] - ifoci.valc * 1000) > BOK_MAX_LVDT_DIFF) {
-    if (abs(values[0] - values[1]) > BOK_MAX_LVDT_DIFF || abs(values[1] - values[2]) > BOK_MAX_LVDT_DIFF || abs(values[2] - values[0]) > BOK_MAX_LVDT_DIFF) {
-      IDMessage(GALIL_DEVICE, "<ERROR> lvdt input values differ more than %.0f units", BOK_MAX_LVDT_DIFF);
-      return;
+    // If only one value, do this
+    IDMessage(GALIL_DEVICE, "n=%d", n);
+    if (n = 0) {
+      if (abs(values[0] - ifoci.vala * 1000) > BOK_MAX_LVDT_DIFF || abs(values[0] - ifoci.valb * 1000) > BOK_MAX_LVDT_DIFF || abs(values[0] - ifoci.valc * 1000) > BOK_MAX_LVDT_DIFF) {
+        IDMessage(GALIL_DEVICE, "<ERROR> lvdt input values differ more than %.0f units", BOK_MAX_LVDT_DIFF);
+        return;
+      }
+      IDMessage(GALIL_DEVICE, "Moving only %s", names[0]);
+      float dista = round((ifoci.vala) * BOK_LVDT_ATOD);
+      float distb = round((ifoci.valb) * BOK_LVDT_ATOD);
+      float distc = round((ifoci.valc) * BOK_LVDT_ATOD);
+      
+      // Figure out what property came in
+      switch (names[0]) {
+        case "lvdta":
+          dista = round((values[0] / 1000 - ifoci.vala) * BOK_LVDT_ATOD);
+          break;
+        case "lvdtb":
+          distb = round((values[0] / 1000 - ifoci.valb) * BOK_LVDT_ATOD);
+          break;
+        case "lvdtc":
+          distc = round((values[0] / 1000 - ifoci.valc) * BOK_LVDT_ATOD);
+          break;
+        default:
+      }
+    }
+    else {
+      if (abs(values[0] - values[1]) > BOK_MAX_LVDT_DIFF || abs(values[1] - values[2]) > BOK_MAX_LVDT_DIFF || abs(values[2] - values[0]) > BOK_MAX_LVDT_DIFF) {
+        IDMessage(GALIL_DEVICE, "<ERROR> lvdt input values differ more than %.0f units", BOK_MAX_LVDT_DIFF);
+        return;
+      }
+      float dista = round((values[0] / 1000 - ifoci.vala) * BOK_LVDT_ATOD);
+      float distb = round((values[1] / 1000 - ifoci.valb) * BOK_LVDT_ATOD);
+      float distc = round((values[2] / 1000 - ifoci.valc) * BOK_LVDT_ATOD);
     }
 
-    // Figure out what name to do 
-    /* IDMessage(GALIL_DEVICE, "%s", names[0]);
-    float dista = 0;
-    float distb;
-    float distc;
-    switch (names[0]) {
-      case "lvdta":
-
-        break;
-    } */
-    
-    float dista = round((values[0] / 1000 - ifoci.vala) * BOK_LVDT_ATOD);
-    float distb = round((values[1] / 1000 - ifoci.valb) * BOK_LVDT_ATOD);
-    float distc = round((values[2] / 1000 - ifoci.valc) * BOK_LVDT_ATOD);
-    IDMessage(GALIL_DEVICE, "lvdt input values a=%.1f, b=%.1f, c=%.1f", values[0], values[1], values[2]);
-    IDMessage(GALIL_DEVICE, "lvdt current values a=%.3f, b=%.3f, c=%.3f", ifoci.vala, ifoci.valb, ifoci.valc);
-    
-    busy = true;
+    /* busy = true;
     IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", dista, distb, distc);
     if ((gstat=xq_focusind(dista, distb, distc)) == G_NO_ERROR) {
       IDMessage(GALIL_DEVICE, "Called xq_focusind(a=%.1f, b=%.1f, c=%.1f) OK", dista, distb, distc);
@@ -565,10 +578,10 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
     }
     busy = false; 
     ifocus_lvdtNP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
-    ifocus_lvdtNP.np[0].value = values[0];
-    ifocus_lvdtNP.np[1].value = values[1];
-    ifocus_lvdtNP.np[2].value = values[2];
-    IDSetNumber(&ifocus_lvdtNP, NULL);
+    // ifocus_lvdtNP.np[0].value = values[0];
+    // ifocus_lvdtNP.np[1].value = values[1];
+    // ifocus_lvdtNP.np[2].value = values[2];
+    IDSetNumber(&ifocus_lvdtNP, NULL); */
 
   /* focus lvdtall value */
   /* This is a relative movement. So all motors will step by the same amount */
@@ -600,7 +613,7 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
     }
     busy = false;
     gfocus_distNP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
-    gfocus_distNP.np[0].value = distgcam;
+    //gfocus_distNP.np[0].value = distgcam;
     IDSetNumber(&gfocus_distNP, NULL);
   }
 }
