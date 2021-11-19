@@ -557,6 +557,7 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
         distc = round((values[0] / 1000 - ifoci.valc) * BOK_LVDT_ATOD);
       }
     }
+    // Handle if all the numbers come in with the special button
     else {
       if (abs(values[0] - values[1]) > BOK_MAX_LVDT_DIFF || abs(values[1] - values[2]) > BOK_MAX_LVDT_DIFF || abs(values[2] - values[0]) > BOK_MAX_LVDT_DIFF) {
         IDMessage(GALIL_DEVICE, "<ERROR> lvdt input values differ more than %.0f units", BOK_MAX_LVDT_DIFF);
@@ -567,15 +568,15 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
       distc = round((values[2] / 1000 - ifoci.valc) * BOK_LVDT_ATOD);
     }
 
-    /* busy = true;
+    busy = true;
     IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", dista, distb, distc);
-    if ((gstat=xq_focusind(dista, distb, distc)) == G_NO_ERROR) {
-      IDMessage(GALIL_DEVICE, "Called xq_focusind(a=%.1f, b=%.1f, c=%.1f) OK", dista, distb, distc);
-    } else {
-      IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", dista, distb, distc);
-    }
+    // if ((gstat=xq_focusind(dista, distb, distc)) == G_NO_ERROR) {
+    //   IDMessage(GALIL_DEVICE, "Called xq_focusind(a=%.1f, b=%.1f, c=%.1f) OK", dista, distb, distc);
+    // } else {
+    //   IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", dista, distb, distc);
+    // }
     busy = false; 
-    ifocus_lvdtNP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
+    //ifocus_lvdtNP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
     // ifocus_lvdtNP.np[0].value = values[0];
     // ifocus_lvdtNP.np[1].value = values[1];
     // ifocus_lvdtNP.np[2].value = values[2];
