@@ -427,6 +427,7 @@ ILightVectorProperty telemetry_lightsLP = {
  * INDI hook: ISGetProperties()
  ******************************************************************************/
 void ISGetProperties(const char *dev) {
+  IDMessage(GALIL_DEVICE, "Requesting properties");
 
   /* check device */
   if (dev && strcmp(GALIL_DEVICE, dev)) return;
@@ -570,16 +571,16 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
 
     busy = true;
     IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", dista, distb, distc);
-    // if ((gstat=xq_focusind(dista, distb, distc)) == G_NO_ERROR) {
-    //   IDMessage(GALIL_DEVICE, "Called xq_focusind(a=%.1f, b=%.1f, c=%.1f) OK", dista, distb, distc);
-    // } else {
-    //   IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", dista, distb, distc);
-    // }
+    if ((gstat=xq_focusind(dista, distb, distc)) == G_NO_ERROR) {
+      IDMessage(GALIL_DEVICE, "Called xq_focusind(a=%.1f, b=%.1f, c=%.1f) OK", dista, distb, distc);
+    } else {
+      IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", dista, distb, distc);
+    }
     busy = false; 
-    //ifocus_lvdtNP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
-    // ifocus_lvdtNP.np[0].value = values[0];
-    // ifocus_lvdtNP.np[1].value = values[1];
-    // ifocus_lvdtNP.np[2].value = values[2];
+    ifocus_lvdtNP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
+    ifocus_lvdtNP.np[0].value = values[0];
+    ifocus_lvdtNP.np[1].value = values[1];
+    ifocus_lvdtNP.np[2].value = values[2];
     IDSetNumber(&ifocus_lvdtNP, NULL);
 
   /* focus lvdtall value */
