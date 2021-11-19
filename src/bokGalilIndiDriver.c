@@ -580,7 +580,7 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
     // ifocus_lvdtNP.np[0].value = values[0];
     // ifocus_lvdtNP.np[1].value = values[1];
     // ifocus_lvdtNP.np[2].value = values[2];
-    IDSetNumber(&ifocus_lvdtNP, NULL); */
+    IDSetNumber(&ifocus_lvdtNP, NULL);
 
   /* focus lvdtall value */
   /* This is a relative movement. So all motors will step by the same amount */
