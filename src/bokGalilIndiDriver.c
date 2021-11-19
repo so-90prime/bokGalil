@@ -387,7 +387,7 @@ static ILight telemetry_ifilterwheelL[] = {
   {"ferr", "FW Error", ISS_OFF, 0, 0}
 };
 ILightVectorProperty telemetry_ifilterwheelLP = {
-  GALIL_DEVICE, "FW_LIGHTS", "FW Status", TELEMETRY_GROUP, IPS_IDLE, telemetry_ifilterwheelL, NARRAY(telemetry_ifilterwheelL), "", 0
+  GALIL_DEVICE, "FW_LIGHTS", "Filter Wheel", TELEMETRY_GROUP, IPS_IDLE, telemetry_ifilterwheelL, NARRAY(telemetry_ifilterwheelL), "", 0
 };
 
 static ILight telemetry_glimitsL[] = {
@@ -1679,7 +1679,16 @@ static void execute_timer(void *p) {
 
   telemetry_engineeringLP.s = IPS_IDLE;
   telemetry_lightsLP.s   = IPS_IDLE;
-  telemetry_ifilterwheelLP.s = IPS_IDLE;
+  // Logic to update light for filter wheel lights
+  if (tcp_val.lv.filtisin != 1.0) {
+    telemetry_ifilterwheelLP.s = IPS_OK;
+  } else if (udp_val.haxis_moving == 1 || udp_val.faxis_moving == 1 || udp_val.gaxis_moving == 1 || tcp_val.lv.filtisin == 1.0) {
+    telemetry_ifilterwheelLP.s = IPS_BUSY;
+  } else if (tcp_val.lv.errfilt == 1.0) {
+    telemetry_ifilterwheelLP.s = IPS_ALERT;
+  } else {
+    telemetry_ifilterwheelLP.s = IPS_IDLE;
+  }
   telemetry_gfilterwheelLP.s = IPS_IDLE;
   IDSetLight(&telemetry_engineeringLP, NULL);
   IDSetLight(&telemetry_lightsLP, NULL);
