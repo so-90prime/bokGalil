@@ -1680,12 +1680,12 @@ static void execute_timer(void *p) {
   telemetry_engineeringLP.s = IPS_IDLE;
   telemetry_lightsLP.s   = IPS_IDLE;
   // Logic to update light for filter wheel lights
-  if (tcp_val.lv.filtisin != 1.0) {
-    telemetry_ifilterwheelLP.s = IPS_OK;
+  if (tcp_val.lv.errfilt == 1.0) {
+    telemetry_ifilterwheelLP.s = IPS_ALERT;
   } else if (udp_val.haxis_moving == 1 || udp_val.faxis_moving == 1 || udp_val.gaxis_moving == 1 || tcp_val.lv.filtisin == 1.0) {
     telemetry_ifilterwheelLP.s = IPS_BUSY;
-  } else if (tcp_val.lv.errfilt == 1.0) {
-    telemetry_ifilterwheelLP.s = IPS_ALERT;
+  } else if (tcp_val.lv.filtisin != 1.0) {
+    telemetry_ifilterwheelLP.s = IPS_OK;
   } else {
     telemetry_ifilterwheelLP.s = IPS_IDLE;
   }
