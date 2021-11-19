@@ -577,7 +577,7 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
     IDMessage(GALIL_DEVICE, "lvdt input values all=%.1f", values[0]);
     IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", distall, distall, distall);
     
-    /* busy = true;
+    busy = true;
     IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", dista, distb, distc);
     if ((gstat=xq_focusind(dista, distb, distc)) == G_NO_ERROR) {
       IDMessage(GALIL_DEVICE, "Called xq_focusind(a=%.1f, b=%.1f, c=%.1f) OK", dista, distb, distc);
@@ -586,7 +586,7 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
     }
     busy = false; 
     ifocus_lvdtallNP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
-    IDSetNumber(&ifocus_lvdtallNP, NULL); */
+    IDSetNumber(&ifocus_lvdtallNP, NULL);
 
   /* gfocus dist value */
   } else if (!strcmp(name, gfocus_distNP.name)) {
