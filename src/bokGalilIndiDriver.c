@@ -571,14 +571,13 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
     IDSetNumber(&ifocus_lvdtNP, NULL);
 
   /* focus lvdtall value */
+  /* This is a relative movement. So all motors will step by the same amount */
   } else if (!strcmp(name, ifocus_lvdtallNP.name)) {
-    float dista = round((values[0] / 1000 - ifoci.vala) * BOK_LVDT_ATOD);
-    float distb = round((values[0] / 1000 - ifoci.valb) * BOK_LVDT_ATOD);
-    float distc = round((values[0] / 1000 - ifoci.valc) * BOK_LVDT_ATOD);
+    float distall = round((values[0] / 1000) * BOK_LVDT_ATOD);
     IDMessage(GALIL_DEVICE, "lvdt input values all=%.1f", values[0]);
-    IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", dista, distb, distc);
+    IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", distall, distall, distall);
     
-    busy = true;
+    /* busy = true;
     IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", dista, distb, distc);
     if ((gstat=xq_focusind(dista, distb, distc)) == G_NO_ERROR) {
       IDMessage(GALIL_DEVICE, "Called xq_focusind(a=%.1f, b=%.1f, c=%.1f) OK", dista, distb, distc);
@@ -587,7 +586,7 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
     }
     busy = false; 
     ifocus_lvdtallNP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
-    IDSetNumber(&ifocus_lvdtallNP, NULL);
+    IDSetNumber(&ifocus_lvdtallNP, NULL); */
 
   /* gfocus dist value */
   } else if (!strcmp(name, gfocus_distNP.name)) {
@@ -1399,11 +1398,8 @@ void execute_ifocus_reference_switches(ISState states[], char *names[], int n) {
       } else {
         IDMessage(GALIL_DEVICE, "Executing 'Restore Focus Reference'");
         delta_a = round((ifoci.refa - ifoci.vala) * BOK_LVDT_ATOD);
-        //delta_a = round((delta_a <= 0.0) ? delta_a : -1.0 * delta_a);
         delta_b = round((ifoci.refb - ifoci.valb) * BOK_LVDT_ATOD);
-        //delta_b = round((delta_b <= 0.0) ? delta_b : -1.0 * delta_b);
         delta_c = round((ifoci.refc - ifoci.valc) * BOK_LVDT_ATOD);
-        //delta_c = round((delta_c <= 0.0) ? delta_c : -1.0 * delta_c);
         busy = true;
         IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", delta_a, delta_b, delta_c);
         if ((gstat=xq_focusind(delta_a, delta_b, delta_c)) == G_NO_ERROR) {
@@ -1440,18 +1436,6 @@ void execute_ifocus_reference_switches(ISState states[], char *names[], int n) {
       } else {
         // nominal plane is offset from B position
         IDMessage(GALIL_DEVICE, "Executing 'Restore Nominal Plane' a=%.3f, b=%.3f, c=%.3f", ifoci.noma, ifoci.nomb, ifoci.nomc);
-        /* 
-        ifoci.nomb += ifoci.valb;
-        ifoci.noma += ifoci.nomb;
-        ifoci.nomc += ifoci.nomb;
-        IDMessage(GALIL_DEVICE, "Corrected nominal plane a=%.3f, b=%.3f, c=%.3f", ifoci.noma, ifoci.nomb, ifoci.nomc);
-        delta_a = (ifoci.vala - ifoci.noma) * BOK_LVDT_ATOD;
-        delta_a = round((delta_a <= 0.0) ? delta_a : -1.0 * delta_a);
-        delta_b = (ifoci.valb - ifoci.nomb) * BOK_LVDT_ATOD;
-        delta_b = round((delta_b <= 0.0) ? delta_b : -1.0 * delta_b);
-        delta_c = (ifoci.valc - ifoci.nomc) * BOK_LVDT_ATOD;
-        delta_c = round((delta_c <= 0.0) ? delta_c : -1.0 * delta_c); 
-        */
         delta_a = ifoci.vala - ifoci.valb;
         delta_b = ifoci.valb - ifoci.valb;
         delta_c = ifoci.valc - ifoci.valb;
