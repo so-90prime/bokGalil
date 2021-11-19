@@ -578,11 +578,11 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
     IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", distall, distall, distall);
     
     busy = true;
-    IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", dista, distb, distc);
+    IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", distall, distall, distall);
     if ((gstat=xq_focusind(dista, distb, distc)) == G_NO_ERROR) {
-      IDMessage(GALIL_DEVICE, "Called xq_focusind(a=%.1f, b=%.1f, c=%.1f) OK", dista, distb, distc);
+      IDMessage(GALIL_DEVICE, "Called xq_focusind(a=%.1f, b=%.1f, c=%.1f) OK", distall, distall, distall);
     } else {
-      IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", dista, distb, distc);
+      IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_focusind(a=%.1f, b=%.1f, c=%.1f)", distall, distall, distall);
     }
     busy = false; 
     ifocus_lvdtallNP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
