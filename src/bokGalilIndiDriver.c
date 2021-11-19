@@ -535,7 +535,7 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
     // Check if in range of each other
     // If only one value, do this
     IDMessage(GALIL_DEVICE, "n=%d", n);
-    if (n = 0) {
+    if (n == 0) {
       if (abs(values[0] - ifoci.vala * 1000) > BOK_MAX_LVDT_DIFF || abs(values[0] - ifoci.valb * 1000) > BOK_MAX_LVDT_DIFF || abs(values[0] - ifoci.valc * 1000) > BOK_MAX_LVDT_DIFF) {
         IDMessage(GALIL_DEVICE, "<ERROR> lvdt input values differ more than %.0f units", BOK_MAX_LVDT_DIFF);
         return;
@@ -546,17 +546,12 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
       float distc = round((ifoci.valc) * BOK_LVDT_ATOD);
       
       // Figure out what property came in
-      switch (names[0]) {
-        case "lvdta":
-          dista = round((values[0] / 1000 - ifoci.vala) * BOK_LVDT_ATOD);
-          break;
-        case "lvdtb":
-          distb = round((values[0] / 1000 - ifoci.valb) * BOK_LVDT_ATOD);
-          break;
-        case "lvdtc":
-          distc = round((values[0] / 1000 - ifoci.valc) * BOK_LVDT_ATOD);
-          break;
-        default:
+      if (!strcmp(names[0], "lvdta")) {
+        dista = round((values[0] / 1000 - ifoci.vala) * BOK_LVDT_ATOD);
+      } else if (!strcmp(names[0], "lvdtb")) {
+        distb = round((values[0] / 1000 - ifoci.valb) * BOK_LVDT_ATOD);
+      } else if (!stcmp(names[0], "lvdtc")) {
+        distc = round((values[0] / 1000 - ifoci.valc) * BOK_LVDT_ATOD);
       }
     }
     else {
