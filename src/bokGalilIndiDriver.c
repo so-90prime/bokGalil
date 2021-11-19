@@ -544,9 +544,9 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
         return;
       }
       IDMessage(GALIL_DEVICE, "Moving only %s", names[0]);
-      dista = round((ifoci.vala) * BOK_LVDT_ATOD);
-      distb = round((ifoci.valb) * BOK_LVDT_ATOD);
-      distc = round((ifoci.valc) * BOK_LVDT_ATOD);
+      dista = 0;
+      distb = 0;
+      distc = 0;
       
       // Figure out what property came in
       if (!strcmp(names[0], "lvdta")) {
