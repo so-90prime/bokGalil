@@ -532,6 +532,9 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
 
   /* focus lvdt value(s) */
   } else if (!strcmp(name, ifocus_lvdtNP.name)) {
+    float dista;
+    float distb;
+    float distc;
     // Check if in range of each other
     // If only one value, do this
     IDMessage(GALIL_DEVICE, "n=%d", n);
@@ -541,9 +544,9 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
         return;
       }
       IDMessage(GALIL_DEVICE, "Moving only %s", names[0]);
-      float dista = round((ifoci.vala) * BOK_LVDT_ATOD);
-      float distb = round((ifoci.valb) * BOK_LVDT_ATOD);
-      float distc = round((ifoci.valc) * BOK_LVDT_ATOD);
+      dista = round((ifoci.vala) * BOK_LVDT_ATOD);
+      distb = round((ifoci.valb) * BOK_LVDT_ATOD);
+      distc = round((ifoci.valc) * BOK_LVDT_ATOD);
       
       // Figure out what property came in
       if (!strcmp(names[0], "lvdta")) {
@@ -559,9 +562,9 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
         IDMessage(GALIL_DEVICE, "<ERROR> lvdt input values differ more than %.0f units", BOK_MAX_LVDT_DIFF);
         return;
       }
-      float dista = round((values[0] / 1000 - ifoci.vala) * BOK_LVDT_ATOD);
-      float distb = round((values[1] / 1000 - ifoci.valb) * BOK_LVDT_ATOD);
-      float distc = round((values[2] / 1000 - ifoci.valc) * BOK_LVDT_ATOD);
+      dista = round((values[0] / 1000 - ifoci.vala) * BOK_LVDT_ATOD);
+      distb = round((values[1] / 1000 - ifoci.valb) * BOK_LVDT_ATOD);
+      distc = round((values[2] / 1000 - ifoci.valc) * BOK_LVDT_ATOD);
     }
 
     /* busy = true;
