@@ -145,7 +145,6 @@ static int timer_id = -1;
 static tcp_val_t tcp_val;
 static udp_val_t udp_val;
 
-
 /*******************************************************************************
  * global scope variable(s)
  ******************************************************************************/
@@ -193,7 +192,7 @@ static ITextVectorProperty gfilterTP = {
 
 /* gfocus group */
 static INumber gfocus_distN[] = {
-  {"distgcam", "Focus G", "%5.0f", -1000.0, 1000.0, 1.0, 0.0, 0, 0, 0}
+  {"distgcam", "Delta Focus G", "%5.0f", -1000.0, 1000.0, 1.0, 0.0, 0, 0, 0}
 };
 static INumberVectorProperty gfocus_distNP = {
   GALIL_DEVICE, "GFOCUS_DIST", "Guider Focus", GFOCUS_GROUP, IP_RW, 0.0, IPS_IDLE, gfocus_distN, NARRAY(gfocus_distN), "", 0
@@ -578,9 +577,6 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
     }
     busy = false; 
     ifocus_lvdtNP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
-    ifocus_lvdtNP.np[0].value = values[0];
-    ifocus_lvdtNP.np[1].value = values[1];
-    ifocus_lvdtNP.np[2].value = values[2];
     IDSetNumber(&ifocus_lvdtNP, NULL);
 
   /* focus lvdtall value */
@@ -613,7 +609,6 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
     }
     busy = false;
     gfocus_distNP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
-    //gfocus_distNP.np[0].value = distgcam;
     IDSetNumber(&gfocus_distNP, NULL);
   }
 }
