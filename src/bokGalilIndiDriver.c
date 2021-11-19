@@ -193,7 +193,7 @@ static ITextVectorProperty gfilterTP = {
 
 /* gfocus group */
 static INumber gfocus_distN[] = {
-  {"distgcam", "Motor Steps", "%5.0f", -1000.0, 1000.0, 1.0, 0.0, 0, 0, 0}
+  {"distgcam", "Guider focus", "%5.0f", -1000.0, 1000.0, 1.0, 0.0, 0, 0, 0}
 };
 static INumberVectorProperty gfocus_distNP = {
   GALIL_DEVICE, "GFOCUS_DIST", "Guider Focus", GFOCUS_GROUP, IP_RW, 0.0, IPS_IDLE, gfocus_distN, NARRAY(gfocus_distN), "", 0
@@ -286,7 +286,7 @@ static INumberVectorProperty ifocus_lvdtNP = {
 };
 
 static INumber ifocus_lvdtallN[] = {
-  {"lvdtall", "Focus All", "%5.0f", BOK_MIN_LVDT, BOK_MAX_LVDT, 1.0, 0.0, 0, 0, 0}
+  {"lvdtall", "Delta Focus All", "%5.0f", BOK_MIN_LVDT, BOK_MAX_LVDT, 1.0, 0.0, 0, 0, 0}
 };
 static INumberVectorProperty ifocus_lvdtallNP = {
   GALIL_DEVICE, "IFOCUS_LVDTALL", "Main Focus All", IFOCUS_GROUP, IP_WO, 0.0, IPS_IDLE, ifocus_lvdtallN, NARRAY(ifocus_lvdtallN), "", 0
@@ -304,9 +304,9 @@ static ITextVectorProperty supportTP = {
 };
 
 static IText telemetry_referenceT[] = {
-  {"a_reference",  "Focus A", telemetrys.a_reference,  0, 0, 0},
-  {"b_reference",  "Focus B", telemetrys.b_reference,  0, 0, 0},
-  {"c_reference",  "Focus C", telemetrys.c_reference,  0, 0, 0}
+  {"a_reference",  "Focus A Reference", telemetrys.a_reference,  0, 0, 0},
+  {"b_reference",  "Focus B Reference", telemetrys.b_reference,  0, 0, 0},
+  {"c_reference",  "Focus C Reference", telemetrys.c_reference,  0, 0, 0}
 };
 static ITextVectorProperty telemetry_referenceTP = {
   GALIL_DEVICE, "TELEMETRY_REFERENCE", "Main Focus References", TELEMETRY_GROUP, IP_RO, 0, IPS_IDLE, telemetry_referenceT, NARRAY(telemetry_referenceT), "", 0
@@ -1398,6 +1398,8 @@ void execute_ifocus_reference_switches(ISState states[], char *names[], int n) {
       ifoci.refc = (float)udp_val.faxis_analog_in * BOK_LVDT_STEPS;
       IDMessage(GALIL_DEVICE, "Executed 'Save Focus Reference' a=%.3f, b=%.3f, c=%.3f OK", ifoci.refa, ifoci.refb, ifoci.refc);
       ifocus_referenceSP.s = IPS_OK;
+      // Updating focus telemetry as well
+      telemetry_referenceTP.s = IPS_OK;
       ifocus_referenceS[0].s = ISS_OFF;
 
     /* process 'Restore Focus Reference' */
@@ -1424,6 +1426,8 @@ void execute_ifocus_reference_switches(ISState states[], char *names[], int n) {
         busy = false;
       }
       ifocus_referenceSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
+      // Updating focus telemetry as well
+      telemetry_referenceTP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
       ifocus_referenceS[1].s = ISS_OFF;
 
     /* process 'Save Nominal Plane' */
