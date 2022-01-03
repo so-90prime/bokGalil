@@ -86,9 +86,14 @@ int main( int argc, char *argv[] ) {
 
   /* get some info */
   (void) memset(buffer, '\0', sizeof(buffer));
+  (void) fprintf(stdout, "%s <%s> executing '%s', gstat=%d\n", _NAME_, (simulate == true ? "SIM" : "OK"), "GInfo()", gstat);
+  (void) fflush(stdout);
   if ((gstat=GInfo(gfd, buffer, sizeof(buffer))) == G_NO_ERROR) {
     (void) fprintf(stdout, "%s <OK> info='%s', gstat=%d\n", _NAME_, buffer, gstat);
     (void) fflush(stdout);
+  } else {
+    (void) fprintf(stderr, "%s <%s> failed executing '%s', gstat=%d\n", _NAME_, (simulate == true ? "SIM" : "OK"), "GInfo()", gstat);
+    (void) fflush(stderr);
   }
 
   /* loop for command */

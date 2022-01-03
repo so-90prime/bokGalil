@@ -79,7 +79,7 @@ clean:
 	rm -f $(HERE)/libbokGalil.so >> /dev/null 2>&1
 	rm -f $(BOK_LIB)/libbokGalil.a >> /dev/null 2>&1
 	rm -f $(BOK_LIB)/libbokGalil.so >> /dev/null 2>&1
-	rm -rf $(HERE)__pycache__ >> /dev/null 2>&1
+	rm -rf $(HERE)/__pycache__ >> /dev/null 2>&1
 	rm -f $(BOK_BIN)/Galil_DMC_22x0_TCP_Read.py >> /dev/null 2>&1
 	rm -f $(BOK_BIN)/Galil_DMC_22x0_UDP_Read.py >> /dev/null 2>&1
 	rm -rf /dev/shm/tcp_shm /dev/shm/udp_shm >> /dev/null 2>&1

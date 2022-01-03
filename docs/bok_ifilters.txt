@@ -39,7 +39,7 @@
 36	24	24
 37	25	25
 38	uJ	uJ
-39	unknwn	unknwn
+39	unknown	unknown
 40	28	28
 41	line	line
 42	2a	2a
