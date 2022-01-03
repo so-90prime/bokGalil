@@ -1497,6 +1497,7 @@ static void execute_timer(void *p) {
   /* read TCP shared memory */
   if ((_tfd=shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666))>=0 &&
       (_tp=(tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, _tfd, 0))!=(tcp_val_p)NULL) {
+    IDMessage(GALIL_DEVICE, "Reading TCP shared memory");
     // reset local structure
     (void) memset((void *)&tcp_val, 0, TCP_VAL_SIZE);
     // copy shared memory to local structure
@@ -1508,11 +1509,15 @@ static void execute_timer(void *p) {
     (void) close(_tfd);
     _tp = (tcp_val_p)NULL;
     _tfd = -1;
+    IDMessage(GALIL_DEVICE, "Read TCP shared memory OK");
+  } else {
+    IDMessage(GALIL_DEVICE, "<ERROR> failed to call TCP shared memory");
   }
 
   /* read UDP shared memory */
   if ((_ufd=shm_open(BOK_SHM_UDP_NAME, O_RDONLY, 0666)) &&
        (_up=(udp_val_p)mmap(0, UDP_VAL_SIZE, PROT_READ, MAP_SHARED, _ufd, 0))!=(udp_val_p)NULL) {
+    IDMessage(GALIL_DEVICE, "Reading UDP shared memory");
     // reset local structure
     (void) memset((void *)&udp_val, 0, UDP_VAL_SIZE);
     // copy shared memory to local structure
@@ -1524,11 +1529,15 @@ static void execute_timer(void *p) {
     (void) close(_ufd);
     _up = (udp_val_p)NULL;
     _ufd = -1;
+    IDMessage(GALIL_DEVICE, "Read UDP shared memory OK");
+  } else {
+    IDMessage(GALIL_DEVICE, "<ERROR> failed to call UDP shared memory");
   }
 
   /* update gfilter(s) */
   (void) memset((void *)&gfilter_names, 0, sizeof(gfilter_names));
   _gfiltn = (int)round(tcp_val.lv.gfiltn);
+  IDMessage(GALIL_DEVICE, "TCP shared memory, _gfiltn=%d", _gfiltn);
   // Use the above value to set the switch to on to highlight
   (void) sprintf(gfilter_names.filter_1, "%s", bok_gfilters[1].name);
   (void) sprintf(gfilter_names.filter_2, "%s", bok_gfilters[2].name);
@@ -1537,7 +1546,9 @@ static void execute_timer(void *p) {
   (void) sprintf(gfilter_names.filter_5, "%s", bok_gfilters[5].name);
   (void) sprintf(gfilter_names.filter_6, "%s", bok_gfilters[6].name);
   IUResetSwitch(&gfilter_changeSP); // Reset the switches to OFF
-  gfilter_changeS[_gfiltn - 1].s = ISS_ON; // Subtract one since zero based
+  if (_gfiltn>=0 && _gfiltn<=6) {
+    gfilter_changeS[_gfiltn - 1].s = ISS_ON; // Subtract one since zero based
+  }
   IDSetSwitch(&gfilter_changeSP, NULL); // Update the switches
   IDSetText(&gfilterTP, NULL);
 
@@ -1546,6 +1557,7 @@ static void execute_timer(void *p) {
   IUResetSwitch(&ifilter_changeSP); // Reset the switches to OFF
   (void) memset((void *)&ifilter_names, 0, sizeof(ifilter_names));
   _ifiltn = (int)round(tcp_val.lv.filtval);
+  IDMessage(GALIL_DEVICE, "TCP shared memory, _ifiltn=%d", _ifiltn);
   if (_ifiltn == (int)round(tcp_val.filtvals[0])) {
     (void) sprintf(ifilter_names.filter_1, "%s", bok_ifilters[(int)round(tcp_val.filtvals[0])].name);
     ifilter_changeS[0].s = ISS_ON;
