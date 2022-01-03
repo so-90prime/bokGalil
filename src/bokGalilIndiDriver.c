@@ -1508,6 +1508,9 @@ static void execute_timer(void *p) {
     (void) close(_tfd);
     _tp = (tcp_val_p)NULL;
     _tfd = -1;
+    IDMessage(GALIL_DEVICE, "Called TCP shared memory OK");
+  } else {
+    IDMessage(GALIL_DEVICE, "<ERROR> failed to call TCP shared memory");
   }
 
   /* read UDP shared memory */
@@ -1524,6 +1527,9 @@ static void execute_timer(void *p) {
     (void) close(_ufd);
     _up = (udp_val_p)NULL;
     _ufd = -1;
+    IDMessage(GALIL_DEVICE, "Called UDP shared memory OK");
+  } else {
+    IDMessage(GALIL_DEVICE, "<ERROR> failed to call UDP shared memory");
   }
 
   /* update gfilter(s) */
