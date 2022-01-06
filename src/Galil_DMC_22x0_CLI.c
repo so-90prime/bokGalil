@@ -78,15 +78,15 @@ int main( int argc, char *argv[] ) {
 
   /* open the ip_addr */
   gstat = G_NO_ERROR;
-  (void) fprintf(stdout, "%s <%s> executing '%s', gstat=%d\n", _NAME_, (simulate == true ? "SIM" : "OK"), BOK_GALIL_TCP_CMD, gstat);
+  (void) fprintf(stdout, "%s <%s> executing '%s', gstat=%d, gfd=%p\n", _NAME_, (simulate == true ? "SIM" : "OK"), BOK_GALIL_TCP_CMD, gstat, gfd);
   (void) fflush(stdout);
   if ((gstat=GOpen(BOK_GALIL_TCP_CMD, &gfd)) != G_NO_ERROR) { simulate = true; }
-  (void) fprintf(stdout, "%s <%s> executed '%s', gstat=%d\n", _NAME_, (simulate == true ? "SIM" : "OK"), BOK_GALIL_TCP_CMD, gstat);
+  (void) fprintf(stdout, "%s <%s> executed '%s', gstat=%d, gfd=%p\n", _NAME_, (simulate == true ? "SIM" : "OK"), BOK_GALIL_TCP_CMD, gstat, gfd);
   (void) fflush(stdout);
 
   /* get some info */
   (void) memset(buffer, '\0', sizeof(buffer));
-  if ((gstat=GInfo(gfd, buffer, sizeof(buffer))) == G_NO_ERROR) {
+  if (simulate==false && gfd!=(GCon)NULL && (gstat=GInfo(gfd, buffer, sizeof(buffer)))==G_NO_ERROR) {
     (void) fprintf(stdout, "%s <OK> info='%s', gstat=%d\n", _NAME_, buffer, gstat);
     (void) fflush(stdout);
   }
