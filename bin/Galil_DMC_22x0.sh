@@ -20,6 +20,7 @@ def_command="status"
 c_read=0
 dry_run=0
 py_read=0
+web_site=0
 
 
 # +
@@ -40,6 +41,7 @@ usage () {
   write_cyan    "  --dry-run,        show (but do not execute) commands,               default=false"            2>&1
   write_cyan    "  --c-read,         start shared memory read in C (debugging),        default=false"            2>&1
   write_cyan    "  --py-read,        start shared memory read in Python (debugging),   default=false"            2>&1
+  write_cyan    "  --web-site,       start web-site (debugging),                       default=false"            2>&1
   echo          ""                                                                                               2>&1
 }
 
@@ -66,6 +68,10 @@ while test $# -gt 0; do
       py_read=1
       shift
       ;;
+    --web-site|--WEB-SITE)
+      web_site=1
+      shift
+      ;;
     --help|*)
       usage
       exit 0
@@ -87,17 +93,19 @@ _prc6="bokGalilIndiDriver"
 _prc7="indiserver"
 _prc8="/dev/shm/tcp_shm"
 _prc9="/dev/shm/udp_shm"
+_prca="pyindi_bok.py"
 
-_nam0="Galil_DMC_22x0_TCP_Write  "
-_nam1="Galil_DMC_22x0_TCP_Read   "
-_nam2="Galil_DMC_22x0_TCP_Read.py"
-_nam3="Galil_DMC_22x0_UDP_Write  "
-_nam4="Galil_DMC_22x0_UDP_Read   "
-_nam5="Galil_DMC_22x0_UDP_Read.py"
-_nam6="bokGalilIndiDriver        "
-_nam7="indiserver                "
-_nam8="TCP Shared Memory File    "
-_nam9="UDP Shared Memory File    "
+_nam0="Galil_DMC_22x0_TCP_Write           "
+_nam1="Galil_DMC_22x0_TCP_Read            "
+_nam2="Galil_DMC_22x0_TCP_Read.py         "
+_nam3="Galil_DMC_22x0_UDP_Write           "
+_nam4="Galil_DMC_22x0_UDP_Read            "
+_nam5="Galil_DMC_22x0_UDP_Read.py         "
+_nam6="bokGalilIndiDriver                 "
+_nam7="indiserver                         "
+_nam8="TCP Shared Memory File             "
+_nam9="UDP Shared Memory File             "
+_nama="PyINDI Bok Web-site (pyindi_bok.py)"
 
 _pid0=$(ps -ef | grep ${_prc0} | grep -v grep | awk '{print $2}')
 _pid1=$(ps -ef | grep ${_prc1} | grep -v py | grep -v grep | awk '{print $2}')
@@ -107,6 +115,11 @@ _pid4=$(ps -ef | grep ${_prc4} | grep -v py | grep -v grep | awk '{print $2}')
 _pid5=$(ps -ef | grep ${_prc5} | grep -v grep | awk '{print $2}')
 _pid6=$(ps -ef | grep ${_prc6} | grep -v ${_prc7} | grep -v grep | awk '{print $2}')
 _pid7=$(ps -ef | grep ${_prc7} | grep -v grep | awk '{print $2}')
+_pid8=''
+_pid9=''
+_pida=$(ps -ef | grep ${_prca} | grep -v grep | awk '{print $2}')
+
+_pyindi_bok=$(service mtnops.pyindi.service status | grep 'Active:' | cut -d':' -f2 | cut -d'(' -f2 | cut -d')' -f1)
 
 
 # +
@@ -130,6 +143,9 @@ case $(echo ${_command}) in
       [[ ${py_read} -eq 1 ]] && write_magenta "Dry-Run> nohup python3 ${BOK_GALIL_BIN}/${_prc5} >> ${BOK_GALIL_LOG}/${_prc5}.log 2>&1 &"
       [[ ${py_read} -eq 1 ]] && write_magenta "Dry-Run> sleep 1"
       write_magenta "Dry-Run> nohup ${_prc7} -vvv ${BOK_GALIL_BIN}/${_prc6} >> ${BOK_GALIL_LOG}/${_prc6}.log 2>&1 &"
+      if [[ ${web_site} -eq 1 ]]; then
+        write_magenta "Dry-Run> service mtnops.pyindi.service start"
+      fi
     else
       write_green "Executing> nohup ${BOK_GALIL_BIN}/${_prc0} >> ${BOK_GALIL_LOG}/${_prc0}.log 2>&1 &"
       [[ -z ${_pid0} ]] && (nohup ${BOK_GALIL_BIN}/${_prc0} >> ${BOK_GALIL_LOG}/${_prc0}.log 2>&1 &) || write_error "${_nam0}" "ALREADY RUNNING"
@@ -165,6 +181,10 @@ case $(echo ${_command}) in
       fi
       write_green "Executing> nohup ${_prc7} -vvv ${BOK_GALIL_BIN}/${_prc6} >> ${BOK_GALIL_LOG}/${_prc6}.log 2>&1 &"
       [[ -z ${_pid6} ]] && (nohup indiserver -vvv ${BOK_GALIL_BIN}/${_prc6} >> ${BOK_GALIL_LOG}/${_prc6}.log 2>&1 &) || write_error "${_nam6}" "ALREADY RUNNING"
+      if [[ ${web_site} -eq 1 ]]; then
+        write_green "Executing> service mtnops.pyindi.service start"
+        service mtnops.pyindi.service start
+      fi
     fi
     ;;
 
@@ -181,6 +201,9 @@ case $(echo ${_command}) in
       write_magenta "Dry-Run> kill -9 pidof(${_prc7})"
       write_magenta "Dry-Run> rm -f ${_prc8}"
       write_magenta "Dry-Run> rm -f ${_prc9}"
+      if [[ ${web_site} -eq 1 ]]; then
+        write_magenta "Dry-Run> service mtnops.pyindi.service stop"
+      fi
     else
       write_green "Executing> kill -SIGINT pidof(${_prc0})"
       [[ ! -z ${_pid0} ]] && kill -SIGINT ${_pid0} || write_error "${_nam0}" "NOT RUNNING"
@@ -202,6 +225,10 @@ case $(echo ${_command}) in
       [[ -f ${_prc8} ]]   && rm -f ${_prc8}        || write_error "${_nam8}" "NOT FOUND"
       write_green "Executing> rm -f ${_prc9}"
       [[ -f ${_prc9} ]]   && rm -f ${_prc9}        || write_error "${_nam9}" "NOT FOUND"
+      if [[ ${web_site} -eq 1 ]]; then
+        write_green "Executing> service mtnops.pyindi.service stop"
+        service mtnops.pyindi.service stop
+      fi
     fi
    ;;
 
@@ -218,6 +245,7 @@ case $(echo ${_command}) in
       write_magenta "Dry-Run> [[ ! -z pidof(${_prc7}) ]] && write_ok '${_prc7}' 'OK (pidof(${_prc7}))' || write_error '${_prc7}' 'NOT RUNNING'"
       write_magenta "Dry-Run> [[ -f ${_prc8} ]]  && write_ok '${_prc8}' 'EXISTS' || write_error '${_prc8}' 'NOT FOUND'"
       write_magenta "Dry-Run> [[ -f ${_prc9} ]]  && write_ok '${_prc9}' 'EXISTS' || write_error '${_prc9}' 'NOT FOUND'"
+      write_magenta "Dry-Run> [[ ! -z pidof(${_prca}) ]] && write_ok '${_prca}' 'OK (pidof(${_prca}))' || write_error '${_prca}' 'NOT RUNNING'"
     else
       [[ ! -z ${_pid0} ]] && write_ok "${_nam0}" "OK (${_pid0})" || write_error "${_nam0}" "NOT RUNNING"
       [[ ! -z ${_pid1} ]] && write_ok "${_nam1}" "OK (${_pid1})" || write_error "${_nam1}" "NOT RUNNING"
@@ -229,6 +257,7 @@ case $(echo ${_command}) in
       [[ ! -z ${_pid7} ]] && write_ok "${_nam7}" "OK (${_pid7})" || write_error "${_nam7}" "NOT RUNNING"
       [[ -f ${_prc8} ]]   && write_ok "${_nam8}" "EXISTS"        || write_error "${_nam8}" "NOT FOUND"
       [[ -f ${_prc9} ]]   && write_ok "${_nam9}" "EXISTS"        || write_error "${_nam9}" "NOT FOUND"
+      [[ ! -z ${_pida} ]] && write_ok "${_nama}" "OK (${_pida})" || write_error "${_nama}" "NOT RUNNING"
     fi
     ;;
 esac
