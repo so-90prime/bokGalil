@@ -2,7 +2,7 @@
 
 ## Requirement(s)
 
- - Ubuntu 20.04.2 LTS
+ - Ubuntu 16.04.7 LTS (or later)
 
  - Indi code (www.indilib.org)
 
