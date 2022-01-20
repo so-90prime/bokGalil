@@ -2,7 +2,7 @@
 
 ## Requirement(s)
 
- - Ubuntu 20.04.2 LTS
+ - Ubuntu 16.04.7 LTS (or later)
 
  - www.indilib.org
 
@@ -46,6 +46,6 @@
 
 --------------------------------------
 
-Last Modified: 20210917
+Last Modified: 20220120
 
 Last Author: Phil Daly (pndaly@arizona.edu)
