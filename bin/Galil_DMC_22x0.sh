@@ -119,7 +119,7 @@ _pid8=''
 _pid9=''
 _pida=$(ps -ef | grep ${_prca} | grep -v grep | awk '{print $2}')
 
-_pyindi_bok=$(service mtnops.pyindi.service status | grep 'Active:' | cut -d':' -f2 | cut -d'(' -f2 | cut -d')' -f1)
+_pyindi_bok=$(service mtnops.pyindi status | grep 'Active:' | cut -d':' -f2 | cut -d'(' -f2 | cut -d')' -f1)
 
 
 # +
@@ -144,7 +144,7 @@ case $(echo ${_command}) in
       [[ ${py_read} -eq 1 ]] && write_magenta "Dry-Run> sleep 1"
       write_magenta "Dry-Run> nohup ${_prc7} -vvv ${BOK_GALIL_BIN}/${_prc6} >> ${BOK_GALIL_LOG}/${_prc6}.log 2>&1 &"
       if [[ ${web_site} -eq 1 ]]; then
-        write_magenta "Dry-Run> service mtnops.pyindi.service start"
+        write_magenta "Dry-Run> service mtnops.pyindi start"
       fi
     else
       write_green "Executing> nohup ${BOK_GALIL_BIN}/${_prc0} >> ${BOK_GALIL_LOG}/${_prc0}.log 2>&1 &"
@@ -182,8 +182,8 @@ case $(echo ${_command}) in
       write_green "Executing> nohup ${_prc7} -vvv ${BOK_GALIL_BIN}/${_prc6} >> ${BOK_GALIL_LOG}/${_prc6}.log 2>&1 &"
       [[ -z ${_pid6} ]] && (nohup indiserver -vvv ${BOK_GALIL_BIN}/${_prc6} >> ${BOK_GALIL_LOG}/${_prc6}.log 2>&1 &) || write_error "${_nam6}" "ALREADY RUNNING"
       if [[ ${web_site} -eq 1 ]]; then
-        write_green "Executing> service mtnops.pyindi.service start"
-        service mtnops.pyindi.service start
+        write_green "Executing> service mtnops.pyindi start"
+        service mtnops.pyindi start
       fi
     fi
     ;;
@@ -202,7 +202,7 @@ case $(echo ${_command}) in
       write_magenta "Dry-Run> rm -f ${_prc8}"
       write_magenta "Dry-Run> rm -f ${_prc9}"
       if [[ ${web_site} -eq 1 ]]; then
-        write_magenta "Dry-Run> service mtnops.pyindi.service stop"
+        write_magenta "Dry-Run> service mtnops.pyindi stop"
       fi
     else
       write_green "Executing> kill -SIGINT pidof(${_prc0})"
@@ -226,8 +226,8 @@ case $(echo ${_command}) in
       write_green "Executing> rm -f ${_prc9}"
       [[ -f ${_prc9} ]]   && rm -f ${_prc9}        || write_error "${_nam9}" "NOT FOUND"
       if [[ ${web_site} -eq 1 ]]; then
-        write_green "Executing> service mtnops.pyindi.service stop"
-        service mtnops.pyindi.service stop
+        write_green "Executing> service mtnops.pyindi stop"
+        service mtnops.pyindi stop
       fi
     fi
    ;;
@@ -257,7 +257,7 @@ case $(echo ${_command}) in
       [[ ! -z ${_pid7} ]] && write_ok "${_nam7}" "OK (${_pid7})" || write_error "${_nam7}" "NOT RUNNING"
       [[ -f ${_prc8} ]]   && write_ok "${_nam8}" "EXISTS"        || write_error "${_nam8}" "NOT FOUND"
       [[ -f ${_prc9} ]]   && write_ok "${_nam9}" "EXISTS"        || write_error "${_nam9}" "NOT FOUND"
-      [[ ! -z ${_pida} ]] && write_ok "${_nama}" "OK (${_pida})" || write_error "${_nama}" "NOT RUNNING"
+      [[ ! -z ${_pida} ]] && write_ok "${_nama}" "OK (http://10.30.1.2:5905/ninety-prime)" || write_error "${_nama}" "NOT RUNNING"
     fi
     ;;
 esac
