@@ -44,25 +44,25 @@ NB: At the Bok telescope, this code is run under either the *mtnops* or *primefo
  - Check status:
 
 ```bash
- % bash Galil_DMC_22x0.sh --command=status
+ % bash Galil_DMC_22x0.sh --command=status --web-site
 ```
 
  - To stop the software:
 
 ```bash
  # check
- % bash Galil_DMC_22x0.sh --command=stop --dry-run
+ % bash Galil_DMC_22x0.sh --command=stop --web-site --dry-run
  # for real
- % bash Galil_DMC_22x0.sh --command=stop
+ % bash Galil_DMC_22x0.sh --command=stop --web-site
 ```
 
  - To start the software:
 
 ```bash
  # check
- % bash Galil_DMC_22x0.sh --command=start --dry-run
+ % bash Galil_DMC_22x0.sh --command=start --web-site --dry-run
  # for real
- % bash Galil_DMC_22x0.sh --command=start
+ % bash Galil_DMC_22x0.sh --command=start --web-site
 ```
 
  - Adding the shared memory readers (not required for operations):
@@ -70,10 +70,10 @@ NB: At the Bok telescope, this code is run under either the *mtnops* or *primefo
 ```bash
  # check
  % bash Galil_DMC_22x0.sh --command=start --dry-run
- # mare sure we have Python > 3.6
- conda activate
+ # make sure we have Python > 3.6
+ % conda activate
  # for real
- % bash Galil_DMC_22x0.sh --command=start --c-read --py-read
+ % bash Galil_DMC_22x0.sh --command=start --c-read --py-read --web-site
 ```
 
 Log files are written to $BOK_GALIL_LOG.
@@ -82,25 +82,6 @@ Log files are written to $BOK_GALIL_LOG.
 
  - 20210923
 ```bash
-   DONE:
-     Tested during nights of 21/22/23 September 2021
-     Instrument filter translation completed successfully
-     Instrument filter rotation completed successfully
-     Instrument filter engineering commands (Populate, PopDone, ReadWheel, Initialize) completed successfully
-     Instrument standard focus completed successfully
-     Instrument delta focus completed successfully
-     Instrument reference focus save/restore completed successfully
-     Instrument nominal plane save/restore completed successfully
-     Telemetry from TCP/UDP shared memory segments completed successfully
-     Telemetry indicators (lights) functionality tested successfully
-     Guider focus tested
-     Guider filter selection tested but does not agree with the guider GUI
-     Added bash control script for easy start | stop | status
-     V1.0.0 Released via GitHub so-90prime repository
-     Code cloned to both /home/mtnops/PycharmProjects/bokGalil (for software development and engineering)
-     and /home/primefocus/bokGalil for production. A "git pull" should be executed from time to time 
-     in those directories to ensure the end-user is running the latest revision.
-
    TODO:
     - Add light(s) for FILTTSC to indicate any limits encountered
     - Work to resolve guider issues. I am reasonably convinced that this driver is doing the right thing 

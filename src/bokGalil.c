@@ -1119,6 +1119,7 @@ GReturn xq(char *cmd) {
   /* declare some variables and initialize them */
   GCon gfd = (GCon)0;
   GReturn gstat = (GReturn)0;
+  GReturn gerror = (GReturn)0;
   char resp[BOK_STR_2048] = {'\0'};
   (void) memset((void *)resp, 0, sizeof(resp));
 
@@ -1128,6 +1129,9 @@ GReturn xq(char *cmd) {
       (void) fprintf(stdout, "Executed '%s' OK, gstat=%d, response='%s'\n", cmd, gstat, resp); (void) fflush(stdout);
     } else {
       (void) fprintf(stderr, "<ERROR> Failed to execute '%s', gstat=%d, response='%s'\n", cmd, gstat, resp); (void) fflush(stderr);
+      (void) memset((void *)resp, 0, sizeof(resp));
+      gerror = GCommand(gfd, "TC 1;", resp, sizeof(resp), 0);
+      (void) fprintf(stderr, "<INFO> '%s', gerror=%d, response='%s'\n", "TC 1", gerror, resp); (void) fflush(stderr);
     }
   } else {
     (void) fprintf(stderr, "<ERROR> failed to open Galil_DMC_22x0 for '%s', gstat=%d\n", cmd, gstat); (void) fflush(stderr);
