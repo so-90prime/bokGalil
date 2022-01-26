@@ -31,27 +31,27 @@
  * define(s)
  ******************************************************************************/
 #define _AUTHOR_             "P. N. Daly"
-#define _DATE_               "23-September-2021"
+#define _DATE_               "26-January-2022"
 #define _EMAIL_              "pndaly@arizona.edu"
 #define _GALIL_              "192.168.0.100"
-#define _VERSION_            "1.0.0"
+#define _VERSION_            "1.1.0"
 
 #define BOK_AXES             8
 #define BOK_BAD_FLOAT        (float)123456789.0
 #define BOK_IFILTERS         6
-#define BOK_IFILTER_FILE     "/home/mtnops/PycharmProjects/bokGalil/docs/bok_ifilters.txt"
+#define BOK_IFILTER_FILE     "bok_ifilters.txt"
 #define BOK_IFILTER_COLUMNS  3
 #define BOK_IFILTER_SLOTS    256
 #define BOK_GALIL_TCP_CMD    "10.30.3.31 --command TCP"
 #define BOK_GFILTERS         6
-#define BOK_GFILTER_FILE     "/home/mtnops/PycharmProjects/bokGalil/docs/bok_gfilters.txt"
+#define BOK_GFILTER_FILE     "bok_gfilters.txt"
 #define BOK_GFILTER_COLUMNS  3
-#define BOK_GFILTER_SLOTS    6
+#define BOK_GFILTER_SLOTS    7
 #define BOK_IAXIS_INPUTS     10
 #define BOK_LVDT_STEPS       (10.0/32767.0)    /* In the old code this is $adconv?        */
 #define BOK_LVDT_ATOD        (-1.0/0.00055)    /* In the old code this is $stepsperlvdtu? */
 #define BOK_MAXINT           2147483647
-#define BOK_NPLANE_FILE      "/home/mtnops/PycharmProjects/bokGalil/docs/bok_nominal_plane.txt"
+#define BOK_NPLANE_FILE      "bok_nominal_plane.txt"
 #define BOK_SHM_FLAG         0
 #define BOK_SHM_TCP_NAME     "tcp_shm"
 #define BOK_SHM_UDP_NAME     "udp_shm"

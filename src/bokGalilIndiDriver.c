@@ -141,7 +141,6 @@ static bool busy = false;
 static filter_file_t bok_ifilters[BOK_IFILTER_SLOTS];
 static filter_file_t bok_gfilters[BOK_GFILTER_SLOTS];
 static bool initialized = false;
-static int loop_counter = -1;
 static int timer_id = -1;
 static tcp_val_t tcp_val;
 static udp_val_t udp_val;
@@ -160,7 +159,7 @@ telemetry_t telemetrys;
 /*******************************************************************************
  * INDI widget(s)
  ******************************************************************************/
-/* gfilter group */
+/* GFILTER_GROUP */
 static ISwitch gfilterS[] = {
   {"g_initfw", "Initialize", ISS_OFF, 0, 0},
 };
@@ -192,7 +191,8 @@ static ITextVectorProperty gfilterTP = {
   GALIL_DEVICE, "GFILTER_NAMES", "Guider Filter Names", GFILTER_GROUP, IP_RO, 0.0, IPS_IDLE, gfilterT, NARRAY(gfilterT), "", 0
 };
 
-/* gfocus group */
+/* GFOCUS_GROUP */
+/* inner limit is +4158 (stop code 2), outer limit is -5979 (stop code 3) but these limits (-1000,1000) are to stop the user sending too large a value at once */
 static INumber gfocus_distN[] = {
   {"distgcam", "Delta Focus G", "%5.0f", -1000.0, 1000.0, 1.0, 0.0, 0, 0, 0}
 };
@@ -200,7 +200,7 @@ static INumberVectorProperty gfocus_distNP = {
   GALIL_DEVICE, "GFOCUS_DIST", "Guider Focus", GFOCUS_GROUP, IP_RW, 0.0, IPS_IDLE, gfocus_distN, NARRAY(gfocus_distN), "", 0
 };
 
-/* ifilter group */
+/* IFILTER_GROUP */
 static ISwitch ifilter_engineeringS[] = {
   {"i_populate", "Populate",      ISS_OFF, 0, 0},
   {"i_popdone",  "PopDone",       ISS_OFF, 0, 0},
@@ -243,7 +243,14 @@ static ITextVectorProperty ifilterTP = {
   GALIL_DEVICE, "IFILTER_NAMES", "Filter Names", IFILTER_GROUP, IP_RO, 0.0, IPS_IDLE, ifilterT, NARRAY(ifilterT), "", 0
 };
 
-/* ifocus group */
+static ISwitch endofnightS[] = {
+  {"watchhasended", "End of Night", ISS_OFF, 0, 0}
+};
+ISwitchVectorProperty endofnightSP = {
+  GALIL_DEVICE, "END_OF_NIGHT", "End of Night", IFILTER_GROUP, IP_RW, ISR_ATMOST1, 0.0, IPS_IDLE, endofnightS, NARRAY(endofnightS), "", 0
+};
+
+/* IFOCUS_GROUP */
 static ISwitch ifocus_referenceS[] = {
   {"savfoc", "Save Reference", ISS_OFF, 0, 0},
   {"resfoc", "Restore Reference", ISS_OFF, 0, 0},
@@ -254,46 +261,43 @@ ISwitchVectorProperty ifocus_referenceSP = {
   GALIL_DEVICE, "IFOCUS_REFERENCE", "Focus Actions", IFOCUS_GROUP, IP_RW, ISR_ATMOST1, 0.0, IPS_IDLE, ifocus_referenceS, NARRAY(ifocus_referenceS), "", 0
 };
 
-static ISwitch endofnightS[] = {
-  {"watchhasended", "End of Night", ISS_OFF, 0, 0}
-};
-ISwitchVectorProperty endofnightSP = {
-  GALIL_DEVICE, "END_OF_NIGHT", "End of Night", IFILTER_GROUP, IP_RW, ISR_ATMOST1, 0.0, IPS_IDLE, endofnightS, NARRAY(endofnightS), "", 0
-};
-
+/* these limits came from nowhere so we should verify it when we have time */
 static INumber ifocus_distN[] = {
-  {"dista", "Encoder A", "%5.0f", -100.0, 100.0, 1.0, 0.0, 0, 0, 0}, // These limits came from nowhere
-  {"distb", "Encoder B", "%5.0f", -100.0, 100.0, 1.0, 0.0, 0, 0, 0}, // We should calculate it when we have time
+  {"dista", "Encoder A", "%5.0f", -100.0, 100.0, 1.0, 0.0, 0, 0, 0},
+  {"distb", "Encoder B", "%5.0f", -100.0, 100.0, 1.0, 0.0, 0, 0, 0},
   {"distc", "Encoder C", "%5.0f", -100.0, 100.0, 1.0, 0.0, 0, 0, 0}
 };
 static INumberVectorProperty ifocus_distNP = {
   GALIL_DEVICE, "IFOCUS_DIST", "Focus Steps", IFOCUS_GROUP, IP_WO, 0.0, IPS_IDLE, ifocus_distN, NARRAY(ifocus_distN), "", 0
 };
 
+/* these limits came from nowhere so we should verify it when we have time */
 static INumber ifocus_distallN[] = {
-  {"distall", "All Encoders", "%5.0f", -100.0, 100.0, 1.0, 0.0, 0, 0, 0} // Same as the ifocus_distN limits
+  {"distall", "All Encoders", "%5.0f", -100.0, 100.0, 1.0, 0.0, 0, 0, 0}
 };
 static INumberVectorProperty ifocus_distallNP = {
   GALIL_DEVICE, "IFOCUS_DISTALL", "Encoder Steps Move All", IFOCUS_GROUP, IP_WO, 0.0, IPS_IDLE, ifocus_distallN, NARRAY(ifocus_distallN), "", 0
 };
 
+/* documented by Joe and Bruce limit test for LVDT (range -250 to 2850) but we include some buffer but there is an official email */
 static INumber ifocus_lvdtN[] = {
-  {"lvdta", "Focus A", "%5.0f", BOK_MIN_LVDT, BOK_MAX_LVDT, 1.0, 0.0, 0, 0, 0}, // Documented by Joe and Bruce limit test for LVDT
-  {"lvdtb", "Focus B", "%5.0f", BOK_MIN_LVDT, BOK_MAX_LVDT, 1.0, 0.0, 0, 0, 0}, // They got the range from -250 to 2850
-  {"lvdtc", "Focus C", "%5.0f", BOK_MIN_LVDT, BOK_MAX_LVDT, 1.0, 0.0, 0, 0, 0}  // I included some buffer. There is an official email.
+  {"lvdta", "Focus A", "%5.0f", BOK_MIN_LVDT, BOK_MAX_LVDT, 1.0, 0.0, 0, 0, 0},
+  {"lvdtb", "Focus B", "%5.0f", BOK_MIN_LVDT, BOK_MAX_LVDT, 1.0, 0.0, 0, 0, 0},
+  {"lvdtc", "Focus C", "%5.0f", BOK_MIN_LVDT, BOK_MAX_LVDT, 1.0, 0.0, 0, 0, 0}
 };
 static INumberVectorProperty ifocus_lvdtNP = {
   GALIL_DEVICE, "IFOCUS_LVDT", "Main Focus", IFOCUS_GROUP, IP_RW, 0.0, IPS_IDLE, ifocus_lvdtN, NARRAY(ifocus_lvdtN), "", 0
 };
 
+/* these limits came from nowhere so we should verify it when we have time */
 static INumber ifocus_lvdtallN[] = {
-  {"lvdtall", "Delta Focus All", "%5.0f", -500.0, 500.0, 1.0, 0.0, 0, 0, 0} // Just chose random numbers
+  {"lvdtall", "Delta Focus All", "%5.0f", -500.0, 500.0, 1.0, 0.0, 0, 0, 0}
 };
 static INumberVectorProperty ifocus_lvdtallNP = {
   GALIL_DEVICE, "IFOCUS_LVDTALL", "Main Focus All", IFOCUS_GROUP, IP_WO, 0.0, IPS_IDLE, ifocus_lvdtallN, NARRAY(ifocus_lvdtallN), "", 0
 };
 
-/* support group */
+/* SUPPORT_GROUP */
 static IText supportT[] = {
   {"author",  "Author",  supports.author,  0, 0, 0},
   {"email",   "Email",   supports.email,   0, 0, 0},
@@ -304,6 +308,7 @@ static ITextVectorProperty supportTP = {
   GALIL_DEVICE, "SUPPORT", "Support Available From", SUPPORT_GROUP, IP_RO, 0, IPS_IDLE, supportT, NARRAY(supportT), "", 0
 };
 
+/* TELEMETRY_GROUP */
 static IText telemetry_referenceT[] = {
   {"a_reference",  "Focus A Reference", telemetrys.a_reference,  0, 0, 0},
   {"b_reference",  "Focus B Reference", telemetrys.b_reference,  0, 0, 0},
@@ -329,7 +334,7 @@ static ITextVectorProperty telemetry_gfocusTP = {
   GALIL_DEVICE, "TELEMETRY_GFOCUS", "Guider Focus", GFOCUS_GROUP, IP_RO, 0, IPS_IDLE, telemetry_gfocusT, NARRAY(telemetry_gfocusT), "", 0
 };
 
-/* telemetry group - broken up into different groups for display purposes */
+/* broken up into different groups for display purposes */
 static IText telemetryT[] = {
   {"hardware",        "Hardware Version                  ", telemetrys.hardware,        0, 0, 0},
   {"software",        "Software Version                  ", telemetrys.software,        0, 0, 0},
@@ -356,12 +361,12 @@ static IText telemetryT[] = {
   {"distgcam",        "distgcam (gfocus)                 ", telemetrys.distgcam,        0, 0, 0},
   {"errfilt",         "errfilt (1.0=Error, 0.0=OK)       ", telemetrys.errfilt,         0, 0, 0},
   {"filtisin",        "filtisin  (1.0=True, 0.0=False)   ", telemetrys.filtisin,        0, 0, 0},
-  {"ifilter_0",       "iFilter 1 (filtvals[0])           ", telemetrys.ifilter_1,       0, 0, 0},
-  {"ifilter_1",       "iFilter 2 (filtvals[1])           ", telemetrys.ifilter_2,       0, 0, 0},
-  {"ifilter_2",       "iFilter 3 (filtvals[2])           ", telemetrys.ifilter_3,       0, 0, 0},
-  {"ifilter_3",       "iFilter 4 (filtvals[3])           ", telemetrys.ifilter_4,       0, 0, 0},
-  {"ifilter_4",       "iFilter 5 (filtvals[4])           ", telemetrys.ifilter_5,       0, 0, 0},
-  {"ifilter_5",       "iFilter 6 (filtvals[5])           ", telemetrys.ifilter_6,       0, 0, 0},
+  {"ifilter_1",       "iFilter 1 (filtvals[0])           ", telemetrys.ifilter_1,       0, 0, 0},
+  {"ifilter_2",       "iFilter 2 (filtvals[1])           ", telemetrys.ifilter_2,       0, 0, 0},
+  {"ifilter_3",       "iFilter 3 (filtvals[2])           ", telemetrys.ifilter_3,       0, 0, 0},
+  {"ifilter_4",       "iFilter 4 (filtvals[3])           ", telemetrys.ifilter_4,       0, 0, 0},
+  {"ifilter_5",       "iFilter 5 (filtvals[4])           ", telemetrys.ifilter_5,       0, 0, 0},
+  {"ifilter_6",       "iFilter 6 (filtvals[5])           ", telemetrys.ifilter_6,       0, 0, 0},
   {"reqfilt",         "reqfilt (requested filter)        ", telemetrys.reqfilt,         0, 0, 0},
   {"filtval",         "filtval (selected filter)         ", telemetrys.filtval,         0, 0, 0},
   {"gfiltn",          "gfiltn                            ", telemetrys.gfiltn,          0, 0, 0},
@@ -492,8 +497,9 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
   /* check device */
   if (dev && strcmp(GALIL_DEVICE, dev)) return;
 
-  for(int ii=0; ii<n; ii++) {
-    IDMessage(GALIL_DEVICE, "value[%i]=%04.3f", ii, values[ii]);
+  /* dump value(s) received */
+  for (int idx=0; idx<n; idx++) {
+    IDMessage(GALIL_DEVICE, "name='%s', value[%d]=%.3f", name, idx, values[idx]);
   }
 
   /* focus dist value(s) */
@@ -501,15 +507,26 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
     float dista = values[0];
     float distb = values[1];
     float distc = values[2];
+
+    /* talk to hardware */
     busy = true;
+    ifocus_distNP.s = IPS_BUSY;
+    IDMessage(GALIL_DEVICE, "Calling xq_hx() from '%s'", name);
+    if ((gstat=xq_hx()) == G_NO_ERROR) {
+      IDMessage(GALIL_DEVICE, "Called xq_hx() from '%s' OK", name);
+    } else {
+      IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_hx() from '%s', gstat=%d", name, (int)gstat);
+    }
     IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f) from '%s'", dista, distb, distc, name);
     if ((gstat=xq_focusind(dista, distb, distc)) == G_NO_ERROR) {
       IDMessage(GALIL_DEVICE, "Called xq_focusind(a=%.1f, b=%.1f, c=%.1f) from '%s' OK", dista, distb, distc, name);
     } else {
       IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_focusind(a=%.1f, b=%.1f, c=%.1f) from '%s', gstat=%d", dista, distb, distc, name, (int)gstat);
     }
-    busy = false;
     ifocus_distNP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
+    busy = false;
+
+    /* update widget(s) */
     ifocus_distNP.np[0].value = dista;
     ifocus_distNP.np[1].value = distb;
     ifocus_distNP.np[2].value = distc;
@@ -518,15 +535,26 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
   /* focus distall value(s) */
   } else if (!strcmp(name, ifocus_distallNP.name)) {
     float distall = values[0];
+
+    /* talk to hardware */
     busy = true;
+    ifocus_distallNP.s = IPS_BUSY;
+    IDMessage(GALIL_DEVICE, "Calling xq_hx() from '%s'", name);
+    if ((gstat=xq_hx()) == G_NO_ERROR) {
+      IDMessage(GALIL_DEVICE, "Called xq_hx() from '%s' OK", name);
+    } else {
+      IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_hx() from '%s', gstat=%d", name, (int)gstat);
+    }
     IDMessage(GALIL_DEVICE, "Calling xq_focusall(a=%.1f)", distall);
     if ((gstat=xq_focusall(distall)) == G_NO_ERROR) {
       IDMessage(GALIL_DEVICE, "Called xq_focusall(a=%.1f) OK", distall);
     } else {
       IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_focusall(a=%.1f), gstat=%d", distall, (int)gstat);
     }
-    busy = false;
     ifocus_distallNP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
+    busy = false;
+
+    /* update widget(s) */
     ifocus_distallNP.np[0].value = distall;
     IDSetNumber(&ifocus_distallNP, NULL);
 
@@ -535,19 +563,18 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
     float dista = 0.0;
     float distb = 0.0;
     float distc = 0.0;
-    // check if in range of each other - if only one value, do this
-    IDMessage(GALIL_DEVICE, "<<n=%d>>", n);
+
+    /* we are setting 1 value, here, not all 3 */
     if (n == 1) {
-      if (abs(values[0] - ifoci.vala * 1000.0) > BOK_MAX_LVDT_DIFF || abs(values[0] - ifoci.valb * 1000.0) > BOK_MAX_LVDT_DIFF || abs(values[0] - ifoci.valc * 1000.0) > BOK_MAX_LVDT_DIFF) {
+      if (abs(values[0] - ifoci.vala * 1000.0) > BOK_MAX_LVDT_DIFF || 
+          abs(values[0] - ifoci.valb * 1000.0) > BOK_MAX_LVDT_DIFF || 
+          abs(values[0] - ifoci.valc * 1000.0) > BOK_MAX_LVDT_DIFF) {
         IDMessage(GALIL_DEVICE, "<ERROR> lvdt input values differ more than %.0f units", BOK_MAX_LVDT_DIFF);
         return;
       }
       IDMessage(GALIL_DEVICE, "Moving only %s", names[0]);
-      dista = 0.0;
-      distb = 0.0;
-      distc = 0.0;
       
-      // figure out what property came in
+      /* so which property are we setting? */
       if (!strcmp(names[0], "lvdta")) {
         dista = round((values[0] / 1000.0 - ifoci.vala) * BOK_LVDT_ATOD);
       } else if (!strcmp(names[0], "lvdtb")) {
@@ -556,9 +583,11 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
         distc = round((values[0] / 1000.0 - ifoci.valc) * BOK_LVDT_ATOD);
       }
 
-    // handle if all the numbers come in with the special button
+    /* we are setting all 3 values, here, not just 1 */
     } else {
-      if (abs(values[0] - values[1]) > BOK_MAX_LVDT_DIFF || abs(values[1] - values[2]) > BOK_MAX_LVDT_DIFF || abs(values[2] - values[0]) > BOK_MAX_LVDT_DIFF) {
+      if (abs(values[0] - values[1]) > BOK_MAX_LVDT_DIFF || 
+          abs(values[1] - values[2]) > BOK_MAX_LVDT_DIFF || 
+          abs(values[2] - values[0]) > BOK_MAX_LVDT_DIFF) {
         IDMessage(GALIL_DEVICE, "<ERROR> lvdt input values differ more than %.0f units", BOK_MAX_LVDT_DIFF);
         return;
       }
@@ -566,6 +595,8 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
       distb = round((values[1] / 1000.0 - ifoci.valb) * BOK_LVDT_ATOD);
       distc = round((values[2] / 1000.0 - ifoci.valc) * BOK_LVDT_ATOD);
     }
+
+    /* talk to hardware */
     busy = true;
     ifocus_lvdtNP.s = IPS_BUSY;
     IDMessage(GALIL_DEVICE, "Calling xq_hx() from '%s'", name);
@@ -580,16 +611,20 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
     } else {
       IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_focusind(a=%.1f, b=%.1f, c=%.1f) from '%s', gstat=%d", dista, distb, distc, name, (int)gstat);
     }
-    busy = false;
     ifocus_lvdtNP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
+    busy = false;
+
+    /* update widget(s) */
     IDSetNumber(&ifocus_lvdtNP, NULL);
 
   /* focus lvdtall value - this is the relative movement so all motors will step by the same amount */
   } else if (!strcmp(name, ifocus_lvdtallNP.name)) {
     float distall = round((values[0] / 1000.0) * BOK_LVDT_ATOD);
     IDMessage(GALIL_DEVICE, "lvdt input values all=%.1f", values[0]);
-    ifocus_lvdtallNP.s = IPS_OK;
+
+    /* talk to hardware */
     busy = true;
+    ifocus_lvdtallNP.s = IPS_BUSY;
     IDMessage(GALIL_DEVICE, "Calling xq_hx() from '%s'", name);
     if ((gstat=xq_hx()) == G_NO_ERROR) {
       IDMessage(GALIL_DEVICE, "Called xq_hx() from '%s' OK", name);
@@ -602,22 +637,35 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
     } else {
       IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_focusind(a=%.1f, b=%.1f, c=%.1f) from '%s', gstat=%d", distall, distall, distall, name, (int)gstat);
     }
-    busy = false; 
     ifocus_lvdtallNP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
+    busy = false; 
+
+    /* update widget(s) */
     IDSetNumber(&ifocus_lvdtallNP, NULL);
 
   /* gfocus dist value */
   } else if (!strcmp(name, gfocus_distNP.name)) {
     float distgcam = values[0];
+
+    /* talk to hardware */
     busy = true;
+    gfocus_distNP.s = IPS_BUSY;
+    IDMessage(GALIL_DEVICE, "Calling xq_hx() from '%s'", name);
+    if ((gstat=xq_hx()) == G_NO_ERROR) {
+      IDMessage(GALIL_DEVICE, "Called xq_hx() from '%s' OK", name);
+    } else {
+      IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_hx() from '%s', gstat=%d", name, (int)gstat);
+    }
     IDMessage(GALIL_DEVICE, "Calling xq_gfocus(a=%.1f)", distgcam);
     if ((gstat=xq_gfocus(distgcam)) == G_NO_ERROR) {
       IDMessage(GALIL_DEVICE, "Called xq_gfocus(a=%.1f) OK", distgcam);
     } else {
       IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_gfocus(a=%.1f), gstat=%d", distgcam, (int)gstat);
     }
-    busy = false;
     gfocus_distNP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
+    busy = false;
+
+    /* update widget(s) */
     IDSetNumber(&gfocus_distNP, NULL);
   }
 }
@@ -686,30 +734,53 @@ void ISNewText(const char *dev, const char *name, char *texts[], char *names[], 
  ******************************************************************************/
 static void driver_init(void) {
 
+  /* declare some variables and initialize them */
+  char *gpath = (char *)NULL;
+  char *ipath = (char *)NULL;
+  char gname[BOK_STR_1024] = {'\0'};
+  char iname[BOK_STR_1024] = {'\0'};
+
   /* check status */
   if (initialized == true) { return; }
 
+  /* get guider filters file */
+  (void) memset((void *)&gname, '\0', sizeof(gname));
+  if ((gpath=getenv("BOK_GALIL_DOCS")) == (char *)NULL) {
+    (void) sprintf(gname, "%s", BOK_GFILTER_FILE);
+  } else {
+    (void) sprintf(gname, "%s/%s", gpath, BOK_GFILTER_FILE);
+  }
+
+  /* get instrument filters file */
+  (void) memset((void *)&iname, '\0', sizeof(iname));
+  if ((ipath=getenv("BOK_GALIL_DOCS")) == (char *)NULL) {
+    (void) sprintf(iname, "%s", BOK_IFILTER_FILE);
+  } else {
+    (void) sprintf(iname, "%s/%s", ipath, BOK_IFILTER_FILE);
+  }
+
   /* output some message(s) */
   IDMessage(GALIL_DEVICE, "Initializing driver v%s, %s (%s), %s", _VERSION_, _AUTHOR_, _EMAIL_, _DATE_);
-
-  /* read instrument filter list from file */
-  for (int i=0; i<BOK_IFILTER_SLOTS; i++) { (void) memset((void *)&bok_ifilters[i], 0, sizeof(filter_file_t)); }
-  read_filters_from_file(BOK_IFILTER_FILE, (filter_file_t *)bok_ifilters, BOK_IFILTER_SLOTS, BOK_IFILTER_COLUMNS);
-  for (int j=0; j<BOK_IFILTER_SLOTS; j++) {
-    if (strlen(bok_ifilters[j].code)>0 && strlen(bok_ifilters[j].name)>0) {
-      (void) fprintf(stderr, "instrument filters> index=%d, code='%s', name='%s'\n", j, bok_ifilters[j].code, bok_ifilters[j].name);
-      (void) fflush(stderr);
-    }
-  }
+  IDMessage(GALIL_DEVICE, "Guider filter file %s", gname);
+  IDMessage(GALIL_DEVICE, "Instrument filter file %s", iname);
 
   /* read guider filter list from file */
   for (int j=0; j<BOK_GFILTER_SLOTS; j++) { (void) memset((void *)&bok_gfilters[j], 0, sizeof(filter_file_t)); }
-  read_filters_from_file(BOK_GFILTER_FILE, (filter_file_t *)bok_gfilters, BOK_GFILTER_SLOTS, BOK_GFILTER_COLUMNS);
+  read_filters_from_file(gname, (filter_file_t *)bok_gfilters, BOK_GFILTER_SLOTS, BOK_GFILTER_COLUMNS);
   for (int j=0; j<BOK_GFILTER_SLOTS; j++) {
     if (strlen(bok_gfilters[j].code)>0 && strlen(bok_gfilters[j].name)>0) {
       (void) fprintf(stderr, "guider filters> index=%d, code='%s', name='%s'\n", j, bok_gfilters[j].code, bok_gfilters[j].name);
       (void) fflush(stderr);
-      
+    }
+  }
+
+  /* read instrument filter list from file */
+  for (int i=0; i<BOK_IFILTER_SLOTS; i++) { (void) memset((void *)&bok_ifilters[i], 0, sizeof(filter_file_t)); }
+  read_filters_from_file(iname, (filter_file_t *)bok_ifilters, BOK_IFILTER_SLOTS, BOK_IFILTER_COLUMNS);
+  for (int j=0; j<BOK_IFILTER_SLOTS; j++) {
+    if (strlen(bok_ifilters[j].code)>0 && strlen(bok_ifilters[j].name)>0) {
+      (void) fprintf(stderr, "instrument filters> index=%d, code='%s', name='%s'\n", j, bok_ifilters[j].code, bok_ifilters[j].name);
+      (void) fflush(stderr);
     }
   }
 
@@ -749,23 +820,25 @@ void execute_end_of_night(ISState states[], char *names[], int n) {
     /* process 'iFilter Unload' - NB: it's up to the higher-level software to check telemetry */
     if (sp == &endofnightS[0]) {
       if (tcp_val.lv.filtisin == 0.0) {
-        IDMessage(GALIL_DEVICE, "Filter is already out of the beam!");
+        IDMessage(GALIL_DEVICE, "Filter already out of the beam - nothing to do");
         endofnightSP.s = IPS_OK;
       } else {
-        IDMessage(GALIL_DEVICE, "Executing 'iFilter Unload'");
-        IDMessage(GALIL_DEVICE, "Calling xq_filtout()");
+
+        /* talk to hardware */
         busy = true;
+        IDMessage(GALIL_DEVICE, "Calling xq_filtout()");
         if ((gstat=xq_filtout()) == G_NO_ERROR) {
           IDMessage(GALIL_DEVICE, "Called xq_filtout() OK");
-          IDMessage(GALIL_DEVICE, "Executed 'iFilter Unload' OK");
         } else {
           IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_filtout(), gstat=%d", (int)gstat);
         }
         endofnightSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
         busy = false;
       }
+
+      /* update widget(s) */
       endofnightS[0].s = ISS_OFF;
-      IDMessage(GALIL_DEVICE, "Your watch has ended, sleep well");
+      IDMessage(GALIL_DEVICE, "watch has ended, nos da");
     }
   }
   /* reset */
@@ -795,163 +868,175 @@ void execute_gfilter_change(ISState states[], char *names[], int n) {
     /* process 'gFilter 1' */
     if (sp == &gfilter_changeS[0]) {
       if (tcp_val.lv.gfiltn == 1.0) {
-        IDMessage(GALIL_DEVICE, "gFilter is already selected!");
+        IDMessage(GALIL_DEVICE, "gFilter 1 is already selected");
         gfilter_changeSP.s = IPS_OK;
       } else {
-        IDMessage(GALIL_DEVICE, "Executing 'gFilter 1'");
-        IDMessage(GALIL_DEVICE, "Calling xq_gfiltn(1.0)");
+
+        /* talk to hardware */
         busy = true;
+        gfilter_changeSP.s = IPS_BUSY;
+        IDMessage(GALIL_DEVICE, "Calling xq_gfiltn(1)");
         if ((gstat=xq_gfiltn(1.0)) == G_NO_ERROR) {
-          IDMessage(GALIL_DEVICE, "Called xq_gfiltn(1.0) OK");
+          IDMessage(GALIL_DEVICE, "Called xq_gfiltn(1) OK");
           IDMessage(GALIL_DEVICE, "Calling xq_gfwmov()");
           if ((gstat=xq_gfwmov()) == G_NO_ERROR) {
             IDMessage(GALIL_DEVICE, "Called xq_gfwmov() OK");
-            IDMessage(GALIL_DEVICE, "Executed 'gFilter 1' OK");
           } else {
             IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_gfwmov(), gstat=%d", (int)gstat);
           }
-          gfilter_changeSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
         } else {
-          IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_gfiltn(1.0), gstat=%d", (int)gstat);
-          gfilter_changeSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
+          IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_gfiltn(1), gstat=%d", (int)gstat);
         }
+        gfilter_changeSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
         busy = false;
       }
+
+      /* update widget(s) */
       gfilter_changeS[0].s = ISS_OFF;
 
     /* process 'gFilter 2' */
     } else if (sp == &gfilter_changeS[1]) {
       if (tcp_val.lv.gfiltn == 2.0) {
-        IDMessage(GALIL_DEVICE, "gFilter is already selected!");
+        IDMessage(GALIL_DEVICE, "gFilter 2 is already selected");
         gfilter_changeSP.s = IPS_OK;
       } else {
-        IDMessage(GALIL_DEVICE, "Executing 'gFilter 2'");
-        IDMessage(GALIL_DEVICE, "Calling xq_gfiltn(2.0)");
+
+        /* talk to hardware */
         busy = true;
+        gfilter_changeSP.s = IPS_BUSY;
+        IDMessage(GALIL_DEVICE, "Calling xq_gfiltn(2)");
         if ((gstat=xq_gfiltn(2.0)) == G_NO_ERROR) {
-          IDMessage(GALIL_DEVICE, "Called xq_gfiltn(2.0) OK");
+          IDMessage(GALIL_DEVICE, "Called xq_gfiltn(2) OK");
           IDMessage(GALIL_DEVICE, "Calling xq_gfwmov()");
           if ((gstat=xq_gfwmov()) == G_NO_ERROR) {
             IDMessage(GALIL_DEVICE, "Called xq_gfwmov() OK");
-            IDMessage(GALIL_DEVICE, "Executed 'gFilter 2' OK");
           } else {
             IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_gfwmov(), gstat=%d", (int)gstat);
           }
-          gfilter_changeSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
         } else {
-          IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_gfiltn(2.0), gstat=%d", (int)gstat);
-          gfilter_changeSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
+          IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_gfiltn(2), gstat=%d", (int)gstat);
         }
+        gfilter_changeSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
         busy = false;
       }
+
+      /* update widget(s) */
       gfilter_changeS[1].s = ISS_OFF;
 
     /* process 'gFilter 3' */
     } else if (sp == &gfilter_changeS[2]) {
       if (tcp_val.lv.gfiltn == 3.0) {
-        IDMessage(GALIL_DEVICE, "gFilter is already selected!");
+        IDMessage(GALIL_DEVICE, "gFilter 3 is already selected");
         gfilter_changeSP.s = IPS_OK;
       } else {
-        IDMessage(GALIL_DEVICE, "Executing 'gFilter 3'");
-        IDMessage(GALIL_DEVICE, "Calling xq_gfiltn(3.0)");
+
+        /* talk to hardware */
         busy = true;
+        gfilter_changeSP.s = IPS_BUSY;
+        IDMessage(GALIL_DEVICE, "Calling xq_gfiltn(3)");
         if ((gstat=xq_gfiltn(3.0)) == G_NO_ERROR) {
-          IDMessage(GALIL_DEVICE, "Called xq_gfiltn(3.0) OK");
+          IDMessage(GALIL_DEVICE, "Called xq_gfiltn(3) OK");
           IDMessage(GALIL_DEVICE, "Calling xq_gfwmov()");
           if ((gstat=xq_gfwmov()) == G_NO_ERROR) {
             IDMessage(GALIL_DEVICE, "Called xq_gfwmov() OK");
-            IDMessage(GALIL_DEVICE, "Executed 'gFilter 3' OK");
           } else {
             IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_gfwmov(), gstat=%d", (int)gstat);
           }
-          gfilter_changeSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
         } else {
-          IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_gfiltn(3.0), gstat=%d", (int)gstat);
-          gfilter_changeSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
+          IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_gfiltn(3), gstat=%d", (int)gstat);
         }
+        gfilter_changeSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
         busy = false;
       }
+
+      /* update widget(s) */
       gfilter_changeS[2].s = ISS_OFF;
 
     /* process 'gFilter 4' */
     } else if (sp == &gfilter_changeS[3]) {
       if (tcp_val.lv.gfiltn == 4.0) {
-        IDMessage(GALIL_DEVICE, "gFilter is already selected!");
+        IDMessage(GALIL_DEVICE, "gFilter 4 is already selected");
         gfilter_changeSP.s = IPS_OK;
       } else {
-        IDMessage(GALIL_DEVICE, "Executing 'gFilter 4'");
-        IDMessage(GALIL_DEVICE, "Calling xq_gfiltn(4.0)");
+
+        /* talk to hardware */
         busy = true;
+        gfilter_changeSP.s = IPS_BUSY;
+        IDMessage(GALIL_DEVICE, "Calling xq_gfiltn(4)");
         if ((gstat=xq_gfiltn(4.0)) == G_NO_ERROR) {
-          IDMessage(GALIL_DEVICE, "Called xq_gfiltn(4.0) OK");
+          IDMessage(GALIL_DEVICE, "Called xq_gfiltn(4) OK");
           IDMessage(GALIL_DEVICE, "Calling xq_gfwmov()");
           if ((gstat=xq_gfwmov()) == G_NO_ERROR) {
             IDMessage(GALIL_DEVICE, "Called xq_gfwmov() OK");
-            IDMessage(GALIL_DEVICE, "Executed 'gFilter 4' OK");
           } else {
             IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_gfwmov(), gstat=%d", (int)gstat);
           }
-          gfilter_changeSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
         } else {
-          IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_gfiltn(4.0), gstat=%d", (int)gstat);
-          gfilter_changeSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
+          IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_gfiltn(4), gstat=%d", (int)gstat);
         }
+        gfilter_changeSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
         busy = false;
       }
+
+      /* update widget(s) */
       gfilter_changeS[3].s = ISS_OFF;
 
     /* process 'gFilter 5' */
     } else if (sp == &gfilter_changeS[4]) {
       if (tcp_val.lv.gfiltn == 5.0) {
-        IDMessage(GALIL_DEVICE, "gFilter is already selected!");
+        IDMessage(GALIL_DEVICE, "gFilter 5 is already selected");
         gfilter_changeSP.s = IPS_OK;
       } else {
-        IDMessage(GALIL_DEVICE, "Executing 'gFilter 5'");
-        IDMessage(GALIL_DEVICE, "Calling xq_gfiltn(5.0)");
+
+        /* talk to hardware */
         busy = true;
+        gfilter_changeSP.s = IPS_BUSY;
+        IDMessage(GALIL_DEVICE, "Calling xq_gfiltn(5)");
         if ((gstat=xq_gfiltn(5.0)) == G_NO_ERROR) {
-          IDMessage(GALIL_DEVICE, "Called xq_gfiltn(5.0) OK");
+          IDMessage(GALIL_DEVICE, "Called xq_gfiltn(5) OK");
           IDMessage(GALIL_DEVICE, "Calling xq_gfwmov()");
           if ((gstat=xq_gfwmov()) == G_NO_ERROR) {
             IDMessage(GALIL_DEVICE, "Called xq_gfwmov() OK");
-            IDMessage(GALIL_DEVICE, "Executed 'gFilter 5' OK");
           } else {
             IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_gfwmov(), gstat=%d", (int)gstat);
           }
-          gfilter_changeSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
         } else {
-          IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_gfiltn(5.0), gstat=%d", (int)gstat);
-          gfilter_changeSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
+          IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_gfiltn(5), gstat=%d", (int)gstat);
         }
+        gfilter_changeSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
         busy = false;
       }
+
+      /* update widget(s) */
       gfilter_changeS[4].s = ISS_OFF;
 
     /* process 'gFilter 6' */
     } else if (sp == &gfilter_changeS[5]) {
       if (tcp_val.lv.gfiltn == 6.0) {
-        IDMessage(GALIL_DEVICE, "gFilter is already selected!");
+        IDMessage(GALIL_DEVICE, "gFilter 6 is already selected");
         gfilter_changeSP.s = IPS_OK;
       } else {
-        IDMessage(GALIL_DEVICE, "Executing 'gFilter 6'");
-        IDMessage(GALIL_DEVICE, "Calling xq_gfiltn(6.0)");
+
+        /* talk to hardware */
         busy = true;
+        gfilter_changeSP.s = IPS_BUSY;
+        IDMessage(GALIL_DEVICE, "Calling xq_gfiltn(6)");
         if ((gstat=xq_gfiltn(6.0)) == G_NO_ERROR) {
-          IDMessage(GALIL_DEVICE, "Called xq_gfiltn(6.0) OK");
+          IDMessage(GALIL_DEVICE, "Called xq_gfiltn(6) OK");
           IDMessage(GALIL_DEVICE, "Calling xq_gfwmov()");
           if ((gstat=xq_gfwmov()) == G_NO_ERROR) {
             IDMessage(GALIL_DEVICE, "Called xq_gfwmov() OK");
-            IDMessage(GALIL_DEVICE, "Executed 'gFilter 6' OK");
           } else {
             IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_gfwmov(), gstat=%d", (int)gstat);
           }
-          gfilter_changeSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
         } else {
-          IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_gfiltn(6.0), gstat=%d", (int)gstat);
-          gfilter_changeSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
+          IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_gfiltn(6), gstat=%d", (int)gstat);
         }
+        gfilter_changeSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
         busy = false;
       }
+
+      /* update widget(s) */
       gfilter_changeS[5].s = ISS_OFF;
     }
   }
@@ -960,6 +1045,8 @@ void execute_gfilter_change(ISState states[], char *names[], int n) {
   IUResetSwitch(&gfilter_changeSP);
   IDSetSwitch(&gfilter_changeSP, NULL);
 }
+
+
 /*******************************************************************************
  * action: execute_gfilter_switches()
  ******************************************************************************/
@@ -980,17 +1067,20 @@ void execute_gfilter_switches(ISState states[], char *names[], int n) {
 
     /* process ginitfw */
     if (sp == &gfilterS[0]) {
-      IDMessage(GALIL_DEVICE, "Executing 'gFilter Initialize'");
-      IDMessage(GALIL_DEVICE, "Calling xq_gfwinit()");
+
+      /* talk to hardware */
       busy = true;
+      gfilterSP.s = IPS_BUSY;
+      IDMessage(GALIL_DEVICE, "Calling xq_gfwinit()");
       if ((gstat=xq_gfwinit()) == G_NO_ERROR) {
         IDMessage(GALIL_DEVICE, "Called xq_gfwinit() OK");
-        IDMessage(GALIL_DEVICE, "Executed 'gFilter Initialize' OK");
       } else {
         IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_gfwinit(), gstat=%d", (int)gstat);
       }
       gfilterSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
       busy = false;
+
+      /* update widget(s) */
       gfilterS[0].s = ISS_OFF;
     }
   }
@@ -999,6 +1089,7 @@ void execute_gfilter_switches(ISState states[], char *names[], int n) {
   IUResetSwitch(&gfilterSP);
   IDSetSwitch(&gfilterSP, NULL);
 }
+
 
 /*******************************************************************************
  * action: execute_ifilter_engineering()
@@ -1019,39 +1110,45 @@ void execute_ifilter_engineering(ISState states[], char *names[], int n) {
     /* process 'iFilter Populate' - NB: it's up to the higher-level software to check telemetry */
     if (sp == &ifilter_engineeringS[0]) {
       if (tcp_val.lv.filtisin == 1.0) {
-        IDMessage(GALIL_DEVICE, "Cannot populate whilst the filter is in the beam!");
+        IDMessage(GALIL_DEVICE, "Cannot populate whilst the filter is in the beam");
         ifilter_engineeringSP.s = IPS_OK;
       } else {
-        IDMessage(GALIL_DEVICE, "Executing 'iFilter Populate'");
-        IDMessage(GALIL_DEVICE, "Calling xq_filtldm()");
+
+        /* talk to hardware */
         busy = true;
+        ifilter_engineeringSP.s = IPS_BUSY;
+        IDMessage(GALIL_DEVICE, "Calling xq_filtldm()");
         if ((gstat=xq_filtldm()) == G_NO_ERROR) {
           IDMessage(GALIL_DEVICE, "Called xq_filtldm() OK");
-          IDMessage(GALIL_DEVICE, "Executed 'iFilter Populate' OK");
         } else {
           IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_filtldm(), gstat=%d", (int)gstat);
         }
         ifilter_engineeringSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
+        busy = false;
+
+        /* update telemetry */
         telemetry_engineeringL[2].s = gstat == G_NO_ERROR ? IPS_BUSY : IPS_ALERT;
         IDSetLight(&telemetry_engineeringLP, NULL);
 
-        busy = false;
       }
       ifilter_engineeringS[0].s = ISS_OFF;
 
     /* process 'iFilter PopDone' - NB: it's up to the higher-level software to check telemetry */
     } else if (sp == &ifilter_engineeringS[1]) {
-      IDMessage(GALIL_DEVICE, "Executing 'iFilter PopDone'");
+
+      /* talk to hardware */
       busy = true;
+      ifilter_engineeringSP.s = IPS_BUSY;
       IDMessage(GALIL_DEVICE, "Calling xq_hx() from '%s'", "ifilter_engineeringS[1]");
       if ((gstat=xq_hx()) == G_NO_ERROR) {
         IDMessage(GALIL_DEVICE, "Called xq_hx() from '%s' OK", "ifilter_engineeringS[1]");
-        IDMessage(GALIL_DEVICE, "Executed 'iFilter PopDone' OK");
       } else {
         IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_hx() from '%s', gstat=%d", "ifilter_engineeringS[1]", (int)gstat);
       }
-      busy = false;
       ifilter_engineeringSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
+      busy = false;
+
+      /* update telemetry */
       telemetry_engineeringL[2].s = gstat == G_NO_ERROR ? IPS_IDLE : IPS_ALERT;
       IDSetLight(&telemetry_engineeringLP, NULL);
       ifilter_engineeringS[1].s = ISS_OFF;
@@ -1059,28 +1156,33 @@ void execute_ifilter_engineering(ISState states[], char *names[], int n) {
     /* process 'iFilter Initialize' - NB: it's up to the higher-level software to check telemetry */
     } else if (sp == &ifilter_engineeringS[2]) {
       if (tcp_val.lv.filtisin == 1.0) {
-        IDMessage(GALIL_DEVICE, "Cannot initialize whilst the filter is in the beam!");
+        IDMessage(GALIL_DEVICE, "Cannot initialize whilst the filter is in the beam");
         ifilter_engineeringSP.s = IPS_OK;
       } else {
-        IDMessage(GALIL_DEVICE, "Executing 'iFilter Initialize'");
-        IDMessage(GALIL_DEVICE, "Calling xq_filtrd()");
+
+        /* talk to hardware */
         busy = true;
+        ifilter_engineeringSP.s = IPS_BUSY;
+        IDMessage(GALIL_DEVICE, "Calling xq_filtrd()");
         if ((gstat=xq_filtrd()) == G_NO_ERROR) {
           IDMessage(GALIL_DEVICE, "Called xq_filtrd() OK");
-          IDMessage(GALIL_DEVICE, "Executed 'iFilter Initialize' OK");
         } else {
           IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_filtrd(), gstat=%d", (int)gstat);
         }
         ifilter_engineeringSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
         busy = false;
       }
+
+      /* update telemetry */
       ifilter_engineeringS[2].s = ISS_OFF;
     }
   }
+
   /* reset */
   IUResetSwitch(&ifilter_engineeringSP);
   IDSetSwitch(&ifilter_engineeringSP, NULL);
 }
+
 
 /*******************************************************************************
  * action: execute_ifilter_change()
@@ -1102,182 +1204,193 @@ void execute_ifilter_change(ISState states[], char *names[], int n) {
     /* process 'iFilter 1' - NB: it's up to the higher-level software to check telemetry */
     if (sp == &ifilter_changeS[0]) {
       if (tcp_val.lv.filtisin == 1.0) {
-        IDMessage(GALIL_DEVICE, "Cannot change filter whilst another filter is in the beam!");
+        IDMessage(GALIL_DEVICE, "Cannot change filter whilst another filter is in the beam");
         ifilter_changeSP.s = IPS_BUSY;
-
       } else if (tcp_val.lv.filtval==tcp_val.lv.reqfilt && tcp_val.lv.reqfilt==tcp_val.filtvals[0]) {
-        IDMessage(GALIL_DEVICE, "iFilter is already selected!");
+        IDMessage(GALIL_DEVICE, "iFilter 1 is already selected");
         ifilter_changeSP.s = IPS_OK;
       } else {
-        IDMessage(GALIL_DEVICE, "Executing 'iFilter 1'");
-        IDMessage(GALIL_DEVICE, "Calling xq_reqfilt(%.1f)", tcp_val.filtvals[0]);
+
+        /* talk to hardware */
         busy = true;
+        ifilter_changeSP.s = IPS_BUSY;
+        IDMessage(GALIL_DEVICE, "Calling xq_reqfilt(%.1f)", tcp_val.filtvals[0]);
         if ((gstat=xq_reqfilt(tcp_val.filtvals[0])) == G_NO_ERROR) {
           IDMessage(GALIL_DEVICE, "Called xq_reqfilt(%.1f) OK", tcp_val.filtvals[0]);
           IDMessage(GALIL_DEVICE, "Calling xq_filtmov()");
           if ((gstat=xq_filtmov()) == G_NO_ERROR) {
             IDMessage(GALIL_DEVICE, "Called xq_filtmov() OK");
-            IDMessage(GALIL_DEVICE, "Executed 'iFilter 1' OK");
           } else {
             IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_filtmov(), gstat=%d", (int)gstat);
           }
-          ifilter_changeSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
         } else {
           IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_reqfilt(%.1f), gstat=%d", tcp_val.filtvals[0], (int)gstat);
-          ifilter_changeSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
         }
+        ifilter_changeSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
         busy = false;
       }
+
+      /* update widget(s) */
       ifilter_changeS[0].s = ISS_OFF;
 
     /* process 'iFilter 2' - NB: it's up to the higher-level software to check telemetry */
     } else if (sp == &ifilter_changeS[1]) {
       if (tcp_val.lv.filtisin == 1.0) {
-        IDMessage(GALIL_DEVICE, "Cannot change filter whilst another filter is in the beam!");
+        IDMessage(GALIL_DEVICE, "Cannot change filter whilst another filter is in the beam");
         ifilter_changeSP.s = IPS_BUSY;
       } else if (tcp_val.lv.filtval==tcp_val.lv.reqfilt && tcp_val.lv.reqfilt == tcp_val.filtvals[1]) {
-        IDMessage(GALIL_DEVICE, "iFilter is already selected!");
+        IDMessage(GALIL_DEVICE, "iFilter 2 is already selected");
         ifilter_changeSP.s = IPS_OK;
       } else {
-        IDMessage(GALIL_DEVICE, "Executing 'iFilter 2'");
-        IDMessage(GALIL_DEVICE, "Calling xq_reqfilt(%.1f)", tcp_val.filtvals[1]);
+
+        /* talk to hardware */
         busy = true;
+        ifilter_changeSP.s = IPS_BUSY;
+        IDMessage(GALIL_DEVICE, "Calling xq_reqfilt(%.1f)", tcp_val.filtvals[1]);
         if ((gstat=xq_reqfilt(tcp_val.filtvals[1])) == G_NO_ERROR) {
           IDMessage(GALIL_DEVICE, "Called xq_reqfilt(%.1f) OK", tcp_val.filtvals[1]);
           IDMessage(GALIL_DEVICE, "Calling xq_filtmov()");
           if ((gstat=xq_filtmov()) == G_NO_ERROR) {
             IDMessage(GALIL_DEVICE, "Called xq_filtmov() OK");
-            IDMessage(GALIL_DEVICE, "Executed 'iFilter 2' OK");
           } else {
             IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_filtmov(), gstat=%d", (int)gstat);
           }
-          ifilter_changeSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
         } else {
           IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_reqfilt(%.1f), gstat=%d", tcp_val.filtvals[1], (int)gstat);
-          ifilter_changeSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
         }
+        ifilter_changeSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
         busy = false;
       }
+
+      /* update widget(s) */
       ifilter_changeS[1].s = ISS_OFF;
 
     /* process 'iFilter 3' - NB: it's up to the higher-level software to check telemetry */
     } else if (sp == &ifilter_changeS[2]) {
       if (tcp_val.lv.filtisin == 1.0) {
-        IDMessage(GALIL_DEVICE, "Cannot change filter whilst another filter is in the beam!");
+        IDMessage(GALIL_DEVICE, "Cannot change filter whilst another filter is in the beam");
         ifilter_changeSP.s = IPS_BUSY;
       } else if (tcp_val.lv.filtval==tcp_val.lv.reqfilt && tcp_val.lv.reqfilt == tcp_val.filtvals[2]) {
-        IDMessage(GALIL_DEVICE, "iFilter is already selected!");
+        IDMessage(GALIL_DEVICE, "iFilter 3 is already selected");
         ifilter_changeSP.s = IPS_OK;
       } else {
-        IDMessage(GALIL_DEVICE, "Executing 'iFilter 3'");
-        IDMessage(GALIL_DEVICE, "Calling xq_reqfilt(%.1f)", tcp_val.filtvals[2]);
+
+        /* talk to hardware */
         busy = true;
+        ifilter_changeSP.s = IPS_BUSY;
+        IDMessage(GALIL_DEVICE, "Calling xq_reqfilt(%.1f)", tcp_val.filtvals[2]);
         if ((gstat=xq_reqfilt(tcp_val.filtvals[2])) == G_NO_ERROR) {
           IDMessage(GALIL_DEVICE, "Called xq_reqfilt(%.1f) OK", tcp_val.filtvals[2]);
           IDMessage(GALIL_DEVICE, "Calling xq_filtmov()");
           if ((gstat=xq_filtmov()) == G_NO_ERROR) {
             IDMessage(GALIL_DEVICE, "Called xq_filtmov() OK");
-            IDMessage(GALIL_DEVICE, "Executed 'iFilter 3' OK");
           } else {
             IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_filtmov(), gstat=%d", (int)gstat);
           }
-          ifilter_changeSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
         } else {
           IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_reqfilt(%.1f), gstat=%d", tcp_val.filtvals[2], (int)gstat);
-          ifilter_changeSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
         }
+        ifilter_changeSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
         busy = false;
       }
+
+      /* update widget(s) */
       ifilter_changeS[2].s = ISS_OFF;
 
     /* process 'iFilter 4' - NB: it's up to the higher-level software to check telemetry */
     } else if (sp == &ifilter_changeS[3]) {
       if (tcp_val.lv.filtisin == 1.0) {
-        IDMessage(GALIL_DEVICE, "Cannot change filter whilst another filter is in the beam!");
+        IDMessage(GALIL_DEVICE, "Cannot change filter whilst another filter is in the beam");
         ifilter_changeSP.s = IPS_BUSY;
       } else if (tcp_val.lv.filtval==tcp_val.lv.reqfilt && tcp_val.lv.reqfilt == tcp_val.filtvals[3]) {
-        IDMessage(GALIL_DEVICE, "iFilter is already selected!");
+        IDMessage(GALIL_DEVICE, "iFilter 4 is already selected");
         ifilter_changeSP.s = IPS_OK;
       } else {
-        IDMessage(GALIL_DEVICE, "Executing 'iFilter 4'");
-        IDMessage(GALIL_DEVICE, "Calling xq_reqfilt(%.1f)", tcp_val.filtvals[3]);
+
+        /* talk to hardware */
         busy = true;
+        ifilter_changeSP.s = IPS_BUSY;
+        IDMessage(GALIL_DEVICE, "Calling xq_reqfilt(%.1f)", tcp_val.filtvals[3]);
         if ((gstat=xq_reqfilt(tcp_val.filtvals[3])) == G_NO_ERROR) {
           IDMessage(GALIL_DEVICE, "Called xq_reqfilt(%.1f) OK", tcp_val.filtvals[3]);
           IDMessage(GALIL_DEVICE, "Calling xq_filtmov()");
           if ((gstat=xq_filtmov()) == G_NO_ERROR) {
             IDMessage(GALIL_DEVICE, "Called xq_filtmov() OK");
-            IDMessage(GALIL_DEVICE, "Executed 'iFilter 4' OK");
           } else {
             IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_filtmov(), gstat=%d", (int)gstat);
           }
-          ifilter_changeSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
         } else {
           IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_reqfilt(%.1f), gstat=%d", tcp_val.filtvals[3], (int)gstat);
-          ifilter_changeSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
         }
+        ifilter_changeSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
         busy = false;
       }
+
+      /* update widget(s) */
       ifilter_changeS[3].s = ISS_OFF;
 
     /* process 'iFilter 5' - NB: it's up to the higher-level software to check telemetry */
     } else if (sp == &ifilter_changeS[4]) {
       if (tcp_val.lv.filtisin == 1.0) {
-        IDMessage(GALIL_DEVICE, "Cannot change filter whilst another filter is in the beam!");
+        IDMessage(GALIL_DEVICE, "Cannot change filter whilst another filter is in the beam");
         ifilter_changeSP.s = IPS_BUSY;
       } else if (tcp_val.lv.filtval==tcp_val.lv.reqfilt && tcp_val.lv.reqfilt == tcp_val.filtvals[4]) {
-        IDMessage(GALIL_DEVICE, "iFilter is already selected!");
+        IDMessage(GALIL_DEVICE, "iFilter 5 is already selected");
         ifilter_changeSP.s = IPS_OK;
       } else {
-        IDMessage(GALIL_DEVICE, "Executing 'iFilter 5'");
-        IDMessage(GALIL_DEVICE, "Calling xq_reqfilt(%.1f)", tcp_val.filtvals[4]);
+
+        /* talk to hardware */
         busy = true;
+        ifilter_changeSP.s = IPS_BUSY;
+        IDMessage(GALIL_DEVICE, "Calling xq_reqfilt(%.1f)", tcp_val.filtvals[4]);
         if ((gstat=xq_reqfilt(tcp_val.filtvals[4])) == G_NO_ERROR) {
           IDMessage(GALIL_DEVICE, "Called xq_reqfilt(%.1f) OK", tcp_val.filtvals[4]);
           IDMessage(GALIL_DEVICE, "Calling xq_filtmov()");
           if ((gstat=xq_filtmov()) == G_NO_ERROR) {
             IDMessage(GALIL_DEVICE, "Called xq_filtmov() OK");
-            IDMessage(GALIL_DEVICE, "Executed 'iFilter 5' OK");
           } else {
             IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_filtmov(), gstat=%d", (int)gstat);
           }
-          ifilter_changeSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
         } else {
           IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_reqfilt(%.1f), gstat=%d", tcp_val.filtvals[4], (int)gstat);
-          ifilter_changeSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
         }
+        ifilter_changeSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
         busy = false;
       }
+
+      /* update widget(s) */
       ifilter_changeS[4].s = ISS_OFF;
 
     /* process 'iFilter 6' - NB: it's up to the higher-level software to check telemetry */
     } else if (sp == &ifilter_changeS[5]) {
       if (tcp_val.lv.filtisin == 1.0) {
-        IDMessage(GALIL_DEVICE, "Cannot change filter whilst another filter is in the beam!");
+        IDMessage(GALIL_DEVICE, "Cannot change filter whilst another filter is in the beam");
         ifilter_changeSP.s = IPS_BUSY;
       } else if (tcp_val.lv.filtval==tcp_val.lv.reqfilt && tcp_val.lv.reqfilt == tcp_val.filtvals[5]) {
-        IDMessage(GALIL_DEVICE, "iFilter is already selected!");
+        IDMessage(GALIL_DEVICE, "iFilter 6 is already selected");
         ifilter_changeSP.s = IPS_OK;
       } else {
-        IDMessage(GALIL_DEVICE, "Executing 'iFilter 6'");
-        IDMessage(GALIL_DEVICE, "Calling xq_reqfilt(%.1f)", tcp_val.filtvals[5]);
+
+        /* talk to hardware */
         busy = true;
+        ifilter_changeSP.s = IPS_BUSY;
+        IDMessage(GALIL_DEVICE, "Calling xq_reqfilt(%.1f)", tcp_val.filtvals[5]);
         if ((gstat=xq_reqfilt(tcp_val.filtvals[5])) == G_NO_ERROR) {
           IDMessage(GALIL_DEVICE, "Called xq_reqfilt(%.1f) OK", tcp_val.filtvals[5]);
           IDMessage(GALIL_DEVICE, "Calling xq_filtmov()");
           if ((gstat=xq_filtmov()) == G_NO_ERROR) {
             IDMessage(GALIL_DEVICE, "Called xq_filtmov() OK");
-            IDMessage(GALIL_DEVICE, "Executed 'iFilter 6' OK");
           } else {
             IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_filtmov(), gstat=%d", (int)gstat);
           }
-          ifilter_changeSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
         } else {
           IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_reqfilt(%.1f), gstat=%d", tcp_val.filtvals[5], (int)gstat);
-          ifilter_changeSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
         }
+        ifilter_changeSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
         busy = false;
       }
+
+      /* update widget(s) */
       ifilter_changeS[5].s = ISS_OFF;
     }
   }
@@ -1308,61 +1421,70 @@ void execute_ifilter_switches(ISState states[], char *names[], int n) {
     /* process 'iFilter Load' - NB: it's up to the higher-level software to check telemetry */
     if (sp == &ifilterS[0]) {
       if (tcp_val.lv.filtisin == 1.0) {
-        IDMessage(GALIL_DEVICE, "Filter is already in the beam!");
+        IDMessage(GALIL_DEVICE, "Filter is already in the beam");
         ifilterSP.s = IPS_OK;
       } else {
-        IDMessage(GALIL_DEVICE, "Executing 'iFilter Load'");
-        IDMessage(GALIL_DEVICE, "Calling xq_filtin()");
+
+        /* talk to hardware */
         busy = true;
+        ifilterSP.s = IPS_BUSY;
+        IDMessage(GALIL_DEVICE, "Calling xq_filtin()");
         if ((gstat=xq_filtin()) == G_NO_ERROR) {
           IDMessage(GALIL_DEVICE, "Called xq_filtin() OK");
-          IDMessage(GALIL_DEVICE, "Executed 'iFilter Load' OK");
         } else {
           IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_filtin(), gstat=%d", (int)gstat);
         }
         ifilterSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
         busy = false;
       }
+
+      /* update widget(s) */
       ifilterS[0].s = ISS_OFF;
 
     /* process 'iFilter Unload' - NB: it's up to the higher-level software to check telemetry */
     } else if (sp == &ifilterS[1]) {
       if (tcp_val.lv.filtisin == 0.0) {
-        IDMessage(GALIL_DEVICE, "Filter is already out of the beam!");
+        IDMessage(GALIL_DEVICE, "Filter is already out of the beam");
         ifilterSP.s = IPS_OK;
       } else {
-        IDMessage(GALIL_DEVICE, "Executing 'iFilter Unload'");
-        IDMessage(GALIL_DEVICE, "Calling xq_filtout()");
+
+        /* talk to hardware */
         busy = true;
+        ifilterSP.s = IPS_BUSY;
+        IDMessage(GALIL_DEVICE, "Calling xq_filtout()");
         if ((gstat=xq_filtout()) == G_NO_ERROR) {
           IDMessage(GALIL_DEVICE, "Called xq_filtout() OK");
-          IDMessage(GALIL_DEVICE, "Executed 'iFilter Unload' OK");
         } else {
           IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_filtout(), gstat=%d", (int)gstat);
         }
         ifilterSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
         busy = false;
       }
+
+      /* update widget(s) */
       ifilterS[1].s = ISS_OFF;
 
     /* process 'iFilter ReadWheel' - NB: it's up to the higher-level software to check telemetry */
     } else if (sp == &ifilterS[2]) {
       if (tcp_val.lv.filtisin == 1.0) {
-        IDMessage(GALIL_DEVICE, "Cannot read wheel whilst the filter is in the beam!");
+        IDMessage(GALIL_DEVICE, "Cannot read wheel whilst the filter is in the beam");
         ifilterSP.s = IPS_OK;
       } else {
-        IDMessage(GALIL_DEVICE, "Executing 'iFilter ReadWheel'");
-        IDMessage(GALIL_DEVICE, "Calling xq_filtrd()");
+
+        /* talk to hardware */
         busy = true;
+        ifilterSP.s = IPS_BUSY;
+        IDMessage(GALIL_DEVICE, "Calling xq_filtrd()");
         if ((gstat=xq_filtrd()) == G_NO_ERROR) {
           IDMessage(GALIL_DEVICE, "Called xq_filtrd() OK");
-          IDMessage(GALIL_DEVICE, "Executed 'iFilter ReadWheel' OK");
         } else {
           IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_filtrd(), gstat=%d", (int)gstat);
         }
         ifilterSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
         busy = false;
       }
+
+      /* update widget(s) */
       ifilterS[2].s = ISS_OFF;
     }
   }
@@ -1396,85 +1518,99 @@ void execute_ifocus_reference_switches(ISState states[], char *names[], int n) {
 
     /* process 'Save Focus Reference' */
     if (sp == &ifocus_referenceS[0]) {
-      IDMessage(GALIL_DEVICE, "Executing 'Save Focus Reference'");
       ifoci.refa = (float)udp_val.baxis_analog_in * BOK_LVDT_STEPS;
       ifoci.refb = (float)udp_val.daxis_analog_in * BOK_LVDT_STEPS;
       ifoci.refc = (float)udp_val.faxis_analog_in * BOK_LVDT_STEPS;
-      IDMessage(GALIL_DEVICE, "Executed 'Save Focus Reference' a=%.3f, b=%.3f, c=%.3f OK", ifoci.refa, ifoci.refb, ifoci.refc);
+      IDMessage(GALIL_DEVICE, "Saving focus reference a=%.3f, b=%.3f, c=%.3f OK", ifoci.refa, ifoci.refb, ifoci.refc);
+
+      /* update widget(s) */
       ifocus_referenceSP.s = IPS_OK;
-      // Updating focus telemetry as well
       telemetry_referenceTP.s = IPS_OK;
       ifocus_referenceS[0].s = ISS_OFF;
 
     /* process 'Restore Focus Reference' */
     } else if (sp == &ifocus_referenceS[1]) {
-      if (ifoci.refa == BOK_BAD_FLOAT) {
-        IDMessage(GALIL_DEVICE, "Invalid focus A reference");
-      } else if (ifoci.refb == BOK_BAD_FLOAT) {
-        IDMessage(GALIL_DEVICE, "Invalid focus B reference");
-      } else if (ifoci.refc == BOK_BAD_FLOAT) {
-        IDMessage(GALIL_DEVICE, "Invalid focus C reference");
+      if (ifoci.refa == BOK_BAD_FLOAT || ifoci.refb == BOK_BAD_FLOAT || ifoci.refc == BOK_BAD_FLOAT) {
+        IDMessage(GALIL_DEVICE, "Invalid focus reference");
       } else {
-        IDMessage(GALIL_DEVICE, "Executing 'Restore Focus Reference'");
         delta_a = round((ifoci.refa - ifoci.vala) * BOK_LVDT_ATOD);
         delta_b = round((ifoci.refb - ifoci.valb) * BOK_LVDT_ATOD);
         delta_c = round((ifoci.refc - ifoci.valc) * BOK_LVDT_ATOD);
+        IDMessage(GALIL_DEVICE, "Restoring focus reference a=%.3f, b=%.3f, c=%.3f OK", delta_a, delta_b, delta_c);
+
+        /* talk to hardware */
         busy = true;
-        IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f) from '%s'", delta_a, delta_b, delta_c, "ifocus_references[1]");
+        ifocus_referenceSP.s = IPS_BUSY;
+        IDMessage(GALIL_DEVICE, "Calling xq_hx() from '%s'", "restore focus reference");
+        if ((gstat=xq_hx()) == G_NO_ERROR) {
+          IDMessage(GALIL_DEVICE, "Called xq_hx() from '%s' OK", "restore focus reference");
+        } else {
+          IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_hx() from '%s', gstat=%d", "restore focus reference", (int)gstat);
+        }
+        IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f) from '%s'", delta_a, delta_b, delta_c, "restore focus reference");
         if ((gstat=xq_focusind(delta_a, delta_b, delta_c)) == G_NO_ERROR) {
-          IDMessage(GALIL_DEVICE, "Called xq_focusind(a=%.1f, b=%.1f, c=%.1f) from '%s' OK", delta_a, delta_b, delta_c, "ifocus_references[1]");
-          IDMessage(GALIL_DEVICE, "Executed 'Restore Focus Reference' OK");
+          IDMessage(GALIL_DEVICE, "Called xq_focusind(a=%.1f, b=%.1f, c=%.1f) from '%s' OK", delta_a, delta_b, delta_c, "restore focus reference");
         } else {
           IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_focusind(a=%.1f, b=%.1f, c=%.1f) from '%s', gstat=%d", delta_a, delta_b, delta_c, "ifocus_references[1]", (int)gstat);
         }
         busy = false;
       }
+
+      /* update widget(s) */
       ifocus_referenceSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
-      // Updating focus telemetry as well
       telemetry_referenceTP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
       ifocus_referenceS[1].s = ISS_OFF;
 
     /* process 'Save Nominal Plane' */
     } else if (sp == &ifocus_referenceS[2]) {
-      // nominal plane is offset from B position
+
+      /* nominal plane is offset from B position */
       ifoci.noma = ifoci.vala - ifoci.valb;
       ifoci.nomb = ifoci.valb - ifoci.valb;
       ifoci.nomc = ifoci.valc - ifoci.valb;
       IDMessage(GALIL_DEVICE, "Saving nominal plane a=%.3f b=%.3f c=%.3f", ifoci.noma, ifoci.nomb, ifoci.nomc);
       save_nominal_plane_to_file(BOK_NPLANE_FILE, ifoci.noma, ifoci.nomb, ifoci.nomc);
+
+      /* update widget(s) */
       ifocus_referenceSP.s = IPS_OK;
       ifocus_referenceS[2].s = ISS_OFF;
 
     /* process 'Restore Nominal Plane' */
     } else if (sp == &ifocus_referenceS[3]) {
       read_nominal_plane_from_file(BOK_NPLANE_FILE, &ifoci.noma, &ifoci.nomb, &ifoci.nomc);
-      if (ifoci.noma == NAN) {
-        IDMessage(GALIL_DEVICE, "Invalid nominal position A");
-      } else if (ifoci.nomb == NAN) {
-        IDMessage(GALIL_DEVICE, "Invalid nominal position B");
-      } else if (ifoci.nomc == NAN) {
-        IDMessage(GALIL_DEVICE, "Invalid nominal position C");
+      if (ifoci.noma == NAN || ifoci.nomb == NAN || ifoci.nomc == NAN) {
+        IDMessage(GALIL_DEVICE, "Invalid nominal position");
       } else {
-        // nominal plane is offset from B position
-        IDMessage(GALIL_DEVICE, "Executing 'Restore Nominal Plane' a=%.3f, b=%.3f, c=%.3f", ifoci.noma, ifoci.nomb, ifoci.nomc);
+
+        /* nominal plane is offset from B position */
         delta_a = ifoci.vala - ifoci.valb;
         delta_b = ifoci.valb - ifoci.valb;
         delta_c = ifoci.valc - ifoci.valb;
+        IDMessage(GALIL_DEVICE, "Restoring nominal plane a=%.3f b=%.3f c=%.3f", delta_a, delta_b, delta_c);
+
         float dista = round((ifoci.noma - delta_a) * BOK_LVDT_ATOD);
         float distb = round((ifoci.nomb - delta_b) * BOK_LVDT_ATOD);
         float distc = round((ifoci.nomc - delta_c) * BOK_LVDT_ATOD);
 
+        /* talk to hardware */
         busy = true;
-        IDMessage(GALIL_DEVICE, "Calculated nominal plane delta a=%.1f, b=%.1f, c=%.1f", delta_a, delta_b, delta_c);
-        IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f) from '%s'", dista, distb, distc, "ifocus_references[3]");
-        if ((gstat=xq_focusind(dista, distb, distc)) == G_NO_ERROR) {
-          IDMessage(GALIL_DEVICE, "Called xq_focusind(a=%.1f, b=%.1f, c=%.1f) from '%s' OK", dista, distb, distc, "ifocus_references[3]");
-          IDMessage(GALIL_DEVICE, "Executing 'Restore Nominal Plane' OK");
+        ifocus_referenceSP.s = IPS_BUSY;
+        IDMessage(GALIL_DEVICE, "Calling xq_hx() from '%s'", "restore nominal plane");
+        if ((gstat=xq_hx()) == G_NO_ERROR) {
+          IDMessage(GALIL_DEVICE, "Called xq_hx() from '%s' OK", "restore nominal plane");
         } else {
-          IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_focusind(a=%.1f, b=%.1f, c=%.1f) from '%s', gstat=%d", dista, distb, distc, "ifocus_references[3]", (int)gstat);
+          IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_hx() from '%s', gstat=%d", "restore nominal plane", (int)gstat);
+        }
+        IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f) from '%s'", dista, distb, distc, "restore nominal plane");
+        if ((gstat=xq_focusind(dista, distb, distc)) == G_NO_ERROR) {
+          IDMessage(GALIL_DEVICE, "Called xq_focusind(a=%.1f, b=%.1f, c=%.1f) from '%s' OK", dista, distb, distc, "restore nominal plane");
+        } else {
+          IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_focusind(a=%.1f, b=%.1f, c=%.1f) from '%s', gstat=%d", dista, distb, distc, "restore nominal plane", (int)gstat);
         }
         busy = false;
       }
+
+      /* update widget(s) */
       ifocus_referenceSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
       ifocus_referenceS[3].s = ISS_OFF;
     }
@@ -1499,20 +1635,13 @@ static void execute_timer(void *p) {
   tcp_val_p _tp = (tcp_val_p)NULL;
   udp_val_p _up = (udp_val_p)NULL;
 
-  /* increment counter */
-  loop_counter++;
-
   /* read TCP shared memory */
   if ((_tfd=shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666))>=0 &&
       (_tp=(tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, _tfd, 0))!=(tcp_val_p)NULL) {
     IDMessage(GALIL_DEVICE, "Reading TCP shared memory");
-    // reset local structure
     (void) memset((void *)&tcp_val, 0, TCP_VAL_SIZE);
-    // copy shared memory to local structure
     (void) memmove((void *)&tcp_val, _tp, TCP_VAL_SIZE);
-    // dump it
-    // (void) dump_tcp_structure(&tcp_val);
-    // release shared memory
+    /* (void) dump_tcp_structure(&tcp_val); */
     (void) munmap(_tp, TCP_VAL_SIZE);
     (void) close(_tfd);
     _tp = (tcp_val_p)NULL;
@@ -1526,13 +1655,9 @@ static void execute_timer(void *p) {
   if ((_ufd=shm_open(BOK_SHM_UDP_NAME, O_RDONLY, 0666)) &&
        (_up=(udp_val_p)mmap(0, UDP_VAL_SIZE, PROT_READ, MAP_SHARED, _ufd, 0))!=(udp_val_p)NULL) {
     IDMessage(GALIL_DEVICE, "Reading UDP shared memory");
-    // reset local structure
     (void) memset((void *)&udp_val, 0, UDP_VAL_SIZE);
-    // copy shared memory to local structure
     (void) memmove((void *)&udp_val, _up, UDP_VAL_SIZE);
-    // dump it
-    // (void) dump_udp_structure(&udp_val);
-    // release shared memory
+    /* (void) dump_udp_structure(&udp_val); */
     (void) munmap(_up, UDP_VAL_SIZE);
     (void) close(_ufd);
     _up = (udp_val_p)NULL;
@@ -1543,26 +1668,24 @@ static void execute_timer(void *p) {
   }
 
   /* update gfilter(s) */
+  IUResetSwitch(&gfilter_changeSP);
   (void) memset((void *)&gfilter_names, 0, sizeof(gfilter_names));
   _gfiltn = (int)round(tcp_val.lv.gfiltn);
   IDMessage(GALIL_DEVICE, "TCP shared memory, _gfiltn=%d", _gfiltn);
-  // Use the above value to set the switch to on to highlight
   (void) sprintf(gfilter_names.filter_1, "%s", bok_gfilters[1].name);
   (void) sprintf(gfilter_names.filter_2, "%s", bok_gfilters[2].name);
   (void) sprintf(gfilter_names.filter_3, "%s", bok_gfilters[3].name);
   (void) sprintf(gfilter_names.filter_4, "%s", bok_gfilters[4].name);
   (void) sprintf(gfilter_names.filter_5, "%s", bok_gfilters[5].name);
   (void) sprintf(gfilter_names.filter_6, "%s", bok_gfilters[6].name);
-  IUResetSwitch(&gfilter_changeSP); // Reset the switches to OFF
-  if (_gfiltn>=0 && _gfiltn<=BOK_GFILTERS) {
-    gfilter_changeS[_gfiltn - 1].s = ISS_ON; // Subtract one since zero based
+  if (_gfiltn>=1 && _gfiltn<=BOK_GFILTERS) {
+    gfilter_changeS[_gfiltn - 1].s = ISS_ON;
   }
-  IDSetSwitch(&gfilter_changeSP, NULL); // Update the switches
+  IDSetSwitch(&gfilter_changeSP, NULL);
   IDSetText(&gfilterTP, NULL);
 
   /* update ifilter(s) */
-  // ifilter is different, it used the filter codes from bar reader not 0-5
-  IUResetSwitch(&ifilter_changeSP); // Reset the switches to OFF
+  IUResetSwitch(&ifilter_changeSP);
   (void) memset((void *)&ifilter_names, 0, sizeof(ifilter_names));
   _ifiltn = (int)round(tcp_val.lv.filtval);
   IDMessage(GALIL_DEVICE, "TCP shared memory, _ifiltn=%d", _ifiltn);
@@ -1660,18 +1783,18 @@ static void execute_timer(void *p) {
   (void) sprintf(telemetrys.gfocus_position, "%d",          udp_val.eaxis_reference_position);
   (void) sprintf(telemetrys.gfocus_limit,  "%d",            (int)round(udp_val.eaxis_stop_code));
   
-  // Update lights for guider limits
+  /* update lights for guider limits */
   telemetry_glimitsL[0].s = ((int)round(udp_val.eaxis_stop_code)) == 2 ? IPS_ALERT : IPS_IDLE;
   telemetry_glimitsL[1].s = ((int)round(udp_val.eaxis_stop_code)) == 3 ? IPS_ALERT : IPS_IDLE;
   IDSetLight(&telemetry_glimitsLP, NULL);
 
-  // Update LVDT
+  /* update LVDT */
   ifocus_lvdtN[0].value = ifoci.vala * 1000.0;
   ifocus_lvdtN[1].value = ifoci.valb * 1000.0;
   ifocus_lvdtN[2].value = ifoci.valc * 1000.0;
   IDSetNumber(&ifocus_lvdtNP, NULL);
 
-  // Update guider focus
+  /* update guider focus */
   gfocus_distN[0].value = udp_val.eaxis_reference_position;
   IDSetNumber(&gfocus_distNP, NULL);
 
@@ -1683,7 +1806,7 @@ static void execute_timer(void *p) {
   /* set and update light(s)*/
   telemetry_engineeringL[0].s = (tcp_val.simulate == 0) ? IPS_OK : IPS_ALERT;
   telemetry_engineeringL[1].s = (udp_val.simulate == 0) ? IPS_OK : IPS_ALERT;
-  telemetry_lightsL[0].s = (busy == true ) ? IPS_BUSY : IPS_IDLE;
+  telemetry_lightsL[0].s = (busy == true) ? IPS_BUSY : IPS_IDLE;
   telemetry_lightsL[1].s = (IS_BIT_SET(tcp_val.status, 7)) ? IPS_BUSY : IPS_IDLE;
   telemetry_gfilterwheelL[0].s = (udp_val.haxis_moving == 1) ? IPS_BUSY : IPS_IDLE;
   telemetry_ifilterwheelL[0].s = (tcp_val.lv.filtisin == 1.0) ? IPS_IDLE : IPS_OK;
@@ -1693,8 +1816,9 @@ static void execute_timer(void *p) {
   telemetry_ifilterwheelL[4].s = (tcp_val.lv.errfilt == 1.0) ? IPS_ALERT : IPS_IDLE;
 
   telemetry_engineeringLP.s = IPS_IDLE;
-  telemetry_lightsLP.s   = IPS_IDLE;
-  // Logic to update light for filter wheel lights
+  telemetry_lightsLP.s = IPS_IDLE;
+
+  /* logic to update light for filter wheel lights */
   if (tcp_val.lv.errfilt == 1.0) {
     telemetry_ifilterwheelLP.s = IPS_ALERT;
   } else if (udp_val.haxis_moving == 1 || udp_val.faxis_moving == 1 || udp_val.gaxis_moving == 1 || tcp_val.lv.filtisin == 1.0) {

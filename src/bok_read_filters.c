@@ -24,6 +24,7 @@
 int main( int argc, char *argv[] ) {
 
   /* declare some variable(s) and initialize them */
+  char *fpath = (char *)NULL;
   char fname[BOK_STR_1024] = {'\0'};
   int ncols = BOK_IFILTER_COLUMNS;
   int nslots = BOK_IFILTER_SLOTS;
@@ -63,8 +64,13 @@ int main( int argc, char *argv[] ) {
   /* check we have a filename */
   if (strlen(fname) == 0) {
     (void) memset((void *)&fname, '\0', sizeof(fname));
-    (void) sprintf(fname, "%s", BOK_IFILTER_FILE);
+    if ((fpath=getenv("BOK_GALIL_DOCS")) == (char *)NULL) {
+      (void) sprintf(fname, "%s", BOK_IFILTER_FILE);
+    } else {
+      (void) sprintf(fname, "%s/%s", fpath, BOK_IFILTER_FILE);
+    }
   }
+  (void) printf("reading file '%s'\n", fname);
 
   /* read */
   read_filters_from_file(fname, (filter_file_t *)bok_filters, nslots, ncols);

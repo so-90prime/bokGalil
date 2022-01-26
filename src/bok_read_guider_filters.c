@@ -25,12 +25,22 @@ int main( int argc, char *argv[] ) {
 
   /* declare some variables and initialize them */
   filter_file_t bok_gfilters[BOK_GFILTER_SLOTS];
+  char *gpath = (char *)NULL;
+  char gname[BOK_STR_1024] = {'\0'};
+
+  /* get guider filters file */
+  (void) memset((void *)&gname, '\0', sizeof(gname));
+  if ((gpath=getenv("BOK_GALIL_DOCS")) == (char *)NULL) {
+    (void) sprintf(gname, "%s", BOK_GFILTER_FILE);
+  } else {
+    (void) sprintf(gname, "%s/%s", gpath, BOK_GFILTER_FILE);
+  }
 
   /* initialize structure(s) */
   for (int i=0; i<BOK_GFILTER_SLOTS; i++) { (void) memset((void *)&bok_gfilters[i], '\0', sizeof(filter_file_t)); }
 
   /* read */
-  read_filters_from_file(BOK_GFILTER_FILE, (filter_file_t *)bok_gfilters, BOK_GFILTER_SLOTS, BOK_GFILTER_COLUMNS);
+  read_filters_from_file(gname, (filter_file_t *)bok_gfilters, BOK_GFILTER_SLOTS, BOK_GFILTER_COLUMNS);
 
   /* dump */
   for (int j=0; j<BOK_GFILTER_SLOTS; j++) {
