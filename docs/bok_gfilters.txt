@@ -1,9 +1,9 @@
 # This file contains the master look-up table for the 90prime guider filter wheel.
 #Filter\tCode\tName
-0	F0	F0
-1	Open	Open
-2	GF1	GF1
-3	GF2	GF2
-4	GF3	GF3
-5	GF4	GF4
-6	GF5	GF5
+0	F0	Ignore_as_never_used
+1	open	open
+2	red	red
+3	neutral	neutral
+4	empty	empty
+5	green	green
+6	blue	blue
