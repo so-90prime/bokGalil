@@ -45,11 +45,11 @@ int main( int argc, char *argv[] ) {
   int istat = 0;
   int port = BOK_UDP_PORT;
   int sfd = 0;
-  time_t now = (time_t)NULL;
   int udp_shm_fd = -1;
   int udp_shm_stat = -1;
   socklen_t sin_len = (socklen_t)-1;
   ssize_t rx = (ssize_t)-1;
+  time_t now = (time_t)NULL;
   udp_val_p udp_shm_p = (udp_val_p)NULL;
 
   /* structure(s) */
@@ -115,7 +115,11 @@ int main( int argc, char *argv[] ) {
   if (!simulate) {
     if ((gstat=GOpen(BOK_GALIL_TCP_CMD, &gfd)) != G_NO_ERROR) { simulate = true; }
     (void) memset((void *)buffer, 0, sizeof(buffer));
-    if (!simulate && (gstat=GCommand(gfd, BOK_UDP_FAUCET_ON, buffer, sizeof(buffer), 0)) != G_NO_ERROR) { simulate = true; }
+    if (!simulate && (gstat=GCommand(gfd, BOK_UDP_FAUCET_ON, buffer, sizeof(buffer), 0)) != G_NO_ERROR) {
+      (void) fprintf(stderr, "%s <ERROR> failed to execute '%s', simulating, gstat=%d\n", _NAME_, BOK_UDP_FAUCET_ON, (int)gstat);
+      (void) fflush(stderr);
+      simulate = true;
+    }
   }
   if (gfd) { (void) GClose(gfd); }
 
@@ -153,7 +157,7 @@ int main( int argc, char *argv[] ) {
     udp_val.simulate = simulate == true ? 1 : 0;
 
     /* create a simulated record using totally random data */
-    if (simulate) {
+    if (simulate == true) {
       /* header */
       udp_val.aaxis_enabled = (rand() % 50) % 2 == 0 ? 1 : 0;
       udp_val.baxis_enabled = (rand() % 50) % 2 == 0 ? 1 : 0;
@@ -764,20 +768,22 @@ int main( int argc, char *argv[] ) {
   /* close device */
   if (sfd) { (void) close(sfd); }
 
+  /* turn off the UDP faucet */
+  if (!simulate) {
+    if ((gstat=GOpen(BOK_GALIL_TCP_CMD, &gfd)) != G_NO_ERROR) { simulate = true; }
+    (void) memset((void *)buffer, 0, sizeof(buffer));
+    if (!simulate && (gstat=GCommand(gfd, BOK_UDP_FAUCET_OFF, buffer, sizeof(buffer), 0)) != G_NO_ERROR) {
+      (void) fprintf(stderr, "%s <ERROR> failed to execute '%s' exiting, gstat=%d\n", _NAME_, BOK_UDP_FAUCET_OFF, (int)gstat);
+      (void) fflush(stderr);
+    }
+  }
+  if (gfd) { (void) GClose(gfd); }
+
   /* close shared memory */
   udp_val.shutdown = 1;
   (void) memmove(udp_shm_p, &udp_val, UDP_VAL_SIZE);
   if (udp_shm_p != (udp_val_p)NULL) { (void) munmap(udp_shm_p, UDP_VAL_SIZE); }
   if (udp_shm_fd >= 0) { (void) close(udp_shm_fd); }
-
-  /* turn off the UDP faucet */
-  if (gfd) { (void) GClose(gfd); }
-  if (!simulate) {
-    if ((gstat=GOpen(BOK_GALIL_TCP_CMD, &gfd)) != G_NO_ERROR) { simulate = true; }
-    (void) memset((void *)buffer, 0, sizeof(buffer));
-    if (!simulate && (gstat=GCommand(gfd, BOK_UDP_FAUCET_OFF, buffer, sizeof(buffer), 0)) != G_NO_ERROR) { simulate = true; }
-  }
-  if (gfd) { (void) GClose(gfd); }
 
   /* return */
   return 0;
