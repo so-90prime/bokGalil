@@ -31,6 +31,19 @@ Further, Dan Avner writes:
   Analog In 8 = Temp sensor (NOT IN USE)
 ```
 
+Further, Greg Stafford writes regarding the Oriel (Guider) Filter Wheel:
+
+```bash
+  Filter ID       | Filter ID           | Hall Effect Sensors |
+  (as labelled)   | (by sharpie)        | ISO1 | ISO2 | ISO3  |
+      1                   5                       Y      Y
+      2                   4                              Y
+      3                   3                Y             Y
+      4                   2                Y              
+      5                   1                Y      Y       
+      6                   6                       Y       
+```
+
 ## Changing Instrument Focus
 
 FW-GUI shows (for example):
