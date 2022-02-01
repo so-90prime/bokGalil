@@ -44,6 +44,37 @@ Further, Greg Stafford writes regarding the Oriel (Guider) Filter Wheel:
       6                   6                       Y       
 ```
 
+## Mapping(s)
+
++ Encoder A = aaxis_motor_position
++ Encoder B = baxis_motor_position
++ Encoder C = caxis_motor_position
+
++ Focus A = baxis_analog_in * (10.0/32767.0)
++ Focus B = daxis_analog_in * (10.0/32767.0)
++ Focus C = faxis_analog_in * (10.0/32767.0)
+
++ Guider Focus Position = eaxis_reference_position
++ Guider Focus Limit Switch = eaxis_stop_code (2, at inner limit, 3 at outer limit)
++ Guider Filter Wheel Rotating = haxis_moving
+
++ Instrument Filter Wheel Rotating = faxis_moving
++ Instrument Filter Wheel Translating = gaxis_moving
+
+Oriel Filter Wheel (DMC code mapping):
+
+```bash
+  FNUM | SNUM
+    0      7
+    1      1
+    2      3
+    3      2
+    4      6
+    5      4
+    6      5
+    7      0
+```
+
 ## Changing Instrument Focus
 
 FW-GUI shows (for example):
@@ -82,6 +113,6 @@ Now, to change the instrument focus, we use the algorithm:
 
 --------------------------------------
 
-Last Modified: 20220120
+Last Modified: 20220201
 
 Last Author: Phil Daly (pndaly@arizona.edu)
