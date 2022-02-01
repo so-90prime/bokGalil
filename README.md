@@ -65,22 +65,11 @@ NB: At the Bok telescope, this code is run under either the *mtnops* or *primefo
  % bash Galil_DMC_22x0.sh --command=start --web-site
 ```
 
- - Adding the shared memory readers (not required for operations):
-
-```bash
- # check
- % bash Galil_DMC_22x0.sh --command=start --dry-run
- # make sure we have Python > 3.6
- % conda activate
- # for real
- % bash Galil_DMC_22x0.sh --command=start --c-read --py-read --web-site
-```
-
 Log files are written to $BOK_GALIL_LOG.
 
 ## Status
 
- - 20210923
+ - 20220201
 ```bash
    TODO:
     - Add light(s) for FILTTSC to indicate any limits encountered
