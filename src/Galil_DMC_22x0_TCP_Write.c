@@ -121,87 +121,93 @@ int main( int argc, char *argv[] ) {
       (void) GInfo(gfd, tcp_val.hardware, sizeof(tcp_val.hardware));
     }
 
-    /* create a simulated record using totally random data */
+    /* create a simulated record using snapshot data */
     if (simulate == true) {
-      tcp_val.filtvals[0] = (float)((rand() % (49 - 0 + 1)) + 0);
-      tcp_val.filtvals[1] = (float)((rand() % (49 - 0 + 1)) + 0);
-      tcp_val.filtvals[2] = (float)((rand() % (49 - 0 + 1)) + 0);
-      tcp_val.filtvals[3] = (float)((rand() % (49 - 0 + 1)) + 0);
-      tcp_val.filtvals[4] = (float)((rand() % (49 - 0 + 1)) + 0);
-      tcp_val.filtvals[5] = (float)((rand() % (49 - 0 + 1)) + 0);
-      tcp_val.status      = (int)((rand() % (65 - 0 + 1)) + 0);
-      tcp_val.position[0] = (float)((rand() % (599 - 500 + 1)) + 500);
-      tcp_val.position[1] = (float)((rand() % (599 - 500 + 1)) + 500);
-      tcp_val.position[2] = (float)((rand() % (599 - 500 + 1)) + 500);
-      tcp_val.position[3] = (float)((rand() % (599 - 500 + 1)) + 500);
-      tcp_val.position[4] = (float)((rand() % (599 - 500 + 1)) + 500);
-      tcp_val.position[5] = (float)((rand() % (599 - 500 + 1)) + 500);
-      tcp_val.position[6] = (float)((rand() % (599 - 500 + 1)) + 500);
-      tcp_val.position[7] = (float)((rand() % (599 - 500 + 1)) + 500);
-      tcp_val.lv.dista    = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.distall  = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.distb    = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.distc    = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.distgcam = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.errfilt  = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.filtbit1 = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.filtbit2 = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.filtbit3 = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.filtbit4 = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.filtbit5 = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.filtbit6 = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.filtbit7 = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.filtbit8 = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.filthigh = (float)((rand() % (799 - 700 + 1)) + 700);
-      // toggle it just to see something changing on the gui!
-      if (counter % 2 == 0) {
-        tcp_val.lv.filtisin = (float)((rand() % (9 - 0 + 1)) + 9);
+      tcp_val.filtvals[0]   = 18.0;
+      tcp_val.filtvals[1]   = 2.0;
+      tcp_val.filtvals[2]   = 3.0;
+      tcp_val.filtvals[3]   = 4.0;
+      tcp_val.filtvals[4]   = 5.0;
+      tcp_val.filtvals[5]   = 6.0;
+      tcp_val.status        = 65;
+      tcp_val.position[0]   = -436.0;
+      tcp_val.position[1]   = -1178.0;
+      tcp_val.position[2]   = 633.0;
+      tcp_val.position[3]   = NAN;
+      tcp_val.position[4]   = NAN;
+      tcp_val.position[5]   = NAN;
+      tcp_val.position[6]   = NAN;
+      tcp_val.position[7]   = NAN;
+      tcp_val.lv.dista      = -3.0;
+      tcp_val.lv.distall    = -180.0;
+      tcp_val.lv.distb      = 3.0;
+      tcp_val.lv.distc      = 0.0;
+      tcp_val.lv.distgcam   = -50.0;
+      tcp_val.lv.errfilt    = 0.0;
+      tcp_val.lv.filtbit1   = 1.0;
+      tcp_val.lv.filtbit2   = 0.0;
+      tcp_val.lv.filtbit3   = 1.0;
+      tcp_val.lv.filtbit4   = 1.0;
+      tcp_val.lv.filtbit5   = 0.0;
+      tcp_val.lv.filtbit6   = 1.0;
+      tcp_val.lv.filtbit7   = 1.0;
+      tcp_val.lv.filtbit8   = 1.0;
+      tcp_val.lv.filthigh   = 224.0;
+      if (counter % 25 == 0) {
+        tcp_val.lv.filtisin = 0.0;
       } else {
-        tcp_val.lv.filtisin = -1.0 * (float)((rand() % (9 - 0 + 1)) + 9);
+        tcp_val.lv.filtisin = 1.0;
       }
-      tcp_val.lv.filtlow  = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.filtnum  = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.filtrac  = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.filtrbl  = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.filtrdc  = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.filtrfl  = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.filtrsp  = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.filttac  = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.filttdc  = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.filttdis = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.filttnud = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.filttsc  = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.filttsp  = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.filtval  = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.focac    = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.focbl    = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.focdc    = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.focfl    = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.focrefa  = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.focrefb  = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.focrefc  = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.focrfset = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.focsp    = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.gfac     = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.gfcent   = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.gfdc     = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.gfiltac  = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.gfiltdc  = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.gfiltn   = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.gfiltq   = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.gfiltsp  = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.gfsp     = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.initfilt = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.nmoves   = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.nrot     = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.reqfilt  = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.totfoca  = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.totfocb  = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.totfocc  = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.vecac    = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.vecdc    = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.lv.vecsp    = (float)((rand() % (799 - 700 + 1)) + 700);
-      tcp_val.gstatus     = (GReturn)0;
+      tcp_val.lv.filtlow    = 13.0;
+      tcp_val.lv.filtnum    = 6.0;
+      tcp_val.lv.filtrac    = 5120.0;
+      tcp_val.lv.filtrbl    = -99999.0;
+      tcp_val.lv.filtrdc    = 14335.0;
+      tcp_val.lv.filtrfl    = 99999.0;
+      tcp_val.lv.filtrsp    = 500.0;
+      tcp_val.lv.filttac    = 5120.0;
+      tcp_val.lv.filttdc    = 99999.0;
+      tcp_val.lv.filttdis   = 2100.0;
+      tcp_val.lv.filttnud   = 200.0;
+      tcp_val.lv.filttsc    = 2.0;
+      tcp_val.lv.filttsp    = 5000.0;
+      tcp_val.lv.filtval    = 18.0;
+      // tcp_val.lv.filtvals = 5.0;
+      // tcp_val.lv.fnum     = 2.0;
+      // tcp_val.lv.fnum_in  = 2.0;
+      tcp_val.lv.focac      = 9216.0;
+      tcp_val.lv.focbl      = -99999.0;
+      tcp_val.lv.focdc      = 9216.0;
+      tcp_val.lv.focfl      = 99999.0;
+      tcp_val.lv.focrefa    = 0.0;
+      tcp_val.lv.focrefb    = 0.0;
+      tcp_val.lv.focrefc    = 0.0;
+      tcp_val.lv.focrfset   = 0.0;
+      tcp_val.lv.focsp      = 600.0;
+      tcp_val.lv.gfac       = 1024.0;
+      tcp_val.lv.gfcent     = 5.0;
+      tcp_val.lv.gfdc       = 1024.0;
+      tcp_val.lv.gfiltac    = 9216.0;
+      tcp_val.lv.gfiltdc    = 9216.0;
+      tcp_val.lv.gfiltn     = 2.0;
+      tcp_val.lv.gfiltq     = 99999.0;
+      // tcp_val.lv.gfiltreq = 0.0;
+      tcp_val.lv.gfiltsp    = 500.0;
+      tcp_val.lv.gfsp       = 100.0;
+      // tcp_val.lv.gifltn   = 0.0;
+      tcp_val.lv.initfilt   = 1.0;
+      tcp_val.lv.nmoves     = 0.0;
+      tcp_val.lv.nrot       = 1.0;
+      tcp_val.lv.reqfilt    = 18.0;
+      // tcp_val.lv.snum     = 3.0;
+      // tcp_val.lv.snum_in  = 3.0;
+      tcp_val.lv.totfoca    = 0.0;
+      tcp_val.lv.totfocb    = 0.0;
+      tcp_val.lv.totfocc    = 0.0;
+      tcp_val.lv.vecac      = 9126.0;
+      tcp_val.lv.vecdc      = 9126.0;
+      tcp_val.lv.vecsp      = 1040.0;
+      tcp_val.gstatus       = (GReturn)0;
 
     /* create record from tcp command(s) */
     } else {
@@ -255,6 +261,12 @@ int main( int argc, char *argv[] ) {
               decode_float(buffer, &tcp_val.filtvals[4]);
             } else if (strncasecmp(pr, "FILTVALS[5]=?;", strlen("FILTVALS[5]=?;")) == 0) {
               decode_float(buffer, &tcp_val.filtvals[5]);
+            //} else if (strncasecmp(pr, "FILTVAL=?;", strlen("FILTVAL=?;")) == 0) {
+            //  decode_float(buffer, &tcp_val.filtval);
+            //} else if (strncasecmp(pr, "FNUM=?;", strlen("FNUM=?;")) == 0) {
+            //  decode_float(buffer, &tcp_val.fnum);
+            //} else if (strncasecmp(pr, "FNUM_IN=?;", strlen("FNUM_IN=?;")) == 0) {
+            //  decode_float(buffer, &tcp_val.fnum_in);
             } else if (strncasecmp(pr, "LV;", strlen("LV;")) == 0) {
               replace_word(buffer, sizeof(buffer), "  ", "\\");
               tok = strtok(buffer, "\\");
@@ -358,10 +370,14 @@ int main( int argc, char *argv[] ) {
                     tcp_val.lv.gfiltn = fval;
                   } else if (strncasecmp(lv_name, "GFILTQ=", strlen("GFILTQ=")) == 0) {
                     tcp_val.lv.gfiltq = fval;
+                  //} else if (strncasecmp(lv_name, "GFILTREQ=", strlen("GFILTREQ=")) == 0) {
+                  //  tcp_val.lv.gfiltreq = fval;
                   } else if (strncasecmp(lv_name, "GFILTSP=", strlen("GFILTSP=")) == 0) {
                     tcp_val.lv.gfiltsp = fval;
                   } else if (strncasecmp(lv_name, "GFSP=", strlen("GFSP=")) == 0) {
                     tcp_val.lv.gfsp = fval;
+                  //} else if (strncasecmp(lv_name, "GIFLTN=", strlen("GIFLTN=")) == 0) {
+                  //  tcp_val.lv.gifltn = fval;
                   } else if (strncasecmp(lv_name, "INITFILT=", strlen("INITFILT=")) == 0) {
                     tcp_val.lv.initfilt = fval;
                   } else if (strncasecmp(lv_name, "NMOVES=", strlen("NMOVES=")) == 0) {
@@ -370,6 +386,10 @@ int main( int argc, char *argv[] ) {
                     tcp_val.lv.nrot = fval;
                   } else if (strncasecmp(lv_name, "REQFILT=", strlen("REQFILT=")) == 0) {
                     tcp_val.lv.reqfilt = fval;
+                  //} else if (strncasecmp(lv_name, "SNUM_IN=", strlen("SNUM_IN=")) == 0) {
+                  //  tcp_val.lv.snum_in = fval;
+                  //} else if (strncasecmp(lv_name, "SNUM=", strlen("SNUM=")) == 0) {
+                  //  tcp_val.lv.snum = fval;
                   } else if (strncasecmp(lv_name, "TOTFOCA=", strlen("TOTFOCA=")) == 0) {
                     tcp_val.lv.totfoca = fval;
                   } else if (strncasecmp(lv_name, "TOTFOCB=", strlen("TOTFOCB=")) == 0) {

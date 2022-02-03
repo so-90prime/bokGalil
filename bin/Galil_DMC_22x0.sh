@@ -142,7 +142,7 @@ case $(echo ${_command}) in
       # [[ ${c_read} -eq 1 ]] && write_magenta "Dry-Run> sleep 1"
       # [[ ${py_read} -eq 1 ]] && write_magenta "Dry-Run> nohup python3 ${BOK_GALIL_BIN}/${_prc5} --loop >> ${BOK_GALIL_LOG}/${_prc5}.log 2>&1 &"
       # [[ ${py_read} -eq 1 ]] && write_magenta "Dry-Run> sleep 1"
-      write_magenta "Dry-Run> nohup ${_prc7} -vvv ${BOK_GALIL_BIN}/${_prc6} >> ${BOK_GALIL_LOG}/${_prc6}.log 2>&1 &"
+      write_magenta "Dry-Run> nohup ${_prc7} -vv ${BOK_GALIL_BIN}/${_prc6} >> ${BOK_GALIL_LOG}/${_prc6}.log 2>&1 &"
       if [[ ${web_site} -eq 1 ]]; then
         write_magenta "Dry-Run> service mtnops.pyindi start"
       fi
@@ -179,8 +179,8 @@ case $(echo ${_command}) in
       #   write_green "Executing> sleep 1"
       #   sleep 1
       # fi
-      write_green "Executing> nohup ${_prc7} -vvv ${BOK_GALIL_BIN}/${_prc6} >> ${BOK_GALIL_LOG}/${_prc6}.log 2>&1 &"
-      [[ -z ${_pid6} ]] && (nohup indiserver -vvv ${BOK_GALIL_BIN}/${_prc6} >> ${BOK_GALIL_LOG}/${_prc6}.log 2>&1 &) || write_error "${_nam6}" "ALREADY RUNNING"
+      write_green "Executing> nohup ${_prc7} -vv ${BOK_GALIL_BIN}/${_prc6} >> ${BOK_GALIL_LOG}/${_prc6}.log 2>&1 &"
+      [[ -z ${_pid6} ]] && (nohup indiserver -vv ${BOK_GALIL_BIN}/${_prc6} >> ${BOK_GALIL_LOG}/${_prc6}.log 2>&1 &) || write_error "${_nam6}" "ALREADY RUNNING"
       if [[ ${web_site} -eq 1 ]]; then
         write_green "Executing> service mtnops.pyindi start"
         service mtnops.pyindi start
