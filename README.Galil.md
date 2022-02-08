@@ -75,6 +75,20 @@ Oriel Filter Wheel (DMC code mapping):
     7      0
 ```
 
+## Guider Filter Wheel Tests of 20220208
+
+```bash
+  Filter   | GFILTN | FNUM_IN | FNUM | SNUM_IN | SNUM | Eyeball
+   green       1         1        1       1        1      5
+   open        2         2        2       3        3      4
+   neutral     3         3        2?      2        2      3
+   red         4         4        2?      6        6      2
+   open        5         5        1?      4        4      1
+   blue        6         6        2?      5        5      6
+```
+
+Unclear why FNUM was abberrant!
+
 ## Changing Instrument Focus
 
 FW-GUI shows (for example):
