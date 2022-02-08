@@ -79,7 +79,7 @@ Oriel Filter Wheel (DMC code mapping):
 
 ```bash
   Filter   | GFILTN | FNUM_IN | FNUM | SNUM_IN | SNUM | Eyeball
-                                  7                0      5
+                                  7                0      
    green       1         1        1       1        1      5
    open        2         2        ?       3        3      4
    neutral     3         3        ?       2        2      3
