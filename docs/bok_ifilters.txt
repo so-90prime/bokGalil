@@ -1,4 +1,4 @@
-# This file contains the master look-up table for the 90prime filter wheel.
+#This file contains the master look-up table for the 90prime filter wheel.
 #Filter\tCode\tName
 0	F0	F0
 1	Open	Open

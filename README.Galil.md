@@ -79,15 +79,30 @@ Oriel Filter Wheel (DMC code mapping):
 
 ```bash
   Filter   | GFILTN | FNUM_IN | FNUM | SNUM_IN | SNUM | Eyeball
+                                  7                0      5
    green       1         1        1       1        1      5
-   open        2         2        2       3        3      4
-   neutral     3         3        2?      2        2      3
-   red         4         4        2?      6        6      2
-   open        5         5        1?      4        4      1
-   blue        6         6        2?      5        5      6
+   open        2         2        ?       3        3      4
+   neutral     3         3        ?       2        2      3
+   red         4         4        ?       6        6      2
+   open        5         5        ?       4        4      1
+   blue        6         6        ?       5        5      6
+                                  0                7       
 ```
 
-Unclear why FNUM was abberrant!
+During the tests FNUM was inconsistent but it's not really used by the DMC code either!
+So, bok_gfilters.txtn should read:
+
+```bash
+#This file contains the master look-up table for the 90prime guider filter wheel.
+#Filter\tCode\tName
+0	F0	Ignore_as_never_used
+1	green	green
+2	open	open
+3	neutral	neutral
+4	red	red
+5	open	open
+6	blue	blue
+```
 
 ## Changing Instrument Focus
 
