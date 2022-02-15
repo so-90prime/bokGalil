@@ -55,7 +55,7 @@ Further, Greg Stafford writes regarding the Oriel (Guider) Filter Wheel:
 + Focus C = faxis_analog_in * (10.0/32767.0)
 
 + Guider Focus Position = eaxis_reference_position
-+ Guider Focus Limit Switch = eaxis_stop_code (2, at inner limit, 3 at outer limit)
++ Guider Focus Limit Switch = eaxis_stop_code (2, at inner limit at +4158 steps, 3 at outer limit at -5979 steps)
 + Guider Filter Wheel Rotating = haxis_moving
 
 + Instrument Filter Wheel Rotating = faxis_moving
