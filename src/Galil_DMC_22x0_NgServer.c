@@ -40,27 +40,22 @@ void *thread_handler(void *thread_fd) {
   char *p = (char *)NULL;
   char *bok_ng_commands[BOK_NG_BUCKETS];
   filter_file_t bok_ifilters[BOK_IFILTER_SLOTS];
+  filter_file_t bok_gfilters[BOK_GFILTER_SLOTS];
 
   int tcp_shm_fd = -1;
   tcp_val_p tcp_shm_ptr = (tcp_val_p)NULL;
 
   char iname[BOK_NG_STRING];
+  char gname[BOK_NG_STRING];
   char incoming[BOK_NG_STRING];
   char outgoing[BOK_NG_STRING];
   (void) memset(iname, '\0', sizeof(iname));
+  (void) memset(gname, '\0', sizeof(gname));
   (void) memset(incoming, '\0', sizeof(incoming));
   (void) memset(outgoing, '\0', sizeof(outgoing));
 
   /* initialize */
   cliMalloc(BOK_NG_BUCKETS, BOK_NG_WORD, bok_ng_commands);
-
-  if ((p=getenv("BOK_GALIL_DOCS")) == (char *)NULL) {
-    (void) sprintf(iname, "%s", BOK_IFILTER_FILE);
-  } else {
-    (void) sprintf(iname, "%s/%s", p, BOK_IFILTER_FILE);
-  }
-  for (int i=0; i<BOK_IFILTER_SLOTS; i++) {(void) memset((void *)&bok_ifilters[i], 0, sizeof(filter_file_t));}
-  read_filters_from_file(iname, (filter_file_t *)bok_ifilters, BOK_IFILTER_SLOTS, BOK_IFILTER_COLUMNS);
 
   /* loop */
   while ((rstat=recv(handler_fd, incoming, sizeof(incoming), 0)) > 0) {
@@ -80,7 +75,7 @@ void *thread_handler(void *thread_fd) {
     } else if ((istat=strncasecmp(bok_ng_commands[1], BOK_NG_INSTRUMENT, strlen(BOK_NG_INSTRUMENT))) != 0) {
       (void) strcat(outgoing, "ERROR (invalid instrument)");
     } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))!=0) && 
-	       (istat=strncasecmp(bok_ng_commands[3], BOK_NG_REQUEST, strlen(BOK_NG_REQUEST))!=0) ) {
+               (istat=strncasecmp(bok_ng_commands[3], BOK_NG_REQUEST, strlen(BOK_NG_REQUEST))!=0) ) {
       (void) strcat(outgoing, "ERROR (invalid command)");
     } else {
 
@@ -88,23 +83,68 @@ void *thread_handler(void *thread_fd) {
       (void) sprintf(outgoing, "%s %s %s", bok_ng_commands[0], bok_ng_commands[1], bok_ng_commands[2]);
 
       /*******************************************************************************
-       * BOK 90PRIME <cmd-id> REQUEST FILTERS
+       * BOK 90PRIME <cmd-id> REQUEST IFILTERS
        ******************************************************************************/
       if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_REQUEST, strlen(BOK_NG_REQUEST))==0) &&
-	       (istat=strncasecmp(bok_ng_commands[4], "FILTERS", strlen("FILTERS"))==0) ) {
-	       /* read memory */
+          (istat=strncasecmp(bok_ng_commands[4], "IFILTERS", strlen("IFILTERS"))==0) ) {
+
+           /* read memory */
            if ((tcp_shm_fd=shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666))<0 ||
                (tcp_shm_ptr=(tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0))==(tcp_val_p)NULL) {
                (void) strcat(outgoing, " ERROR (invalid tcp memory)");
            } else {
+
+             /* read filter(s) file */
+             (void) memset(iname, '\0', sizeof(iname));
+             if ((p=getenv("BOK_GALIL_DOCS")) == (char *)NULL) {
+               (void) sprintf(iname, "%s", BOK_IFILTER_FILE);
+             } else {
+               (void) sprintf(iname, "%s/%s", p, BOK_IFILTER_FILE);
+             }
+             for (int i=0; i<BOK_IFILTER_SLOTS; i++) {(void) memset((void *)&bok_ifilters[i], 0, sizeof(filter_file_t));}
+             read_filters_from_file(iname, (filter_file_t *)bok_ifilters, BOK_IFILTER_SLOTS, BOK_IFILTER_COLUMNS);
+
              /* report filters */
              (void) strcat(outgoing, " OK");
-    	     for (int j=0; j<BOK_IFILTERS; j++) {
+             for (int j=0; j<BOK_IFILTERS; j++) {
                (void) memset(iname, '\0', sizeof(iname));
                istat = (int)round(tcp_shm_ptr->filtvals[j]);
                (void) sprintf(iname, " %d:%d:'%s'", j, istat, bok_ifilters[istat].name);
                (void) strcat(outgoing, iname);
-	         }
+             }
+             (void) strcat(outgoing, "\n");
+           }
+
+      /*******************************************************************************
+       * BOK 90PRIME <cmd-id> REQUEST GFILTERS
+       ******************************************************************************/
+      } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_REQUEST, strlen(BOK_NG_REQUEST))==0) &&
+                 (istat=strncasecmp(bok_ng_commands[4], "GFILTERS", strlen("GFILTERS"))==0) ) {
+
+           /* read memory */
+           if ((tcp_shm_fd=shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666))<0 ||
+               (tcp_shm_ptr=(tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0))==(tcp_val_p)NULL) {
+               (void) strcat(outgoing, " ERROR (invalid tcp memory)");
+           } else {
+
+             /* read filter(s) file */
+             (void) memset(gname, '\0', sizeof(gname));
+             if ((p=getenv("BOK_GALIL_DOCS")) == (char *)NULL) {
+               (void) sprintf(gname, "%s", BOK_GFILTER_FILE);
+             } else {
+               (void) sprintf(gname, "%s/%s", p, BOK_GFILTER_FILE);
+             }
+             for (int i=0; i<BOK_GFILTER_SLOTS; i++) {(void) memset((void *)&bok_ifilters[i], 0, sizeof(filter_file_t));}
+             read_filters_from_file(gname, (filter_file_t *)bok_ifilters, BOK_GFILTER_SLOTS, BOK_GFILTER_COLUMNS);
+
+             /* report filters */
+             (void) strcat(outgoing, " OK");
+             for (int j=0; j<BOK_GFILTERS; j++) {
+               (void) memset(gname, '\0', sizeof(gname));
+               istat = (int)round(tcp_shm_ptr->filtvals[j]);
+               (void) sprintf(gname, " %d:%d:'%s'", j, istat, bok_ifilters[istat].name);
+               (void) strcat(outgoing, gname);
+             }
              (void) strcat(outgoing, "\n");
            }
 
