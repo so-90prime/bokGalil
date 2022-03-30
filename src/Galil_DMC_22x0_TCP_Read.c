@@ -14,7 +14,7 @@
 /*******************************************************************************
  * define(s)
  ******************************************************************************/
-#define _HELP_ "Read shared memory for TCP command(s) from Galil_DMC_22x0_TCP"
+#define _HELP_ "Read shared memory for TCP command(s)"
 #define _NAME_ "Galil_DMC_22x0_TCP_Read"
 
 

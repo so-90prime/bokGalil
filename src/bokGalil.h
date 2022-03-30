@@ -48,6 +48,15 @@
 #define BOK_GFILTER_COLUMNS  3
 #define BOK_GFILTER_SLOTS    7
 #define BOK_IAXIS_INPUTS     10
+#define BOK_NG_HOST          "127.0.0.1"
+#define BOK_NG_PORT          5750
+#define BOK_NG_TELESCOPE     "BOK"
+#define BOK_NG_INSTRUMENT    "90PRIME"
+#define BOK_NG_COMMAND       "COMMAND"
+#define BOK_NG_REQUEST       "REQUEST"
+#define BOK_NG_STRING        1024
+#define BOK_NG_BUCKETS       64
+#define BOK_NG_WORD          256
 #define BOK_LVDT_STEPS       (10.0/32767.0)    /* In the old code this is $adconv?        */
 #define BOK_LVDT_ATOD        (-1.0/0.00055)    /* In the old code this is $stepsperlvdtu? */
 #define BOK_MAXINT           2147483647

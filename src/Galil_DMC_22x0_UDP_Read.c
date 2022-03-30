@@ -14,7 +14,7 @@
 /*******************************************************************************
  * define(s)
  ******************************************************************************/
-#define _HELP_ "Read shared memory for polling command(s) from Galil_DMC_22x0_UDP"
+#define _HELP_ "Read shared memory for polling command(s)"
 #define _NAME_ "Galil_DMC_22x0_UDP_Read"
 
 

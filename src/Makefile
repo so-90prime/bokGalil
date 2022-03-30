@@ -10,6 +10,7 @@
 #///////////////////////////////////////////////////////////////////////////////
 ATARGETS  = bok_read_filters bok_read_guider_filters bok_read_instrument_filters bok_read_nominal_plane Galil_DMC_22x0_CLI
 DTARGETS  = bokGalilIndiDriver
+STARGETS  = Galil_DMC_22x0_NgClient Galil_DMC_22x0_NgServer
 TTARGETS  = Galil_DMC_22x0_TCP_Write Galil_DMC_22x0_TCP_Read
 UTARGETS  = Galil_DMC_22x0_UDP_Write Galil_DMC_22x0_UDP_Read
 LIBRARIES = libbokGalil.so libbokGalil.a
@@ -30,6 +31,7 @@ CFLAGS = -O2 -Wall -I$(BOK_SRC) -g -DDEBUG
 GLIBS = -L/usr/lib -lgclib -lgclibo -lrt
 DLIBS = -lindidriver -lm -lcurl
 LLIBS = -L$(BOK_LIB) -lbokGalil
+SLIBS = -lm -lpthread
 
 
 #///////////////////////////////////////////////////////////////////////////////
@@ -51,6 +53,9 @@ all:
 	for target in $(DTARGETS); do\
 	 gcc $(CFLAGS) -o $(HERE)/$$target $(HERE)/$$target.c $(LLIBS) $(DLIBS) $(GLIBS);\
 	done
+	for target in $(STARGETS); do\
+	 gcc $(CFLAGS) -o $(HERE)/$$target $(HERE)/$$target.c $(LLIBS) $(SLIBS) $(GLIBS);\
+	done
 	for target in $(TTARGETS); do\
 	 gcc $(CFLAGS) -o $(HERE)/$$target $(HERE)/$$target.c $(LLIBS) $(GLIBS);\
 	done
@@ -64,6 +69,10 @@ clean:
 	 rm -rf $(BOK_BIN)/$$target >> /dev/null 2>&1;\
 	done
 	for target in $(DTARGETS); do\
+	 rm -rf $(HERE)/$$target >> /dev/null 2>&1;\
+	 rm -rf $(BOK_BIN)/$$target >> /dev/null 2>&1;\
+	done
+	for target in $(STARGETS); do\
 	 rm -rf $(HERE)/$$target >> /dev/null 2>&1;\
 	 rm -rf $(BOK_BIN)/$$target >> /dev/null 2>&1;\
 	done
@@ -95,6 +104,9 @@ install:
 	 cp $(HERE)/$$target $(BOK_BIN)/$$target; \
 	done
 	for target in $(DTARGETS); do\
+	 cp $(HERE)/$$target $(BOK_BIN)/$$target; \
+	done
+	for target in $(STARGETS); do\
 	 cp $(HERE)/$$target $(BOK_BIN)/$$target; \
 	done
 	for target in $(TTARGETS); do\
