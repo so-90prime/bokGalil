@@ -31,7 +31,7 @@
  ******************************************************************************/
 void *thread_handler(void *thread_fd) {
 
-  /* declare some variable(s) and initialuze them */
+  /* declare some variable(s) and initialize them */
   int handler_fd = *(int *)thread_fd;
   int istat = 0;
   int rstat = 0;
@@ -195,7 +195,7 @@ void *thread_handler(void *thread_fd) {
  ******************************************************************************/
 int main(int argc, char *argv[]) {
 
-  /* declare some variable(s) and initialuze them */
+  /* declare some variable(s) and initialize them */
   int socket_fd = 0;
   int client_fd = 0;
   int client_len = 0;

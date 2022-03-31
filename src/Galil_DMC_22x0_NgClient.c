@@ -28,7 +28,7 @@
  ******************************************************************************/
 void client_handler(int handler_fd) {
 
-  /* declare some variable(s) and initialuze them */
+  /* declare some variable(s) and initialize them */
   bool running = true;
   char *p = (char *)NULL;
   int istat = 0;
@@ -78,7 +78,7 @@ void client_handler(int handler_fd) {
  ******************************************************************************/
 int main(int argc, char *argv[]) {
 
-  /* declare some variable(s) and initialuze them */
+  /* declare some variable(s) and initialize them */
   int socket_fd = 0;
   int connection_fd = 0;
   struct sockaddr_in server_addr;
