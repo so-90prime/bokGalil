@@ -167,8 +167,9 @@ void *thread_handler(void *thread_fd) {
          /* report filters */
          (void) memset(buffer, '\0', sizeof(buffer));
          istat = (int)round(tcp_shm_ptr->lv.filtval);
-         (void) sprintf(buffer, " OK FILTVAL=%d:%s ROTATING=%s TRANSLATING=%s\n", 
+         (void) sprintf(buffer, " OK FILTVAL=%d:%s INBEAM=%s ROTATING=%s TRANSLATING=%s\n", 
            istat, bok_ifilters[istat].name, 
+           ((int)round(tcp_shm_ptr->lv.filtisin)==1 ? "True" : "False"),
            ((int)round(udp_shm_ptr->faxis_moving)==1 ? "True" : "False"),
            ((int)round(udp_shm_ptr->gaxis_moving)==1 ? "True" : "False"));
          (void) strcat(outgoing, buffer);
@@ -278,8 +279,8 @@ void *thread_handler(void *thread_fd) {
 
          /* report encoder(s) */
          (void) memset(buffer, '\0', sizeof(buffer));
-         (void) sprintf(buffer, " OK A=%.4f B=%.4f C=%.4f\n", udp_shm_ptr->aaxis_motor_position,
-           udp_shm_ptr->baxis_motor_position, udp_shm_ptr->caxis_motor_position);
+         (void) sprintf(buffer, " OK A=%.4f B=%.4f C=%.4f\n", (float)udp_shm_ptr->aaxis_motor_position,
+           (float)udp_shm_ptr->baxis_motor_position, (float)udp_shm_ptr->caxis_motor_position);
          (void) strcat(outgoing, buffer);
        }
 
@@ -304,8 +305,8 @@ void *thread_handler(void *thread_fd) {
          /* report ifocus(s) */
          (void) memset(buffer, '\0', sizeof(buffer));
          (void) sprintf(buffer, " OK A=%.4f B=%.4f C=%.4f\n",
-           udp_shm_ptr->baxis_analog_in*BOK_LVDT_STEPS, udp_shm_ptr->daxis_analog_in*BOK_LVDT_STEPS,
-           udp_shm_ptr->faxis_analog_in*BOK_LVDT_STEPS);
+           (float)udp_shm_ptr->baxis_analog_in*BOK_LVDT_STEPS, (float)udp_shm_ptr->daxis_analog_in*BOK_LVDT_STEPS,
+           (float)udp_shm_ptr->faxis_analog_in*BOK_LVDT_STEPS);
          (void) strcat(outgoing, buffer);
        }
 
@@ -329,7 +330,7 @@ void *thread_handler(void *thread_fd) {
 
          /* report gfocus(s) */
          (void) memset(buffer, '\0', sizeof(buffer));
-         (void) sprintf(buffer, " OK %.4f\n", udp_shm_ptr->eaxis_reference_position);
+         (void) sprintf(buffer, " OK %.4f\n", (float)udp_shm_ptr->eaxis_reference_position);
          (void) strcat(outgoing, buffer);
        }
 
