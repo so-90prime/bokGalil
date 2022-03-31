@@ -134,15 +134,14 @@ void *thread_handler(void *thread_fd) {
              } else {
                (void) sprintf(gname, "%s/%s", p, BOK_GFILTER_FILE);
              }
-             for (int i=0; i<BOK_GFILTER_SLOTS; i++) {(void) memset((void *)&bok_ifilters[i], 0, sizeof(filter_file_t));}
-             read_filters_from_file(gname, (filter_file_t *)bok_ifilters, BOK_GFILTER_SLOTS, BOK_GFILTER_COLUMNS);
+             for (int i=0; i<BOK_GFILTER_SLOTS; i++) {(void) memset((void *)&bok_gfilters[i], 0, sizeof(filter_file_t));}
+             read_filters_from_file(gname, (filter_file_t *)bok_gfilters, BOK_GFILTER_SLOTS, BOK_GFILTER_COLUMNS);
 
              /* report filters */
              (void) strcat(outgoing, " OK");
              for (int j=0; j<BOK_GFILTERS; j++) {
                (void) memset(gname, '\0', sizeof(gname));
-               istat = (int)round(tcp_shm_ptr->filtvals[j]);
-               (void) sprintf(gname, " %d:%d:'%s'", j, istat, bok_ifilters[istat].name);
+               (void) sprintf(gname, " %d:%d:'%s'", j+1, j+1, bok_gfilters[j+1].name);
                (void) strcat(outgoing, gname);
              }
              (void) strcat(outgoing, "\n");
