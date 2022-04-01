@@ -59,7 +59,10 @@ class NgClient(object):
 
         # set default(s)
         self.__answer = f""
+        self.__command = f""
         self.__error = f""
+        self.__ifilters = {}
+        self.__gfilters = {}
         self.__sock = None
 
     # +
@@ -94,8 +97,20 @@ class NgClient(object):
         return self.__answer
 
     @property
+    def command(self):
+        return self.__command
+
+    @property
     def error(self):
         return self.__error
+
+    @property
+    def gfilters(self):
+        return self.__gfilters
+
+    @property
+    def ifilters(self):
+        return self.__ifilters
 
     @property
     def sock(self):
@@ -127,32 +142,46 @@ class NgClient(object):
     # +
     # method: get_ifilters()
     # -
-    def get_ifilters(self) -> str:
+    def get_ifilters(self) -> None:
         """ send: BOK 90PRIME <cmd-id> REQUEST IFILTERS """
-        self.__answer, self.__error = f"", f""
+        self.__answer, self.__command, self.__error = f"", f"BOK 90PRIME {get_jd()} REQUEST IFILTERS\r\n", f""
         try:
-            self.connect()
-            self.__sock.write(f"BOK 90PRIME {get_jd()} REQUEST IFILTERS\r\n")
-            self.__answer = self.__sock.recv(BOK_NG_STRING)
-            self.disconnect()
+            self.__sock.send(self.__command.encode())
+            self.__answer = self.__sock.recv(BOK_NG_STRING).decode()
+            if 'ERROR' in self.__answer:
+                self.__error = f"{self.__answer}"
+            if 'OK' in self.__answer:
+                self.__error, self.__ifilters = f"", {}
+                # expect BOK 90PRIME 2459671.4276736835 OK 0=18:Bob 1=2:g 2=3:r 3=4:i 4=5:z 5=6:u
+                for _e in self.__answer.split():
+                    if '=' in _e:
+                        self.__ifilters = {**self.__ifilters, **{
+                            f"Slot {_e.split('=')[0]}": {"Number": int(_e.split('=')[1].split(':')[0]),
+                                                         "Name": f"{_e.split('=')[1].split(':')[1]}"}}}
         except Exception as _:
             self.__answer, self.__error = f"", f"{_}"
-        return self.__answer
 
     # +
     # method: get_gfilters()
     # -
-    def get_gfilters(self) -> str:
+    def get_gfilters(self) -> None:
         """ send: BOK 90PRIME <cmd-id> REQUEST GFILTERS """
-        self.__answer, self.__error = f"", f""
+        self.__answer, self.__command, self.__error = f"", f"BOK 90PRIME {get_jd()} REQUEST GFILTERS\r\n", f""
         try:
-            self.connect()
-            self.__sock.write(f"BOK 90PRIME {get_jd()} REQUEST GFILTERS\r\n")
-            self.__answer = self.__sock.recv(BOK_NG_STRING)
-            self.disconnect()
+            self.__sock.send(self.__command.encode())
+            self.__answer = self.__sock.recv(BOK_NG_STRING).decode()
+            if 'ERROR' in self.__answer:
+                self.__error = f"{self.__answer}"
+            if 'OK' in self.__answer:
+                self.__error, self.__gfilters = f"", {}
+                # expect BOK 90PRIME 2459671.4276736835 OK 1=1:green 2=2:open 3=3:neutral 4=4:red 5=5:open 6=6:blue
+                for _e in self.__answer.split():
+                    if '=' in _e:
+                        self.__gfilters = {**self.__gfilters, **{
+                            f"Slot {_e.split('=')[0]}": {"Number": int(_e.split('=')[1].split(':')[0]),
+                                                         "Name": f"{_e.split('=')[1].split(':')[1]}"}}}
         except Exception as _:
             self.__answer, self.__error = f"", f"{_}"
-        return self.__answer
 
 
 # +
@@ -160,5 +189,10 @@ class NgClient(object):
 # -
 if __name__ == '__main__':
     _client = NgClient()
-    print(f"{_client.get_ifilters()}")
-    print(f"{_client.get_gfilters()}")
+    _client.connect()
+    _client.get_ifilters()
+    _client.get_gfilters()
+    _client.disconnect()
+
+    print(f"Instrument filters loaded: {_client.ifilters}")
+    print(f"Guider filters loaded: {_client.gfilters}")
