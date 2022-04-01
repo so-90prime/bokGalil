@@ -2,16 +2,20 @@
  *
  * Galil_DMC_22x0_NgServer.c
  *
+ * Command(s) supported:
+ *   BOK 90PRIME <cmd-id> COMMAND EXIT
+ *   BOK 90PRIME <cmd-id> COMMAND LOAD IFILTER
+ *   BOK 90PRIME <cmd-id> COMMAND TEST
+ *   BOK 90PRIME <cmd-id> COMMAND UNLOAD IFILTER
+ *
  * Request(s) supported:
- *   BOK 90PRIME <cmd-id> REQUEST IFILTERS - done
- *   BOK 90PRIME <cmd-id> REQUEST IFILTER  - done
- *   BOK 90PRIME <cmd-id> REQUEST GFILTERS - done
- *   BOK 90PRIME <cmd-id> REQUEST GFILTER  - done
- *   BOK 90PRIME <cmd-id> REQUEST ENCODERS - done
- *   BOK 90PRIME <cmd-id> REQUEST IFOCUS   - done
- *   BOK 90PRIME <cmd-id> REQUEST GFOCUS   - done
- *   BOK 90PRIME <cmd-id> COMMAND TEST     - done
- *   BOK 90PRIME <cmd-id> COMMAND EXIT     - done
+ *   BOK 90PRIME <cmd-id> REQUEST IFILTERS
+ *   BOK 90PRIME <cmd-id> REQUEST IFILTER
+ *   BOK 90PRIME <cmd-id> REQUEST GFILTERS
+ *   BOK 90PRIME <cmd-id> REQUEST GFILTER
+ *   BOK 90PRIME <cmd-id> REQUEST ENCODERS
+ *   BOK 90PRIME <cmd-id> REQUEST IFOCUS
+ *   BOK 90PRIME <cmd-id> REQUEST GFOCUS
  *
  ******************************************************************************/
 
@@ -32,9 +36,16 @@
  * define(s)
  ******************************************************************************/
 #undef _HELP_
-#define _HELP_      "NG server for the Galil_DMC_22x0 via gclib"
+#define _HELP_  "NG server for the Galil_DMC_22x0 via gclib"
 #undef _NAME_
-#define _NAME_      "Galil_DMC_22x0_NgServer"
+#define _NAME_  "Galil_DMC_22x0_NgServer"
+
+
+/*******************************************************************************
+ * times for action(s)
+ ******************************************************************************/
+#define BOK_NG_LOAD_IFILTER_TIME 5
+#define BOK_NG_UNLOAD_IFILTER_TIME 5
 
 
 /*******************************************************************************
@@ -43,6 +54,8 @@
 void *thread_handler(void *thread_fd) {
 
   /* declare some variable(s) and initialize them */
+  bool is_done = false;
+  GReturn gstat = (GReturn)0;
   int handler_fd = *(int *)thread_fd;
   int istat = 0;
   int rstat = 0;
@@ -97,9 +110,111 @@ void *thread_handler(void *thread_fd) {
     } else {
 
       /*******************************************************************************
+       * BOK 90PRIME <cmd-id> COMMAND LOAD IFILTER
+       ******************************************************************************/
+      if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
+          (istat=strncasecmp(bok_ng_commands[4], "LOAD", strlen("LOAD"))==0) &&
+          (istat=strncasecmp(bok_ng_commands[4], "IFILTER", strlen("IFILTER"))==0) ) {
+
+       /* read memory */
+       tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
+       tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
+
+       if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
+         (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
+       } else {
+
+         /* if filter is already in, do nothing */
+         if (((int)round(tcp_shm_ptr->lv.filtisin))) == 1) {
+           (void) strcat(outgoing, " OK\n");
+         } else {
+
+           /* talk to hardware */
+           if ((gstat=xq_filtin()) == G_NO_ERROR) {
+
+             /* allow 5s for filter to be in position */
+             is_done = false;
+             cstat = BOK_NG_LOAD_IFILTER_TIME;
+             while (cstat > 0) {
+               (void) sleep(1.0)
+               if (((int)round(tcp_shm_ptr->lv.filtisin))) == 1) {
+                 is_done = true;
+                 break;
+               }
+               cstat -= 1;
+             }
+
+             /* report success or timeout */
+             if (is_done) {
+               (void) strcat(outgoing, " OK\n");
+             } else {
+               (void) strcat(outgoing, " ERROR (timeout)\n");
+             }
+           } else {
+             (void) strcat(outgoing, " ERROR (hardware unresponsive)\n");
+           }
+         }
+       }
+
+       /* close memory */
+       if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
+       if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
+
+      /*******************************************************************************
+       * BOK 90PRIME <cmd-id> COMMAND UNLOAD IFILTER
+       ******************************************************************************/
+      } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
+          (istat=strncasecmp(bok_ng_commands[4], "UNLOAD", strlen("UNLOAD"))==0) &&
+          (istat=strncasecmp(bok_ng_commands[4], "IFILTER", strlen("IFILTER"))==0) ) {
+
+       /* read memory */
+       tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
+       tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
+
+       if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
+         (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
+       } else {
+
+         /* if filter is already out, do nothing */
+         if (((int)round(tcp_shm_ptr->lv.filtisin))) == 0) {
+           (void) strcat(outgoing, " OK\n");
+         } else {
+
+           /* talk to hardware */
+           if ((gstat=xq_filtout()) == G_NO_ERROR) {
+
+             /* allow 5s for filter to be in position */
+             is_done = false;
+             cstat = BOK_NG_LOAD_IFILTER_TIME;
+             while (cstat > 0) {
+               (void) sleep(1.0)
+               if (((int)round(tcp_shm_ptr->lv.filtisin))) == 0) {
+                 is_done = true;
+                 break;
+               }
+               cstat -= 1;
+             }
+
+             /* report success or timeout */
+             if (is_done) {
+               (void) strcat(outgoing, " OK\n");
+             } else {
+               (void) strcat(outgoing, " ERROR (timeout)\n");
+             }
+           } else {
+             (void) strcat(outgoing, " ERROR (hardware unresponsive)\n");
+           }
+         }
+       }
+
+       /* close memory */
+       if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
+       if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
+
+      /*******************************************************************************
        * BOK 90PRIME <cmd-id> REQUEST IFILTERS
        ******************************************************************************/
-      if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_REQUEST, strlen(BOK_NG_REQUEST))==0) &&
+      } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_REQUEST, strlen(BOK_NG_REQUEST))==0) &&
           (istat=strncasecmp(bok_ng_commands[4], "IFILTERS", strlen("IFILTERS"))==0) ) {
 
        /* read memory */
