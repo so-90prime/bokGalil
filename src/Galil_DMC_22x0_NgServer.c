@@ -445,7 +445,7 @@ void *thread_handler(void *thread_fd) {
 
          /* report gfocus(s) */
          (void) memset(buffer, '\0', sizeof(buffer));
-         (void) sprintf(buffer, " OK %.4f\n", (float)udp_shm_ptr->eaxis_reference_position);
+         (void) sprintf(buffer, " OK GFOCUS=%.4f\n", (float)udp_shm_ptr->eaxis_reference_position);
          (void) strcat(outgoing, buffer);
        }
 
