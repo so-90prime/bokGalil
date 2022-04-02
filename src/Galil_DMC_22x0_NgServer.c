@@ -125,7 +125,7 @@ void *thread_handler(void *thread_fd) {
        } else {
 
          /* if filter is already in, do nothing */
-         if (((int)round(tcp_shm_ptr->lv.filtisin))) == 1) {
+         if ((((int)round(tcp_shm_ptr->lv.filtisin))) == 1) {
            (void) strcat(outgoing, " OK\n");
          } else {
 
@@ -136,8 +136,8 @@ void *thread_handler(void *thread_fd) {
              is_done = false;
              cstat = BOK_NG_LOAD_IFILTER_TIME;
              while (cstat > 0) {
-               (void) sleep(1.0)
-               if (((int)round(tcp_shm_ptr->lv.filtisin))) == 1) {
+               (void) sleep(1.0);
+               if ((((int)round(tcp_shm_ptr->lv.filtisin))) == 1) {
                  is_done = true;
                  break;
                }
@@ -176,7 +176,7 @@ void *thread_handler(void *thread_fd) {
        } else {
 
          /* if filter is already out, do nothing */
-         if (((int)round(tcp_shm_ptr->lv.filtisin))) == 0) {
+         if ((((int)round(tcp_shm_ptr->lv.filtisin))) == 0) {
            (void) strcat(outgoing, " OK\n");
          } else {
 
@@ -187,8 +187,8 @@ void *thread_handler(void *thread_fd) {
              is_done = false;
              cstat = BOK_NG_LOAD_IFILTER_TIME;
              while (cstat > 0) {
-               (void) sleep(1.0)
-               if (((int)round(tcp_shm_ptr->lv.filtisin))) == 0) {
+               (void) sleep(1.0);
+               if ((((int)round(tcp_shm_ptr->lv.filtisin))) == 0) {
                  is_done = true;
                  break;
                }
