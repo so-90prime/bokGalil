@@ -110,9 +110,16 @@ void *thread_handler(void *thread_fd) {
     } else {
 
       /*******************************************************************************
-       * BOK 90PRIME <cmd-id> COMMAND LOAD IFILTER
+       * BOK 90PRIME <cmd-id> COMMAND EXIT
        ******************************************************************************/
       if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
+                 (istat=strncasecmp(bok_ng_commands[4], "EXIT", strlen("EXIT"))==0) ) {
+        (void) strcat(outgoing, " EXIT OK\n");
+
+      /*******************************************************************************
+       * BOK 90PRIME <cmd-id> COMMAND LOAD IFILTER
+       ******************************************************************************/
+      } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
           (istat=strncasecmp(bok_ng_commands[4], "LOAD", strlen("LOAD"))==0) &&
           (istat=strncasecmp(bok_ng_commands[4], "IFILTER", strlen("IFILTER"))==0) ) {
 
@@ -159,6 +166,13 @@ void *thread_handler(void *thread_fd) {
        /* close memory */
        if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
        if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
+
+       /*******************************************************************************
+       * BOK 90PRIME <cmd-id> COMMAND TEST
+       ******************************************************************************/
+      } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
+                 (istat=strncasecmp(bok_ng_commands[4], "TEST", strlen("TEST"))==0) ) {
+        (void) strcat(outgoing, " TEST OK\n");
 
       /*******************************************************************************
        * BOK 90PRIME <cmd-id> COMMAND UNLOAD IFILTER
@@ -452,20 +466,6 @@ void *thread_handler(void *thread_fd) {
        /* close memory */
        if (udp_shm_ptr != (udp_val_p)NULL) { (void) munmap(udp_shm_ptr, UDP_VAL_SIZE); }
        if (udp_shm_fd >= 0) { (void) close(udp_shm_fd); }
-
-      /*******************************************************************************
-       * BOK 90PRIME <cmd-id> COMMAND TEST
-       ******************************************************************************/
-      } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
-                 (istat=strncasecmp(bok_ng_commands[4], "TEST", strlen("TEST"))==0) ) {
-        (void) strcat(outgoing, " TEST OK\n");
-
-      /*******************************************************************************
-       * BOK 90PRIME <cmd-id> COMMAND EXIT
-       ******************************************************************************/
-      } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
-                 (istat=strncasecmp(bok_ng_commands[4], "EXIT", strlen("EXIT"))==0) ) {
-        (void) strcat(outgoing, " EXIT OK\n");
 
       /*******************************************************************************
        * BOK 90PRIME <cmd-id> ?????
