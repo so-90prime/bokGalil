@@ -3,19 +3,42 @@
  * Galil_DMC_22x0_NgServer.c
  *
  * Command(s) supported:
- *   BOK 90PRIME <cmd-id> COMMAND EXIT
- *   BOK 90PRIME <cmd-id> COMMAND LOAD IFILTER
- *   BOK 90PRIME <cmd-id> COMMAND TEST
- *   BOK 90PRIME <cmd-id> COMMAND UNLOAD IFILTER
+ *   BOK 90PRIME <cmd-id> COMMAND EXIT           - Done
+ *   BOK 90PRIME <cmd-id> COMMAND IFILTER LOAD   - Done
+ *   BOK 90PRIME <cmd-id> COMMAND IFILTER UNLOAD - Done
+ *   BOK 90PRIME <cmd-id> COMMAND TEST           - Done
+ *
+ *   BOK 90PRIME <cmd-id> COMMAND IFILTER INIT
+ *   BOK 90PRIME <cmd-id> COMMAND IFOCUS DISTA=<float> DISTB=<float> DISTC=<float>
+ *       xq_hx; xq_focusind(dista, distb, distc)
+ *   BOK 90PRIME <cmd-id> COMMAND IFOCUSALL DIST=<float>
+ *       distall = DIST
+ *       xq_hx; xq_focusall(distall)
+ *   BOK 90PRIME <cmd-id> COMMAND LVDT DISTA=<float> DISTB=<float> DISTC=<float>
+ *       dista = round((values[0] / 1000.0 - ifoci.vala) * BOK_LVDT_ATOD);
+ *       distb = round((values[1] / 1000.0 - ifoci.valb) * BOK_LVDT_ATOD);
+ *       distc = round((values[2] / 1000.0 - ifoci.valc) * BOK_LVDT_ATOD);
+ *       xq_hx;
+ *   BOK 90PRIME <cmd-id> COMMAND LVDTALL DIST=<float>
+ *       distall = round((distall / 1000.0) * BOK_LVDT_ATOD));
+ *       xq_hx; xq_focusind(distall, distall, distall)
+ *   BOK 90PRIME <cmd-id> COMMAND GFOCUS DIST=<float>
+ *       distgcam = DIST
+ *       xq_hx; xq_gfocus(distgcam)
+ *   BOK 90PRIME <cmd_id> COMMAND GFILTER NUMBER=<int>
+ *       xq_hx; xq_gfiltn(GFILTN=x); xq_gfwmov()
+ *   BOK 90PRIME <cmd_id> COMMAND GFILTER NAME=<str>
+ *       xq_hx; xq_gfiltn(convert(NAME)); xq_gfwmov
+ *   BOK 90PRIME <cmd-id> COMMAND GFILTER INIT
  *
  * Request(s) supported:
- *   BOK 90PRIME <cmd-id> REQUEST IFILTERS
- *   BOK 90PRIME <cmd-id> REQUEST IFILTER
+ *   BOK 90PRIME <cmd-id> REQUEST ENCODERS
+ *   BOK 90PRIME <cmd-id> REQUEST GFOCUS
  *   BOK 90PRIME <cmd-id> REQUEST GFILTERS
  *   BOK 90PRIME <cmd-id> REQUEST GFILTER
- *   BOK 90PRIME <cmd-id> REQUEST ENCODERS
+ *   BOK 90PRIME <cmd-id> REQUEST IFILTERS
+ *   BOK 90PRIME <cmd-id> REQUEST IFILTER
  *   BOK 90PRIME <cmd-id> REQUEST IFOCUS
- *   BOK 90PRIME <cmd-id> REQUEST GFOCUS
  *
  ******************************************************************************/
 
@@ -117,11 +140,11 @@ void *thread_handler(void *thread_fd) {
         (void) strcat(outgoing, " EXIT OK\n");
 
       /*******************************************************************************
-       * BOK 90PRIME <cmd-id> COMMAND LOAD IFILTER
+       * BOK 90PRIME <cmd-id> COMMAND IFILTER LOAD
        ******************************************************************************/
       } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
-          (istat=strncasecmp(bok_ng_commands[4], "LOAD", strlen("LOAD"))==0) &&
-          (istat=strncasecmp(bok_ng_commands[4], "IFILTER", strlen("IFILTER"))==0) ) {
+          (istat=strncasecmp(bok_ng_commands[4], "IFILTER", strlen("IFILTER"))==0) &&
+          (istat=strncasecmp(bok_ng_commands[4], "LOAD", strlen("LOAD"))==0) ) {
 
        /* read memory */
        tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
@@ -167,19 +190,12 @@ void *thread_handler(void *thread_fd) {
        if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
        if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
 
-       /*******************************************************************************
-       * BOK 90PRIME <cmd-id> COMMAND TEST
-       ******************************************************************************/
-      } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
-                 (istat=strncasecmp(bok_ng_commands[4], "TEST", strlen("TEST"))==0) ) {
-        (void) strcat(outgoing, " TEST OK\n");
-
       /*******************************************************************************
-       * BOK 90PRIME <cmd-id> COMMAND UNLOAD IFILTER
+       * BOK 90PRIME <cmd-id> COMMAND IFILTER UNLOAD
        ******************************************************************************/
       } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
-          (istat=strncasecmp(bok_ng_commands[4], "UNLOAD", strlen("UNLOAD"))==0) &&
-          (istat=strncasecmp(bok_ng_commands[4], "IFILTER", strlen("IFILTER"))==0) ) {
+          (istat=strncasecmp(bok_ng_commands[4], "IFILTER", strlen("IFILTER"))==0) &&
+          (istat=strncasecmp(bok_ng_commands[4], "UNLOAD", strlen("UNLOAD"))==0) ) {
 
        /* read memory */
        tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
@@ -225,91 +241,38 @@ void *thread_handler(void *thread_fd) {
        if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
        if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
 
-      /*******************************************************************************
-       * BOK 90PRIME <cmd-id> REQUEST IFILTERS
+       /*******************************************************************************
+       * BOK 90PRIME <cmd-id> COMMAND TEST
        ******************************************************************************/
-      } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_REQUEST, strlen(BOK_NG_REQUEST))==0) &&
-          (istat=strncasecmp(bok_ng_commands[4], "IFILTERS", strlen("IFILTERS"))==0) ) {
-
-       /* read memory */
-       tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
-       tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
-
-       if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
-         (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
-       } else {
-
-         /* read filter(s) file */
-         (void) memset(buffer, '\0', sizeof(buffer));
-         if ((p=getenv("BOK_GALIL_DOCS")) == (char *)NULL) {
-           (void) sprintf(buffer, "%s", BOK_IFILTER_FILE);
-         } else {
-           (void) sprintf(buffer, "%s/%s", p, BOK_IFILTER_FILE);
-         }
-         for (int i=0; i<BOK_IFILTER_SLOTS; i++) {(void) memset((void *)&bok_ifilters[i], 0, sizeof(filter_file_t));}
-         read_filters_from_file(buffer, (filter_file_t *)bok_ifilters, BOK_IFILTER_SLOTS, BOK_IFILTER_COLUMNS);
-
-         /* report filters */
-         (void) strcat(outgoing, " OK");
-         for (int j=0; j<BOK_IFILTERS; j++) {
-           (void) memset(buffer, '\0', sizeof(buffer));
-           istat = (int)round(tcp_shm_ptr->filtvals[j]);
-           (void) sprintf(buffer, " %d=%d:%s", j, istat, bok_ifilters[istat].name);
-           (void) strcat(outgoing, buffer);
-         }
-         (void) strcat(outgoing, "\n");
-       }
-
-       /* close memory */
-       if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
-       if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
+      } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
+                 (istat=strncasecmp(bok_ng_commands[4], "TEST", strlen("TEST"))==0) ) {
+        (void) strcat(outgoing, " TEST OK\n");
 
       /*******************************************************************************
-       * BOK 90PRIME <cmd-id> REQUEST IFILTER
+       * BOK 90PRIME <cmd-id> REQUEST ENCODERS
        ******************************************************************************/
       } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_REQUEST, strlen(BOK_NG_REQUEST))==0) &&
-          (istat=strncasecmp(bok_ng_commands[4], "IFILTER", strlen("IFILTER"))==0) ) {
+                 (istat=strncasecmp(bok_ng_commands[4], "ENCODERS", strlen("ENCODERS"))==0) ) {
 
        /* read memory */
-       tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
-       tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
-
        udp_shm_fd = shm_open(BOK_SHM_UDP_NAME, O_RDONLY, 0666);
        udp_shm_ptr = (udp_val_p)mmap(0, UDP_VAL_SIZE, PROT_READ, MAP_SHARED, udp_shm_fd, 0);
 
-       if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
-         (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
-       } else if (udp_shm_fd<0 || udp_shm_ptr==(udp_val_p)NULL) {
+       if (udp_shm_fd<0 || udp_shm_ptr==(udp_val_p)NULL) {
          (void) strcat(outgoing, " ERROR (invalid udp memory)\n");
        } else {
 
-         /* read filter(s) file */
+         /* report encoder(s) */
          (void) memset(buffer, '\0', sizeof(buffer));
-         if ((p=getenv("BOK_GALIL_DOCS")) == (char *)NULL) {
-           (void) sprintf(buffer, "%s", BOK_IFILTER_FILE);
-         } else {
-           (void) sprintf(buffer, "%s/%s", p, BOK_IFILTER_FILE);
-         }
-         for (int i=0; i<BOK_IFILTER_SLOTS; i++) {(void) memset((void *)&bok_ifilters[i], 0, sizeof(filter_file_t));}
-         read_filters_from_file(buffer, (filter_file_t *)bok_ifilters, BOK_IFILTER_SLOTS, BOK_IFILTER_COLUMNS);
-
-         /* report filters */
-         (void) memset(buffer, '\0', sizeof(buffer));
-         istat = (int)round(tcp_shm_ptr->lv.filtval);
-         (void) sprintf(buffer, " OK FILTVAL=%d:%s INBEAM=%s ROTATING=%s TRANSLATING=%s\n", 
-           istat, bok_ifilters[istat].name, 
-           ((int)round(tcp_shm_ptr->lv.filtisin)==1 ? "True" : "False"),
-           ((int)round(udp_shm_ptr->faxis_moving)==1 ? "True" : "False"),
-           ((int)round(udp_shm_ptr->gaxis_moving)==1 ? "True" : "False"));
+         (void) sprintf(buffer, " OK A=%.4f B=%.4f C=%.4f\n", (float)udp_shm_ptr->aaxis_motor_position,
+           (float)udp_shm_ptr->baxis_motor_position, (float)udp_shm_ptr->caxis_motor_position);
          (void) strcat(outgoing, buffer);
        }
- 
+
        /* close memory */
-       if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
-       if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
        if (udp_shm_ptr != (udp_val_p)NULL) { (void) munmap(udp_shm_ptr, UDP_VAL_SIZE); }
        if (udp_shm_fd >= 0) { (void) close(udp_shm_fd); }
- 
+
       /*******************************************************************************
        * BOK 90PRIME <cmd-id> REQUEST GFILTERS
        ******************************************************************************/
@@ -391,12 +354,12 @@ void *thread_handler(void *thread_fd) {
        if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
        if (udp_shm_ptr != (udp_val_p)NULL) { (void) munmap(udp_shm_ptr, UDP_VAL_SIZE); }
        if (udp_shm_fd >= 0) { (void) close(udp_shm_fd); }
- 
+
       /*******************************************************************************
-       * BOK 90PRIME <cmd-id> REQUEST ENCODERS
+       * BOK 90PRIME <cmd-id> REQUEST GFOCUS
        ******************************************************************************/
       } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_REQUEST, strlen(BOK_NG_REQUEST))==0) &&
-                 (istat=strncasecmp(bok_ng_commands[4], "ENCODERS", strlen("ENCODERS"))==0) ) {
+                 (istat=strncasecmp(bok_ng_commands[4], "GFOCUS", strlen("GFOCUS"))==0) ) {
 
        /* read memory */
        udp_shm_fd = shm_open(BOK_SHM_UDP_NAME, O_RDONLY, 0666);
@@ -406,14 +369,98 @@ void *thread_handler(void *thread_fd) {
          (void) strcat(outgoing, " ERROR (invalid udp memory)\n");
        } else {
 
-         /* report encoder(s) */
+         /* report gfocus(s) */
          (void) memset(buffer, '\0', sizeof(buffer));
-         (void) sprintf(buffer, " OK A=%.4f B=%.4f C=%.4f\n", (float)udp_shm_ptr->aaxis_motor_position,
-           (float)udp_shm_ptr->baxis_motor_position, (float)udp_shm_ptr->caxis_motor_position);
+         (void) sprintf(buffer, " OK GFOCUS=%.4f\n", (float)udp_shm_ptr->eaxis_reference_position);
          (void) strcat(outgoing, buffer);
        }
 
        /* close memory */
+       if (udp_shm_ptr != (udp_val_p)NULL) { (void) munmap(udp_shm_ptr, UDP_VAL_SIZE); }
+       if (udp_shm_fd >= 0) { (void) close(udp_shm_fd); }
+
+      /*******************************************************************************
+       * BOK 90PRIME <cmd-id> REQUEST IFILTERS
+       ******************************************************************************/
+      } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_REQUEST, strlen(BOK_NG_REQUEST))==0) &&
+          (istat=strncasecmp(bok_ng_commands[4], "IFILTERS", strlen("IFILTERS"))==0) ) {
+
+       /* read memory */
+       tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
+       tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
+
+       if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
+         (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
+       } else {
+
+         /* read filter(s) file */
+         (void) memset(buffer, '\0', sizeof(buffer));
+         if ((p=getenv("BOK_GALIL_DOCS")) == (char *)NULL) {
+           (void) sprintf(buffer, "%s", BOK_IFILTER_FILE);
+         } else {
+           (void) sprintf(buffer, "%s/%s", p, BOK_IFILTER_FILE);
+         }
+         for (int i=0; i<BOK_IFILTER_SLOTS; i++) {(void) memset((void *)&bok_ifilters[i], 0, sizeof(filter_file_t));}
+         read_filters_from_file(buffer, (filter_file_t *)bok_ifilters, BOK_IFILTER_SLOTS, BOK_IFILTER_COLUMNS);
+
+         /* report filters */
+         (void) strcat(outgoing, " OK");
+         for (int j=0; j<BOK_IFILTERS; j++) {
+           (void) memset(buffer, '\0', sizeof(buffer));
+           istat = (int)round(tcp_shm_ptr->filtvals[j]);
+           (void) sprintf(buffer, " %d=%d:%s", j, istat, bok_ifilters[istat].name);
+           (void) strcat(outgoing, buffer);
+         }
+         (void) strcat(outgoing, "\n");
+       }
+
+       /* close memory */
+       if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
+       if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
+
+      /*******************************************************************************
+       * BOK 90PRIME <cmd-id> REQUEST IFILTER
+       ******************************************************************************/
+      } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_REQUEST, strlen(BOK_NG_REQUEST))==0) &&
+          (istat=strncasecmp(bok_ng_commands[4], "IFILTER", strlen("IFILTER"))==0) ) {
+
+       /* read memory */
+       tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
+       tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
+
+       udp_shm_fd = shm_open(BOK_SHM_UDP_NAME, O_RDONLY, 0666);
+       udp_shm_ptr = (udp_val_p)mmap(0, UDP_VAL_SIZE, PROT_READ, MAP_SHARED, udp_shm_fd, 0);
+
+       if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
+         (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
+       } else if (udp_shm_fd<0 || udp_shm_ptr==(udp_val_p)NULL) {
+         (void) strcat(outgoing, " ERROR (invalid udp memory)\n");
+       } else {
+
+         /* read filter(s) file */
+         (void) memset(buffer, '\0', sizeof(buffer));
+         if ((p=getenv("BOK_GALIL_DOCS")) == (char *)NULL) {
+           (void) sprintf(buffer, "%s", BOK_IFILTER_FILE);
+         } else {
+           (void) sprintf(buffer, "%s/%s", p, BOK_IFILTER_FILE);
+         }
+         for (int i=0; i<BOK_IFILTER_SLOTS; i++) {(void) memset((void *)&bok_ifilters[i], 0, sizeof(filter_file_t));}
+         read_filters_from_file(buffer, (filter_file_t *)bok_ifilters, BOK_IFILTER_SLOTS, BOK_IFILTER_COLUMNS);
+
+         /* report filters */
+         (void) memset(buffer, '\0', sizeof(buffer));
+         istat = (int)round(tcp_shm_ptr->lv.filtval);
+         (void) sprintf(buffer, " OK FILTVAL=%d:%s INBEAM=%s ROTATING=%s TRANSLATING=%s\n",
+           istat, bok_ifilters[istat].name,
+           ((int)round(tcp_shm_ptr->lv.filtisin)==1 ? "True" : "False"),
+           ((int)round(udp_shm_ptr->faxis_moving)==1 ? "True" : "False"),
+           ((int)round(udp_shm_ptr->gaxis_moving)==1 ? "True" : "False"));
+         (void) strcat(outgoing, buffer);
+       }
+
+       /* close memory */
+       if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
+       if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
        if (udp_shm_ptr != (udp_val_p)NULL) { (void) munmap(udp_shm_ptr, UDP_VAL_SIZE); }
        if (udp_shm_fd >= 0) { (void) close(udp_shm_fd); }
 
@@ -433,33 +480,11 @@ void *thread_handler(void *thread_fd) {
 
          /* report ifocus(s) */
          (void) memset(buffer, '\0', sizeof(buffer));
-         (void) sprintf(buffer, " OK A=%.4f B=%.4f C=%.4f\n",
+         (void) sprintf(buffer, " OK A=%.4f B=%.4f C=%.4f MEAN=%.4f\n",
            (float)udp_shm_ptr->baxis_analog_in*BOK_LVDT_STEPS, (float)udp_shm_ptr->daxis_analog_in*BOK_LVDT_STEPS,
-           (float)udp_shm_ptr->faxis_analog_in*BOK_LVDT_STEPS);
-         (void) strcat(outgoing, buffer);
-       }
-
-       /* close memory */
-       if (udp_shm_ptr != (udp_val_p)NULL) { (void) munmap(udp_shm_ptr, UDP_VAL_SIZE); }
-       if (udp_shm_fd >= 0) { (void) close(udp_shm_fd); }
-
-      /*******************************************************************************
-       * BOK 90PRIME <cmd-id> REQUEST GFOCUS
-       ******************************************************************************/
-      } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_REQUEST, strlen(BOK_NG_REQUEST))==0) &&
-                 (istat=strncasecmp(bok_ng_commands[4], "GFOCUS", strlen("GFOCUS"))==0) ) {
-
-       /* read memory */
-       udp_shm_fd = shm_open(BOK_SHM_UDP_NAME, O_RDONLY, 0666);
-       udp_shm_ptr = (udp_val_p)mmap(0, UDP_VAL_SIZE, PROT_READ, MAP_SHARED, udp_shm_fd, 0);
-
-       if (udp_shm_fd<0 || udp_shm_ptr==(udp_val_p)NULL) {
-         (void) strcat(outgoing, " ERROR (invalid udp memory)\n");
-       } else {
-
-         /* report gfocus(s) */
-         (void) memset(buffer, '\0', sizeof(buffer));
-         (void) sprintf(buffer, " OK GFOCUS=%.4f\n", (float)udp_shm_ptr->eaxis_reference_position);
+           (float)udp_shm_ptr->faxis_analog_in*BOK_LVDT_STEPS,
+           ((float)udp_shm_ptr->baxis_analog_in*BOK_LVDT_STEPS + (float)udp_shm_ptr->daxis_analog_in*BOK_LVDT_STEPS +
+           (float)udp_shm_ptr->faxis_analog_in*BOK_LVDT_STEPS)/3.0);
          (void) strcat(outgoing, buffer);
        }
 

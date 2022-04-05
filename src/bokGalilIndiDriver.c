@@ -192,7 +192,8 @@ static ITextVectorProperty gfilterTP = {
 };
 
 /* GFOCUS_GROUP */
-/* inner limit is +4158 (stop code 2), outer limit is -5979 (stop code 3) but these limits (-1000,1000) are to stop the user sending too large a value at once */
+/* inner limit is +4158 (stop code 2), outer limit is -5979 (stop code 3) but these limits (-1000,1000) are to
+ * stop the user sending too large a value at once */
 static INumber gfocus_distN[] = {
   {"distgcam", "Delta Focus G", "%5.0f", -1000.0, 1000.0, 1.0, 0.0, 0, 0, 0}
 };

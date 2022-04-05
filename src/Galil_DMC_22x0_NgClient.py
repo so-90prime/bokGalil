@@ -90,6 +90,7 @@ class NgClient(object):
         self.__ifocus_a = math.nan
         self.__ifocus_b = math.nan
         self.__ifocus_c = math.nan
+        self.__ifocus_mean = math.nan
         self.__sock = None
 
     # +
@@ -203,6 +204,10 @@ class NgClient(object):
         return self.__ifocus_c
 
     @property
+    def ifocus_mean(self):
+        return self.__ifocus_mean
+
+    @property
     def sock(self):
         return self.__sock
 
@@ -229,6 +234,58 @@ class NgClient(object):
             self.__error = f"{self.__command.replace('EXIT OK', 'ERROR (no response)')}"
             return False
         else:
+            return True
+
+    # +
+    # method: command_ifilter_load()
+    # -
+    def command_ifilter_load(self) -> bool:
+        """ BOK 90PRIME <cmd-id> COMMAND IFILTER LOAD """
+
+        # set variable(s)
+        self.__answer, self.__command, self.__error = f"", f"BOK 90PRIME {get_jd()} COMMAND IFILTER LOAD\r\n", f""
+
+        # send command and receive response
+        try:
+            self.__sock.send(self.__command.encode())
+            self.__answer = self.__sock.recv(BOK_NG_STRING).decode()
+        except Exception as _:
+            self.__answer, self.__error = f"", f"{_}"
+        else:
+            self.__error = f""
+
+        # parse answer, eg 'BOK 90PRIME <cmd-id> ERROR (reason)'
+        if 'ERROR' in self.__answer:
+            self.__error = f"{self.__answer}"
+            return False
+        elif 'OK' in self.__answer:
+            self.__error = f""
+            return True
+
+    # +
+    # method: command_ifilter_unload()
+    # -
+    def command_ifilter_unload(self) -> bool:
+        """ BOK 90PRIME <cmd-id> COMMAND IFILTER UNLOAD """
+
+        # set variable(s)
+        self.__answer, self.__command, self.__error = f"", f"BOK 90PRIME {get_jd()} COMMAND IFILTER UNLOAD\r\n", f""
+
+        # send command and receive response
+        try:
+            self.__sock.send(self.__command.encode())
+            self.__answer = self.__sock.recv(BOK_NG_STRING).decode()
+        except Exception as _:
+            self.__answer, self.__error = f"", f"{_}"
+        else:
+            self.__error = f""
+
+        # parse answer, eg 'BOK 90PRIME <cmd-id> ERROR (reason)'
+        if 'ERROR' in self.__answer:
+            self.__error = f"{self.__answer}"
+            return False
+        elif 'OK' in self.__answer:
+            self.__error = f""
             return True
 
     # +
@@ -617,12 +674,20 @@ class NgClient(object):
                         self.__ifocus_c = math.nan
                     else:
                         self.__error = f""
+                elif 'MEAN=' in _elem:
+                    try:
+                        self.__ifocus_mean = float(_elem.split('=')[1])
+                    except Exception as _em:
+                        self.__error = f"{_em}"
+                        self.__ifocus_mean = math.nan
+                    else:
+                        self.__error = f""
 
 
 # +
-# function: checkout_commands()
+# function: checkout_requests()
 # -
-def checkout_commands(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeout: float = BOK_NG_TIMEOUT) -> None:
+def checkout_requests(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeout: float = BOK_NG_TIMEOUT) -> None:
 
     # exercise command(s) and request(s)
     _client = None
@@ -671,6 +736,44 @@ def checkout_commands(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeo
         print(f"Instrument Focus B: {_client.ifocus_b}")
         print(f"Instrument Focus C: {_client.ifocus_c}")
 
+    except Exception as _x:
+        # report this error
+        print(f"{_x}")
+        # report last client error
+        if _client is not None and hasattr(_client, 'error'):
+            print(f"{_client.error}")
+
+    # disconnect from server
+    if _client is not None and hasattr(_client, 'disconnect'):
+        _client.disconnect()
+
+
+# +
+# function: checkout_commands()
+# -
+def checkout_commands(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeout: float = BOK_NG_TIMEOUT) -> None:
+
+    # exercise command(s) and request(s)
+    _client = None
+    try:
+
+        # instantiate client and connect to server
+        _client = NgClient(host=_host, port=_port, timeout=_timeout)
+        _client.connect()
+        print(f"Client instantiated: sock={_client.sock}")
+
+        # command ifilter load
+        if _client.command_ifilter_load():
+            print(f"client passed test")
+        else:
+            print(f"client failed test, {_client.error}")
+
+        # command ifilter unload
+        if _client.command_ifilter_unload():
+            print(f"client passed test")
+        else:
+            print(f"client failed test, {_client.error}")
+
         # command test
         if _client.command_test():
             print(f"client passed test")
@@ -712,6 +815,7 @@ if __name__ == '__main__':
 
     # noinspection PyBroadException
     try:
+        checkout_requests(_host=_args.host, _port=int(_args.port), _timeout=float(_args.timeout))
         checkout_commands(_host=_args.host, _port=int(_args.port), _timeout=float(_args.timeout))
     except Exception as _:
         print(f"{_}\nUse: {__doc__}")
