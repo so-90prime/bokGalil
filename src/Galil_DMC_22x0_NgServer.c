@@ -140,6 +140,98 @@ void *thread_handler(void *thread_fd) {
         (void) strcat(outgoing, " EXIT OK\n");
 
       /*******************************************************************************
+       * BOK 90PRIME <cmd-id> COMMAND GFILTER INIT
+       ******************************************************************************/
+      } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
+          (istat=strncasecmp(bok_ng_commands[4], "GFILTER", strlen("GFILTER"))==0) &&
+          (istat=strncasecmp(bok_ng_commands[4], "INIT", strlen("INIT"))==0) ) {
+
+       /* read memory */
+       tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
+       tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
+
+       if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
+         (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
+       } else {
+
+           /* talk to hardware */
+           if ((gstat=xq_gfwinit()) == G_NO_ERROR) {
+
+             /* allow 5s for filter to be in position */
+             is_done = false;
+             cstat = BOK_NG_LOAD_IFILTER_TIME;
+             while (cstat > 0) {
+               (void) sleep(1.0);
+               if ((((int)round(tcp_shm_ptr->lv.gfiltn))) == 1) {
+                 is_done = true;
+                 break;
+               }
+               cstat -= 1;
+             }
+
+             /* report success or timeout */
+             if (is_done) {
+               (void) strcat(outgoing, " OK\n");
+             } else {
+               (void) strcat(outgoing, " ERROR (timeout)\n");
+             }
+           } else {
+             (void) strcat(outgoing, " ERROR (hardware unresponsive)\n");
+           }
+         }
+       }
+
+       /* close memory */
+       if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
+       if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
+
+      /*******************************************************************************
+       * BOK 90PRIME <cmd-id> COMMAND IFILTER INIT
+       ******************************************************************************/
+      } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
+          (istat=strncasecmp(bok_ng_commands[4], "IFILTER", strlen("IFILTER"))==0) &&
+          (istat=strncasecmp(bok_ng_commands[4], "INIT", strlen("INIT"))==0) ) {
+
+       /* read memory */
+       tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
+       tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
+
+       if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
+         (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
+       } else {
+
+           /* talk to hardware */
+           if ((gstat=xq_filtrd()) == G_NO_ERROR) {
+
+             /* allow 5s for filter to be in position */
+             is_done = false;
+             cstat = BOK_NG_LOAD_IFILTER_TIME;
+             while (cstat > 0) {
+               (void) sleep(1.0);
+               if ((((int)round(tcp_shm_ptr->lv.gfiltn))) == 1) {
+                 is_done = true;
+                 break;
+               }
+               cstat -= 1;
+             }
+
+             /* report success or timeout */
+             if (is_done) {
+               (void) strcat(outgoing, " OK\n");
+             } else {
+               (void) strcat(outgoing, " ERROR (timeout)\n");
+             }
+           } else {
+             (void) strcat(outgoing, " ERROR (hardware unresponsive)\n");
+           }
+         }
+       }
+
+       /* close memory */
+       if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
+       if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
+
+      /*******************************************************************************
        * BOK 90PRIME <cmd-id> COMMAND IFILTER LOAD
        ******************************************************************************/
       } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&

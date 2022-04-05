@@ -101,22 +101,22 @@ everything:
 
 install:
 	for target in $(ATARGETS); do\
-	 cp $(HERE)/$$target $(BOK_BIN)/$$target; \
+	 mv $(HERE)/$$target $(BOK_BIN)/$$target; \
 	done
 	for target in $(DTARGETS); do\
-	 cp $(HERE)/$$target $(BOK_BIN)/$$target; \
+	 mv $(HERE)/$$target $(BOK_BIN)/$$target; \
 	done
 	for target in $(STARGETS); do\
-	 cp $(HERE)/$$target $(BOK_BIN)/$$target; \
+	 mv $(HERE)/$$target $(BOK_BIN)/$$target; \
 	done
 	for target in $(TTARGETS); do\
-	 cp $(HERE)/$$target $(BOK_BIN)/$$target; \
+	 mv $(HERE)/$$target $(BOK_BIN)/$$target; \
 	done
 	for target in $(UTARGETS); do\
-	 cp $(HERE)/$$target $(BOK_BIN)/$$target; \
+	 cmv $(HERE)/$$target $(BOK_BIN)/$$target; \
 	done
-	cp $(HERE)/libbokGalil.a  $(BOK_LIB)/libbokGalil.a
-	cp $(HERE)/libbokGalil.so $(BOK_LIB)/libbokGalil.so
+	mv $(HERE)/libbokGalil.a  $(BOK_LIB)/libbokGalil.a
+	mv $(HERE)/libbokGalil.so $(BOK_LIB)/libbokGalil.so
 	cp $(HERE)/Galil_DMC_22x0_TCP_Read.py $(BOK_BIN)/
 	cp $(HERE)/Galil_DMC_22x0_UDP_Read.py $(BOK_BIN)/
 	touch $(BOK_BIN)/*
