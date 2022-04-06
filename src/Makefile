@@ -113,7 +113,7 @@ install:
 	 mv $(HERE)/$$target $(BOK_BIN)/$$target; \
 	done
 	for target in $(UTARGETS); do\
-	 cmv $(HERE)/$$target $(BOK_BIN)/$$target; \
+	 mv $(HERE)/$$target $(BOK_BIN)/$$target; \
 	done
 	mv $(HERE)/libbokGalil.a  $(BOK_LIB)/libbokGalil.a
 	mv $(HERE)/libbokGalil.so $(BOK_LIB)/libbokGalil.so

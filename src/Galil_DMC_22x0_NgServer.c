@@ -144,7 +144,7 @@ void *thread_handler(void *thread_fd) {
        ******************************************************************************/
       } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
           (istat=strncasecmp(bok_ng_commands[4], "GFILTER", strlen("GFILTER"))==0) &&
-          (istat=strncasecmp(bok_ng_commands[4], "INIT", strlen("INIT"))==0) ) {
+          (istat=strncasecmp(bok_ng_commands[5], "INIT", strlen("INIT"))==0) ) {
 
         /* read memory */
         tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
@@ -189,7 +189,7 @@ void *thread_handler(void *thread_fd) {
        ******************************************************************************/
       } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
           (istat=strncasecmp(bok_ng_commands[4], "IFILTER", strlen("IFILTER"))==0) &&
-          (istat=strncasecmp(bok_ng_commands[4], "INIT", strlen("INIT"))==0) ) {
+          (istat=strncasecmp(bok_ng_commands[5], "INIT", strlen("INIT"))==0) ) {
 
         /* read memory */
         tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
@@ -234,7 +234,7 @@ void *thread_handler(void *thread_fd) {
        ******************************************************************************/
       } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
           (istat=strncasecmp(bok_ng_commands[4], "IFILTER", strlen("IFILTER"))==0) &&
-          (istat=strncasecmp(bok_ng_commands[4], "LOAD", strlen("LOAD"))==0) ) {
+          (istat=strncasecmp(bok_ng_commands[5], "LOAD", strlen("LOAD"))==0) ) {
 
         /* read memory */
         tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
@@ -285,7 +285,7 @@ void *thread_handler(void *thread_fd) {
        ******************************************************************************/
       } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
           (istat=strncasecmp(bok_ng_commands[4], "IFILTER", strlen("IFILTER"))==0) &&
-          (istat=strncasecmp(bok_ng_commands[4], "UNLOAD", strlen("UNLOAD"))==0) ) {
+          (istat=strncasecmp(bok_ng_commands[5], "UNLOAD", strlen("UNLOAD"))==0) ) {
 
         /* read memory */
         tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);

@@ -212,108 +212,6 @@ class NgClient(object):
         return self.__sock
 
     # +
-    # method: command_exit()
-    # -
-    def command_exit(self) -> bool:
-        """ BOK 90PRIME <cmd-id> COMMAND EXIT """
-
-        # set variable(s)
-        self.__answer, self.__command, self.__error = f"", f"BOK 90PRIME {get_jd()} COMMAND EXIT\r\n", f""
-
-        # send command and receive response
-        try:
-            self.__sock.send(self.__command.encode())
-            self.__answer = self.__sock.recv(BOK_NG_STRING).decode()
-        except Exception as _:
-            self.__answer, self.__error = f"", f"{_}"
-        else:
-            self.__error = f""
-
-        # parse answer, eg 'BOK 90PRIME <cmd-id> EXIT OK'
-        if 'EXIT' not in self.__answer and 'OK' not in self.__answer:
-            self.__error = f"{self.__command.replace('EXIT OK', 'ERROR (no response)')}"
-            return False
-        else:
-            return True
-
-    # +
-    # method: command_ifilter_load()
-    # -
-    def command_ifilter_load(self) -> bool:
-        """ BOK 90PRIME <cmd-id> COMMAND IFILTER LOAD """
-
-        # set variable(s)
-        self.__answer, self.__command, self.__error = f"", f"BOK 90PRIME {get_jd()} COMMAND IFILTER LOAD\r\n", f""
-
-        # send command and receive response
-        try:
-            self.__sock.send(self.__command.encode())
-            self.__answer = self.__sock.recv(BOK_NG_STRING).decode()
-        except Exception as _:
-            self.__answer, self.__error = f"", f"{_}"
-        else:
-            self.__error = f""
-
-        # parse answer, eg 'BOK 90PRIME <cmd-id> ERROR (reason)'
-        if 'ERROR' in self.__answer:
-            self.__error = f"{self.__answer}"
-            return False
-        elif 'OK' in self.__answer:
-            self.__error = f""
-            return True
-
-    # +
-    # method: command_ifilter_unload()
-    # -
-    def command_ifilter_unload(self) -> bool:
-        """ BOK 90PRIME <cmd-id> COMMAND IFILTER UNLOAD """
-
-        # set variable(s)
-        self.__answer, self.__command, self.__error = f"", f"BOK 90PRIME {get_jd()} COMMAND IFILTER UNLOAD\r\n", f""
-
-        # send command and receive response
-        try:
-            self.__sock.send(self.__command.encode())
-            self.__answer = self.__sock.recv(BOK_NG_STRING).decode()
-        except Exception as _:
-            self.__answer, self.__error = f"", f"{_}"
-        else:
-            self.__error = f""
-
-        # parse answer, eg 'BOK 90PRIME <cmd-id> ERROR (reason)'
-        if 'ERROR' in self.__answer:
-            self.__error = f"{self.__answer}"
-            return False
-        elif 'OK' in self.__answer:
-            self.__error = f""
-            return True
-
-    # +
-    # method: command_test()
-    # -
-    def command_test(self) -> bool:
-        """ BOK 90PRIME <cmd-id> COMMAND TEST """
-
-        # set variable(s)
-        self.__answer, self.__command, self.__error = f"", f"BOK 90PRIME {get_jd()} COMMAND TEST\r\n", f""
-
-        # send command and receive response
-        try:
-            self.__sock.send(self.__command.encode())
-            self.__answer = self.__sock.recv(BOK_NG_STRING).decode()
-        except Exception as _:
-            self.__answer, self.__error = f"", f"{_}"
-        else:
-            self.__error = f""
-
-        # parse answer, eg 'BOK 90PRIME <cmd-id> TEST OK'
-        if 'TEST' not in self.__answer and 'OK' not in self.__answer:
-            self.__error = f"{self.__command.replace('TEST OK', 'ERROR (no response')}"
-            return False
-        else:
-            return True
-
-    # +
     # method: connect()
     # -
     def connect(self) -> None:
@@ -342,23 +240,137 @@ class NgClient(object):
                 self.__error = f""
         self.__sock = None
 
+
     # +
-    # method: request_encoders()
+    # method: converse()
     # -
-    def request_encoders(self) -> None:
-        """ BOK 90PRIME <cmd-id> REQUEST ENCODERS """
+    def converse(self, talk: str = '') -> None:
+        """ converses across socket """
 
         # set variable(s)
-        self.__answer, self.__command, self.__error = f"", f"BOK 90PRIME {get_jd()} REQUEST ENCODERS\r\n", f""
+        self.__answer = f""
+        self.__command = f"{talk}\r\n"
+        self.__error = f""
 
         # send command and receive response
         try:
             self.__sock.send(self.__command.encode())
             self.__answer = self.__sock.recv(BOK_NG_STRING).decode()
         except Exception as _:
-            self.__answer, self.__error = f"", f"{_}"
+            self.__answer = f""
+            self.__error = f"{_}"
         else:
             self.__error = f""
+
+    # +
+    # method: command_exit()
+    # -
+    def command_exit(self) -> bool:
+        """ BOK 90PRIME <cmd-id> COMMAND EXIT """
+
+        # talk to hardware
+        self.converse(f"BOK 90PRIME {get_jd()} COMMAND EXIT")
+
+        # parse answer, eg 'BOK 90PRIME <cmd-id> EXIT OK'
+        if 'EXIT' not in self.__answer and 'OK' not in self.__answer:
+            self.__error = f"{self.__command.replace('EXIT OK', 'ERROR (no response)')}"
+            return False
+        else:
+            return True
+
+    # +
+    # method: command_gfilter_init()
+    # -
+    def command_gfilter_init(self) -> bool:
+        """ BOK 90PRIME <cmd-id> COMMAND GFILTER INIT """
+
+        # talk to hardware
+        self.converse(f"BOK 90PRIME {get_jd()} COMMAND GFILTER INIT")
+
+
+        # parse answer, eg 'BOK 90PRIME <cmd-id> ERROR (reason)'
+        if 'ERROR' in self.__answer:
+            self.__error = f"{self.__answer}"
+            return False
+        elif 'OK' in self.__answer:
+            self.__error = f""
+            return True
+
+    # +
+    # method: command_ifilter_init()
+    # -
+    def command_ifilter_init(self) -> bool:
+        """ BOK 90PRIME <cmd-id> COMMAND IFILTER INIT """
+
+        # talk to hardware
+        self.converse(f"BOK 90PRIME {get_jd()} COMMAND IFILTER INIT")
+
+        # parse answer, eg 'BOK 90PRIME <cmd-id> ERROR (reason)'
+        if 'ERROR' in self.__answer:
+            self.__error = f"{self.__answer}"
+            return False
+        elif 'OK' in self.__answer:
+            self.__error = f""
+            return True
+
+    # +
+    # method: command_ifilter_load()
+    # -
+    def command_ifilter_load(self) -> bool:
+        """ BOK 90PRIME <cmd-id> COMMAND IFILTER LOAD """
+
+        # talk to hardware
+        self.converse(f"BOK 90PRIME {get_jd()} COMMAND IFILTER LOAD")
+
+        # parse answer, eg 'BOK 90PRIME <cmd-id> ERROR (reason)'
+        if 'ERROR' in self.__answer:
+            self.__error = f"{self.__answer}"
+            return False
+        elif 'OK' in self.__answer:
+            self.__error = f""
+            return True
+
+    # +
+    # method: command_ifilter_unload()
+    # -
+    def command_ifilter_unload(self) -> bool:
+        """ BOK 90PRIME <cmd-id> COMMAND IFILTER UNLOAD """
+
+        # talk to hardware
+        self.converse(f"BOK 90PRIME {get_jd()} COMMAND IFILTER UNLOAD")
+
+        # parse answer, eg 'BOK 90PRIME <cmd-id> ERROR (reason)'
+        if 'ERROR' in self.__answer:
+            self.__error = f"{self.__answer}"
+            return False
+        elif 'OK' in self.__answer:
+            self.__error = f""
+            return True
+
+    # +
+    # method: command_test()
+    # -
+    def command_test(self) -> bool:
+        """ BOK 90PRIME <cmd-id> COMMAND TEST """
+
+        # talk to hardware
+        self.converse(f"BOK 90PRIME {get_jd()} COMMAND TEST")
+
+        # parse answer, eg 'BOK 90PRIME <cmd-id> TEST OK'
+        if 'TEST' not in self.__answer and 'OK' not in self.__answer:
+            self.__error = f"{self.__command.replace('TEST OK', 'ERROR (no response')}"
+            return False
+        else:
+            return True
+
+    # +
+    # method: request_encoders()
+    # -
+    def request_encoders(self) -> None:
+        """ BOK 90PRIME <cmd-id> REQUEST ENCODERS """
+
+        # talk to hardware
+        self.converse(f"BOK 90PRIME {get_jd()} REQUEST ENCODERS")
 
         # parse answer, eg 'BOK 90PRIME <cmd-id> ERROR (reason)'
         if 'ERROR' in self.__answer:
@@ -398,17 +410,8 @@ class NgClient(object):
     def request_gfilter(self) -> None:
         """ BOK 90PRIME <cmd-id> REQUEST GFILTER """
 
-        # set variable(s)
-        self.__answer, self.__command, self.__error = f"", f"BOK 90PRIME {get_jd()} REQUEST GFILTER\r\n", f""
-
-        # send command and receive response
-        try:
-            self.__sock.send(self.__command.encode())
-            self.__answer = self.__sock.recv(BOK_NG_STRING).decode()
-        except Exception as _:
-            self.__answer, self.__error = f"", f"{_}"
-        else:
-            self.__error = f""
+        # talk to hardware
+        self.converse(f"BOK 90PRIME {get_jd()} REQUEST GFILTER")
 
         # parse answer, eg 'BOK 90PRIME <cmd-id> ERROR (reason)'
         if 'ERROR' in self.__answer:
@@ -442,17 +445,8 @@ class NgClient(object):
     def request_gfilters(self) -> None:
         """ BOK 90PRIME <cmd-id> REQUEST GFILTERS """
 
-        # set variable(s)
-        self.__answer, self.__command, self.__error = f"", f"BOK 90PRIME {get_jd()} REQUEST GFILTERS\r\n", f""
-
-        # send command and receive response
-        try:
-            self.__sock.send(self.__command.encode())
-            self.__answer = self.__sock.recv(BOK_NG_STRING).decode()
-        except Exception as _:
-            self.__answer, self.__error = f"", f"{_}"
-        else:
-            self.__error = f""
+        # talk to hardware
+        self.converse(f"BOK 90PRIME {get_jd()} REQUEST GFILTERS")
 
         # parse answer, eg 'BOK 90PRIME <cmd-id> ERROR (reason)'
         if 'ERROR' in self.__answer:
@@ -489,17 +483,8 @@ class NgClient(object):
     def request_gfocus(self) -> None:
         """ BOK 90PRIME <cmd-id> REQUEST GFOCUS """
 
-        # set variable(s)
-        self.__answer, self.__command, self.__error = f"", f"BOK 90PRIME {get_jd()} REQUEST GFOCUS\r\n", f""
-
-        # send command and receive response
-        try:
-            self.__sock.send(self.__command.encode())
-            self.__answer = self.__sock.recv(BOK_NG_STRING).decode()
-        except Exception as _:
-            self.__answer, self.__error = f"", f"{_}"
-        else:
-            self.__error = f""
+        # talk to hardware
+        self.converse(f"BOK 90PRIME {get_jd()} REQUEST GFOCUS")
 
         # parse answer, eg 'BOK 90PRIME <cmd-id> ERROR (reason)'
         if 'ERROR' in self.__answer:
@@ -523,17 +508,8 @@ class NgClient(object):
     def request_ifilter(self) -> None:
         """ BOK 90PRIME <cmd-id> REQUEST IFILTER """
 
-        # set variable(s)
-        self.__answer, self.__command, self.__error = f"", f"BOK 90PRIME {get_jd()} REQUEST IFILTER\r\n", f""
-
-        # send command and receive response
-        try:
-            self.__sock.send(self.__command.encode())
-            self.__answer = self.__sock.recv(BOK_NG_STRING).decode()
-        except Exception as _:
-            self.__answer, self.__error = f"", f"{_}"
-        else:
-            self.__error = f""
+        # talk to hardware
+        self.converse(f"BOK 90PRIME {get_jd()} REQUEST IFILTER")
 
         # parse answer, eg 'BOK 90PRIME <cmd-id> ERROR (reason)'
         if 'ERROR' in self.__answer:
@@ -584,17 +560,8 @@ class NgClient(object):
     def request_ifilters(self) -> None:
         """ BOK 90PRIME <cmd-id> REQUEST IFILTERS """
 
-        # set variable(s)
-        self.__answer, self.__command, self.__error = f"", f"BOK 90PRIME {get_jd()} REQUEST IFILTERS\r\n", f""
-
-        # send command and receive response
-        try:
-            self.__sock.send(self.__command.encode())
-            self.__answer = self.__sock.recv(BOK_NG_STRING).decode()
-        except Exception as _:
-            self.__answer, self.__error = f"", f"{_}"
-        else:
-            self.__error = f""
+        # talk to hardware
+        self.converse(f"BOK 90PRIME {get_jd()} REQUEST IFILTERS")
 
         # parse answer, eg 'BOK 90PRIME <cmd-id> ERROR (reason)'
         if 'ERROR' in self.__answer:
@@ -631,17 +598,8 @@ class NgClient(object):
     def request_ifocus(self) -> None:
         """ BOK 90PRIME <cmd-id> REQUEST IFOCUS """
 
-        # set variable(s)
-        self.__answer, self.__command, self.__error = f"", f"BOK 90PRIME {get_jd()} REQUEST IFOCUS\r\n", f""
-
-        # send command and receive response
-        try:
-            self.__sock.send(self.__command.encode())
-            self.__answer = self.__sock.recv(BOK_NG_STRING).decode()
-        except Exception as _:
-            self.__answer, self.__error = f"", f"{_}"
-        else:
-            self.__error = f""
+        # talk to hardware
+        self.converse(f"BOK 90PRIME {get_jd()} REQUEST IFOCUS")
 
         # parse answer, eg 'BOK 90PRIME <cmd-id> ERROR (reason)'
         if 'ERROR' in self.__answer:
@@ -710,9 +668,9 @@ def checkout_requests(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeo
 
         # request current guider filter
         _client.request_gfilter()
-        print(f"Guider current filter name: {_client.ifilter_name}")
-        print(f"Guider current filter number: {_client.ifilter_number}")
-        print(f"Guider current filter rotating: {_client.ifilter_rotating}")
+        print(f"Guider current filter name: {_client.gfilter_name}")
+        print(f"Guider current filter number: {_client.gfilter_number}")
+        print(f"Guider current filter rotating: {_client.gfilter_rotating}")
 
         # request guider focus
         _client.request_gfocus()
@@ -761,6 +719,18 @@ def checkout_commands(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeo
         _client = NgClient(host=_host, port=_port, timeout=_timeout)
         _client.connect()
         print(f"Client instantiated: sock={_client.sock}")
+
+        # command gfilter init
+        if _client.command_gfilter_init():
+            print(f"client passed test")
+        else:
+            print(f"client failed test, {_client.error}")
+
+        # command ifilter init
+        if _client.command_ifilter_init():
+            print(f"client passed test")
+        else:
+            print(f"client failed test, {_client.error}")
 
         # command ifilter load
         if _client.command_ifilter_load():
