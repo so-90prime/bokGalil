@@ -4,11 +4,23 @@
  *
  * Command(s) supported:
  *   BOK 90PRIME <cmd-id> COMMAND EXIT           - Done
+ *   BOK 90PRIME <cmd-id> COMMAND GFILTER INIT   - Done
+ *   BOK 90PRIME <cmd-id> COMMAND IFILTER INIT   - Done
  *   BOK 90PRIME <cmd-id> COMMAND IFILTER LOAD   - Done
  *   BOK 90PRIME <cmd-id> COMMAND IFILTER UNLOAD - Done
  *   BOK 90PRIME <cmd-id> COMMAND TEST           - Done
  *
- *   BOK 90PRIME <cmd-id> COMMAND IFILTER INIT
+ *   BOK 90PRIME <cmd_id> COMMAND GFILTER NUMBER=<int>
+ *       xq_hx; xq_gfiltn(GFILTN=x); xq_gfwmov()
+ *   BOK 90PRIME <cmd_id> COMMAND GFILTER NAME=<str>
+ *       xq_hx; xq_gfiltn(convert(NAME)); xq_gfwmov
+ *   BOK 90PRIME <cmd-id> COMMAND GFOCUS DIST=<float>
+ *       distgcam = DIST
+ *       xq_hx; xq_gfocus(distgcam) *
+ *
+ *   BOK 90PRIME <cmd_id> COMMAND IFILTER NUMBER=<int>
+ *   BOK 90PRIME <cmd_id> COMMAND IFILTER NAME=<str>
+ *
  *   BOK 90PRIME <cmd-id> COMMAND IFOCUS DISTA=<float> DISTB=<float> DISTC=<float>
  *       xq_hx; xq_focusind(dista, distb, distc)
  *   BOK 90PRIME <cmd-id> COMMAND IFOCUSALL DIST=<float>
@@ -22,14 +34,6 @@
  *   BOK 90PRIME <cmd-id> COMMAND LVDTALL DIST=<float>
  *       distall = round((distall / 1000.0) * BOK_LVDT_ATOD));
  *       xq_hx; xq_focusind(distall, distall, distall)
- *   BOK 90PRIME <cmd-id> COMMAND GFOCUS DIST=<float>
- *       distgcam = DIST
- *       xq_hx; xq_gfocus(distgcam)
- *   BOK 90PRIME <cmd_id> COMMAND GFILTER NUMBER=<int>
- *       xq_hx; xq_gfiltn(GFILTN=x); xq_gfwmov()
- *   BOK 90PRIME <cmd_id> COMMAND GFILTER NAME=<str>
- *       xq_hx; xq_gfiltn(convert(NAME)); xq_gfwmov
- *   BOK 90PRIME <cmd-id> COMMAND GFILTER INIT
  *
  * Request(s) supported:
  *   BOK 90PRIME <cmd-id> REQUEST ENCODERS
@@ -137,7 +141,7 @@ void *thread_handler(void *thread_fd) {
        ******************************************************************************/
       if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
                  (istat=strncasecmp(bok_ng_commands[4], "EXIT", strlen("EXIT"))==0) ) {
-        (void) strcat(outgoing, " EXIT OK\n");
+        (void) strcat(outgoing, " OK\n");
 
       /*******************************************************************************
        * BOK 90PRIME <cmd-id> COMMAND GFILTER INIT

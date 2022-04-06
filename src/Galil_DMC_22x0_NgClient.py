@@ -77,11 +77,17 @@ class NgClient(object):
         self.__encoder_c = math.nan
         self.__error = f""
         self.__gfilters = {}
+        self.__gfilters_names = []
+        self.__gfilters_numbers = []
+        self.__gfilters_slots = []
         self.__gfilter_name = f""
         self.__gfilter_number = -1
         self.__gfilter_rotating = False
         self.__gfocus = math.nan
         self.__ifilters = {}
+        self.__ifilters_names = []
+        self.__ifilters_numbers = []
+        self.__ifilters_slots = []
         self.__ifilter_inbeam = False
         self.__ifilter_name = f""
         self.__ifilter_number = -1
@@ -152,6 +158,18 @@ class NgClient(object):
         return self.__gfilters
 
     @property
+    def gfilters_names(self):
+        return self.__gfilters_names
+
+    @property
+    def gfilters_numbers(self):
+        return self.__gfilters_numbers
+
+    @property
+    def gfilters_slots(self):
+        return self.__gfilters_slots
+
+    @property
     def gfilter_name(self):
         return self.__gfilter_name
 
@@ -170,6 +188,18 @@ class NgClient(object):
     @property
     def ifilters(self):
         return self.__ifilters
+
+    @property
+    def ifilters_names(self):
+        return self.__ifilters_names
+
+    @property
+    def ifilters_numbers(self):
+        return self.__ifilters_numbers
+
+    @property
+    def ifilters_slots(self):
+        return self.__ifilters_slots
 
     @property
     def ifilter_inbeam(self):
@@ -216,7 +246,9 @@ class NgClient(object):
     # -
     def connect(self) -> None:
         """ connects to host:port via socket """
+
         try:
+            self.__sock = None
             self.__sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.__sock.connect((socket.gethostbyname(self.__host), self.__port))
             self.__sock.settimeout(self.__timeout)
@@ -231,6 +263,7 @@ class NgClient(object):
     # -
     def disconnect(self) -> None:
         """ disconnects socket """
+
         if self.__sock is not None and hasattr(self.__sock, 'close'):
             try:
                 self.__sock.close()
@@ -240,19 +273,22 @@ class NgClient(object):
                 self.__error = f""
         self.__sock = None
 
-
     # +
     # method: converse()
     # -
-    def converse(self, talk: str = '') -> None:
+    def converse(self, talk: str = f"") -> str:
         """ converses across socket """
 
-        # set variable(s)
-        self.__answer = f""
-        self.__command = f"{talk}\r\n"
-        self.__error = f""
+        # send and recv data
+        if talk.strip() == "":
+            return f""
 
-        # send command and receive response
+        # initialize variable(s)
+        self.__answer = f""
+        self.__error = f""
+        self.__command = f"{talk}\r\n"
+
+        # converse
         try:
             self.__sock.send(self.__command.encode())
             self.__answer = self.__sock.recv(BOK_NG_STRING).decode()
@@ -262,21 +298,37 @@ class NgClient(object):
         else:
             self.__error = f""
 
+        # return
+        return self.__answer
+
+    # +
+    # method: parse_command_response()
+    # -
+    def parse_command_response(self, reply: str = '') -> bool:
+        """ parses command response from socket """
+
+        _reply = reply.upper()
+        if not _reply.startswith(BOK_NG_TELESCOPE):
+            return False
+
+        elif BOK_NG_INSTRUMENT not in _reply:
+            return False
+
+        else:
+            if " OK" in _reply:
+                return True
+            else:
+                self.__error = f"{_reply} ERROR (no response)"
+                return False
+
     # +
     # method: command_exit()
     # -
     def command_exit(self) -> bool:
         """ BOK 90PRIME <cmd-id> COMMAND EXIT """
 
-        # talk to hardware
-        self.converse(f"BOK 90PRIME {get_jd()} COMMAND EXIT")
-
-        # parse answer, eg 'BOK 90PRIME <cmd-id> EXIT OK'
-        if 'EXIT' not in self.__answer and 'OK' not in self.__answer:
-            self.__error = f"{self.__command.replace('EXIT OK', 'ERROR (no response)')}"
-            return False
-        else:
-            return True
+        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND EXIT")
+        return self.parse_command_response(_reply)
 
     # +
     # method: command_gfilter_init()
@@ -284,17 +336,50 @@ class NgClient(object):
     def command_gfilter_init(self) -> bool:
         """ BOK 90PRIME <cmd-id> COMMAND GFILTER INIT """
 
-        # talk to hardware
-        self.converse(f"BOK 90PRIME {get_jd()} COMMAND GFILTER INIT")
+        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND GFILTER INIT")
+        return self.parse_command_response(_reply)
 
+    # +
+    # method: command_gfilter_name()
+    # -
+    def command_gfilter_name(self, gname: str = '') -> bool:
+        """ BOK 90PRIME <cmd-id> COMMAND GFILTER NAME=<str> """
 
-        # parse answer, eg 'BOK 90PRIME <cmd-id> ERROR (reason)'
-        if 'ERROR' in self.__answer:
-            self.__error = f"{self.__answer}"
+        if gname.strip() == "":
             return False
-        elif 'OK' in self.__answer:
-            self.__error = f""
-            return True
+
+        if not self.__gfilters:
+            self.request_gfilters()
+
+        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND GFILTER NAME={gname}")
+        return self.parse_command_response(_reply)
+
+    # +
+    # method: command_gfilter_number()
+    # -
+    def command_gfilter_number(self, gnumber: int = -1) -> bool:
+        """ BOK 90PRIME <cmd-id> COMMAND GFILTER NUMBER=<int> """
+
+        if gnumber not in BOK_NG_GFILTER_SLOTS:
+            return False
+
+        if not self.__gfilters:
+            self.request_gfilters()
+
+        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND GFILTER NUMBER={gnumber}")
+        return self.parse_command_response(_reply)
+
+    # +
+    # method: command_gfocus()
+    # -
+    def command_gfocus(self, gfocus: float = math.nan) -> bool:
+        """ BOK 90PRIME <cmd-id> COMMAND GFOCUS DIST=<float> """
+
+        if math.nan < gfocus < -math.nan:
+            return False
+
+        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND GFOCUS DIST={gfocus}")
+        return self.parse_command_response(_reply)
 
     # +
     # method: command_ifilter_init()
@@ -302,16 +387,8 @@ class NgClient(object):
     def command_ifilter_init(self) -> bool:
         """ BOK 90PRIME <cmd-id> COMMAND IFILTER INIT """
 
-        # talk to hardware
-        self.converse(f"BOK 90PRIME {get_jd()} COMMAND IFILTER INIT")
-
-        # parse answer, eg 'BOK 90PRIME <cmd-id> ERROR (reason)'
-        if 'ERROR' in self.__answer:
-            self.__error = f"{self.__answer}"
-            return False
-        elif 'OK' in self.__answer:
-            self.__error = f""
-            return True
+        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND IFILTER INIT")
+        return self.parse_command_response(_reply)
 
     # +
     # method: command_ifilter_load()
@@ -319,16 +396,32 @@ class NgClient(object):
     def command_ifilter_load(self) -> bool:
         """ BOK 90PRIME <cmd-id> COMMAND IFILTER LOAD """
 
-        # talk to hardware
-        self.converse(f"BOK 90PRIME {get_jd()} COMMAND IFILTER LOAD")
+        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND IFILTER LOAD")
+        return self.parse_command_response(_reply)
 
-        # parse answer, eg 'BOK 90PRIME <cmd-id> ERROR (reason)'
-        if 'ERROR' in self.__answer:
-            self.__error = f"{self.__answer}"
+    # +
+    # method: command_ifilter_name()
+    # -
+    def command_ifilter_name(self, iname: str = '') -> bool:
+        """ BOK 90PRIME <cmd-id> COMMAND IFILTER NAME=<str> """
+
+        if iname.strip() == "":
             return False
-        elif 'OK' in self.__answer:
-            self.__error = f""
-            return True
+
+        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND IFILTER NAME={iname}")
+        return self.parse_command_response(_reply)
+
+    # +
+    # method: command_ifilter_number()
+    # -
+    def command_ifilter_number(self, inumber: int = -1) -> bool:
+        """ BOK 90PRIME <cmd-id> COMMAND IFILTER NUMBER=<int> """
+
+        if inumber not in BOK_NG_IFILTER_SLOTS:
+            return False
+
+        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND IFILTER NUMBER={inumber}")
+        return self.parse_command_response(_reply)
 
     # +
     # method: command_ifilter_unload()
@@ -336,16 +429,56 @@ class NgClient(object):
     def command_ifilter_unload(self) -> bool:
         """ BOK 90PRIME <cmd-id> COMMAND IFILTER UNLOAD """
 
-        # talk to hardware
-        self.converse(f"BOK 90PRIME {get_jd()} COMMAND IFILTER UNLOAD")
+        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND IFILTER UNLOAD")
+        return self.parse_command_response(_reply)
 
-        # parse answer, eg 'BOK 90PRIME <cmd-id> ERROR (reason)'
-        if 'ERROR' in self.__answer:
-            self.__error = f"{self.__answer}"
+    # +
+    # method: command_ifocus()
+    # -
+    def command_ifocus(self, focus_a: float = math.nan, focus_b: float = math.nan, focus_c: float = math.nan) -> bool:
+        """ BOK 90PRIME <cmd-id> COMMAND IFOCUS FOCUS_A=<float> FOCUS_B=<float> FOCUS_C=<float> """
+
+        if (math.nan < focus_a < -math.nan) or (math.nan < focus_b < -math.nan) or (math.nan < focus_c < -math.nan):
             return False
-        elif 'OK' in self.__answer:
-            self.__error = f""
-            return True
+
+        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND IFOCUS FOCUS_A={focus_a} FOCUS_B={focus_b} FOCUS_C={focus_c}")
+        return self.parse_command_response(_reply)
+
+    # +
+    # method: command_ifocusall()
+    # -
+    def command_ifocusall(self, ifocus: float = math.nan) -> bool:
+        """ BOK 90PRIME <cmd-id> COMMAND IFOCUSALL DIST=<float> """
+
+        if math.nan < ifocus < -math.nan:
+            return False
+
+        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND IFOCUSALL DIST={ifocus}")
+        return self.parse_command_response(_reply)
+
+    # +
+    # method: command_lvdt()
+    # -
+    def command_lvdt(self, lvdt_a: float = math.nan, lvdt_b: float = math.nan, lvdt_c: float = math.nan) -> bool:
+        """ BOK 90PRIME <cmd-id> COMMAND LVDT LVDT_A=<float> LVDT_B=<float> LVDT_C=<float> """
+
+        if (math.nan < lvdt_a < -math.nan) or (math.nan < lvdt_b < -math.nan) or (math.nan < lvdt_c < -math.nan):
+            return False
+
+        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND LVDT LVDT_A={lvdt_a} LVDT_B={lvdt_b} LVDT_C={lvdt_c}")
+        return self.parse_command_response(_reply)
+
+    # +
+    # method: command_lvdtall()
+    # -
+    def command_lvdtall(self, lvdt: float = math.nan) -> bool:
+        """ BOK 90PRIME <cmd-id> COMMAND LVDTALL LVDT=<float> """
+
+        if math.nan < lvdt < -math.nan:
+            return False
+
+        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND LVDTALL LVDT={lvdt}")
+        return self.parse_command_response(_reply)
 
     # +
     # method: command_test()
@@ -353,15 +486,8 @@ class NgClient(object):
     def command_test(self) -> bool:
         """ BOK 90PRIME <cmd-id> COMMAND TEST """
 
-        # talk to hardware
-        self.converse(f"BOK 90PRIME {get_jd()} COMMAND TEST")
-
-        # parse answer, eg 'BOK 90PRIME <cmd-id> TEST OK'
-        if 'TEST' not in self.__answer and 'OK' not in self.__answer:
-            self.__error = f"{self.__command.replace('TEST OK', 'ERROR (no response')}"
-            return False
-        else:
-            return True
+        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND TEST")
+        return self.parse_command_response(_reply)
 
     # +
     # method: request_encoders()
@@ -476,6 +602,11 @@ class NgClient(object):
                             self.__error = f""
                             self.__gfilters = {**self.__gfilters,
                                                **{f"Slot {_slot}": {"Number": _number, "Name": _name}}}
+
+        # parse dictionary
+        self.__gfilters_names = [_v['Name'] for _k, _v in self.__gfilters.items()]
+        self.__gfilters_numbers = [_v['Number'] for _k, _v in self.__gfilters.items()]
+        self.__gfilters_slots = [int(_.split()[1]) for _ in self.__gfilters]
 
     # +
     # method: request_gfocus()
@@ -592,6 +723,11 @@ class NgClient(object):
                             self.__ifilters = {**self.__ifilters,
                                                **{f"Slot {_slot}": {"Number": _number, "Name": _name}}}
 
+        # parse dictionary
+        self.__ifilters_names = [_v['Name'] for _k, _v in self.__ifilters.items()]
+        self.__ifilters_numbers = [_v['Number'] for _k, _v in self.__ifilters.items()]
+        self.__ifilters_slots = [int(_.split()[1]) for _ in self.__ifilters]
+
     # +
     # method: request_ifocus()
     # -
@@ -665,6 +801,9 @@ def checkout_requests(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeo
         # request guider filters
         _client.request_gfilters()
         print(f"Guider filters loaded: {_client.gfilters}")
+        print(f"Guider filters names: {_client.gfilters_names}")
+        print(f"Guider filters numbers: {_client.gfilters_numbers}")
+        print(f"Guider filters slots: {_client.gfilters_slots}")
 
         # request current guider filter
         _client.request_gfilter()
@@ -679,6 +818,9 @@ def checkout_requests(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeo
         # request instrument filters
         _client.request_ifilters()
         print(f"Instrument filters loaded: {_client.ifilters}")
+        print(f"Instrument filters names: {_client.ifilters_names}")
+        print(f"Instrument filters numbers: {_client.ifilters_numbers}")
+        print(f"Instrument filters slots: {_client.ifilters_slots}")
 
         # request current instrument filter
         _client.request_ifilter()
