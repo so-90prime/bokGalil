@@ -89,6 +89,12 @@ void *thread_handler(void *thread_fd) {
   /* declare some variable(s) and initialize them */
   bool is_done = false;
   float fval = 0.0;
+  float focus_a = 0.0;
+  float focus_b = 0.0;
+  float focus_c = 0.0;
+  float lvdt_a = 0.0;
+  float lvdt_b = 0.0;
+  float lvdt_c = 0.0;
   GReturn gstat = (GReturn)0;
   int handler_fd = *(int *)thread_fd;
   int istat = 0;
@@ -306,7 +312,7 @@ void *thread_handler(void *thread_fd) {
       } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
           (istat=strncasecmp(bok_ng_commands[4], "GFOCUS", strlen("GFOCUS"))==0) &&
           (istat=strncasecmp(bok_ng_commands[5], "DELTA", strlen("DELTA"))==0) &&
-          (istat=(int)strlen(bok_ng_commands[6])!=0) ) {
+          (istat=(int)strlen(bok_ng_commands[6])>0) ) {
 
         /* read memory */
         tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
@@ -611,19 +617,75 @@ void *thread_handler(void *thread_fd) {
         if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
 
       /*******************************************************************************
-       * BOK 90PRIME <cmd-id> COMMAND IFOCUS DELTA <float> <float> <float>
+       * BOK 90PRIME <cmd-id> COMMAND IFOCUS A <float> B <float> C <float>
        ******************************************************************************/
       } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
           (istat=strncasecmp(bok_ng_commands[4], "IFOCUS", strlen("IFOCUS"))==0) &&
-          (istat=strncasecmp(bok_ng_commands[5], "DELTA", strlen("DELTA"))==0) &&
+          (istat=strncasecmp(bok_ng_commands[5], "A", strlen("A"))==0) &&
           (istat=(int)strlen(bok_ng_commands[6])>0) &&
-          (istat=(int)strlen(bok_ng_commands[7])>0) &&
-          (istat=(int)strlen(bok_ng_commands[8])>0) ) {
+          (istat=strncasecmp(bok_ng_commands[7], "B", strlen("B"))==0) &&
+          (istat=(int)strlen(bok_ng_commands[8])>0) &&
+          (istat=strncasecmp(bok_ng_commands[9], "C", strlen("C"))==0) &&
+          (istat=(int)strlen(bok_ng_commands[10])>0) ) {
 
         /* read memory */
         tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
         tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
-        decode_float(bok_ng_commands[6], &fval);
+        decode_float(bok_ng_commands[6], &focus_a);
+        decode_float(bok_ng_commands[8], &focus_b);
+        decode_float(bok_ng_commands[10], &focus_c);
+
+        if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
+          (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
+
+        } else if (focus_a==NAN || focus_b==NAN || focus_c==NAN) {
+          (void) strcat(outgoing, " ERROR (invalid number)\n");
+
+        } else {
+
+            /* simulate */
+            is_done = false;
+            if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))==0)) {
+              (void) sleep(float(BOK_NG_INSTRUMENT_FOCUS_TIME));
+              is_done = true;
+
+            /* talk to hardware */
+            } else {
+              if ((gstat=xq_focusind(focus_a, focus_b, focus_c)) == G_NO_ERROR) {
+                cstat = BOK_NG_INSTRUMENT_FOCUS_TIME;
+                while (--cstat > 0) {
+                  (void) sleep(1.0);
+//                  if ((((int)round(tcp_shm_ptr->lv.filtisin))) == 0) {
+//                    is_done = true;
+//                    break;
+//                  }
+                }
+              }
+            }
+
+            /* report success or timeout */
+            if (is_done) {
+              (void) strcat(outgoing, " OK\n");
+            } else {
+              (void) strcat(outgoing, " ERROR (timeout or hardware unresponsive)\n");
+            }
+        }
+
+        /* close memory */
+        if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
+        if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
+
+      /*******************************************************************************
+       * BOK 90PRIME <cmd-id> COMMAND IFOCUSALL <float>
+       ******************************************************************************/
+      } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
+          (istat=strncasecmp(bok_ng_commands[4], "IFOCUSALL", strlen("IFOCUSALL"))==0) &&
+          (istat=(int)strlen(bok_ng_commands[5])>0) ) {
+
+        /* read memory */
+        tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
+        tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
+        decode_float(bok_ng_commands[5], &fval);
 
         if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
           (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
@@ -633,32 +695,143 @@ void *thread_handler(void *thread_fd) {
 
         } else {
 
-          /* simulate */
-          is_done = false;
-          if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))==0)) {
-            (void) sleep(float(BOK_NG_GUIDER_FOCUS_TIME));
-            is_done = true;
+            /* simulate */
+            is_done = false;
+            if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))==0)) {
+              (void) sleep(float(BOK_NG_INSTRUMENT_FOCUS_TIME));
+              is_done = true;
 
-          /* talk to hardware - TO_DO */
-          } else {
-            if ((gstat=xq_hx()) == G_NO_ERROR) {
-              cstat = BOK_NG_GUIDER_FOCUS_TIME;
-              while (--cstat > 0) {
-                (void) sleep(1.0);
-//                if ((((int)round(tcp_shm_ptr->lv.distgcam))) == 1) {
-//                  is_done = true;
-//                  break;
-//                }
+            /* talk to hardware */
+            } else {
+              if ((gstat=xq_focusall(fval)) == G_NO_ERROR) {
+                cstat = BOK_NG_INSTRUMENT_FOCUS_TIME;
+                while (--cstat > 0) {
+                  (void) sleep(1.0);
+//                  if ((((int)round(tcp_shm_ptr->lv.filtisin))) == 0) {
+//                    is_done = true;
+//                    break;
+//                  }
+                }
               }
             }
-          }
 
-          /* report success or timeout */
-          if (is_done) {
-            (void) strcat(outgoing, " OK\n");
-          } else {
-            (void) strcat(outgoing, " ERROR (timeout or hardware unresponsive)\n");
-          }
+            /* report success or timeout */
+            if (is_done) {
+              (void) strcat(outgoing, " OK\n");
+            } else {
+              (void) strcat(outgoing, " ERROR (timeout or hardware unresponsive)\n");
+            }
+        }
+
+        /* close memory */
+        if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
+        if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
+
+      /*******************************************************************************
+       * BOK 90PRIME <cmd-id> COMMAND LVDT A <float> B <float> C <float>
+       ******************************************************************************/
+      } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
+          (istat=strncasecmp(bok_ng_commands[4], "LVDT", strlen("LVDT"))==0) &&
+          (istat=strncasecmp(bok_ng_commands[5], "A", strlen("A"))==0) &&
+          (istat=(int)strlen(bok_ng_commands[6])>0) &&
+          (istat=strncasecmp(bok_ng_commands[7], "B", strlen("B"))==0) &&
+          (istat=(int)strlen(bok_ng_commands[8])>0) &&
+          (istat=strncasecmp(bok_ng_commands[9], "C", strlen("C"))==0) &&
+          (istat=(int)strlen(bok_ng_commands[10])>0) ) {
+
+        /* read memory */
+        tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
+        tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
+        decode_float(bok_ng_commands[6], &lvdt_a);
+        decode_float(bok_ng_commands[8], &lvdt_b);
+        decode_float(bok_ng_commands[10], &lvdt_c);
+
+        if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
+          (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
+
+        } else if (focus_a==NAN || focus_b==NAN || focus_c==NAN) {
+          (void) strcat(outgoing, " ERROR (invalid number)\n");
+
+        } else {
+
+            /* simulate */
+            is_done = false;
+            if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))==0)) {
+              (void) sleep(float(BOK_NG_INSTRUMENT_FOCUS_TIME));
+              is_done = true;
+
+            /* talk to hardware */
+            } else {
+              if ((gstat=xq_focusind(lvdt_a, lvdt_b, lvdt_c)) == G_NO_ERROR) {
+                cstat = BOK_NG_INSTRUMENT_FOCUS_TIME;
+                while (--cstat > 0) {
+                  (void) sleep(1.0);
+//                  if ((((int)round(tcp_shm_ptr->lv.filtisin))) == 0) {
+//                    is_done = true;
+//                    break;
+//                  }
+                }
+              }
+            }
+
+            /* report success or timeout */
+            if (is_done) {
+              (void) strcat(outgoing, " OK\n");
+            } else {
+              (void) strcat(outgoing, " ERROR (timeout or hardware unresponsive)\n");
+            }
+        }
+
+        /* close memory */
+        if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
+        if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
+
+      /*******************************************************************************
+       * BOK 90PRIME <cmd-id> COMMAND LVDTALL <float>
+       ******************************************************************************/
+      } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
+          (istat=strncasecmp(bok_ng_commands[4], "LVDTALL", strlen("LVDTALL"))==0) &&
+          (istat=(int)strlen(bok_ng_commands[5])>0) ) {
+
+        /* read memory */
+        tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
+        tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
+        decode_float(bok_ng_commands[5], &fval);
+
+        if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
+          (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
+
+        } else if (fval == NAN) {
+          (void) strcat(outgoing, " ERROR (invalid number)\n");
+
+        } else {
+
+            /* simulate */
+            is_done = false;
+            if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))==0)) {
+              (void) sleep(float(BOK_NG_INSTRUMENT_FOCUS_TIME));
+              is_done = true;
+
+            /* talk to hardware */
+            } else {
+              if ((gstat=xq_focusall(fval)) == G_NO_ERROR) {
+                cstat = BOK_NG_INSTRUMENT_FOCUS_TIME;
+                while (--cstat > 0) {
+                  (void) sleep(1.0);
+//                  if ((((int)round(tcp_shm_ptr->lv.filtisin))) == 0) {
+//                    is_done = true;
+//                    break;
+//                  }
+                }
+              }
+            }
+
+            /* report success or timeout */
+            if (is_done) {
+              (void) strcat(outgoing, " OK\n");
+            } else {
+              (void) strcat(outgoing, " ERROR (timeout or hardware unresponsive)\n");
+            }
         }
 
         /* close memory */

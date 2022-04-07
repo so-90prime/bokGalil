@@ -420,24 +420,24 @@ class NgClient(object):
     # method: command_ifilter_name()
     # -
     def command_ifilter_name(self, iname: str = '') -> bool:
-        """ BOK 90PRIME <cmd-id> COMMAND IFILTER NAME=<str> """
+        """ BOK 90PRIME <cmd-id> COMMAND IFILTER NAME <str> """
 
         if iname.strip() == "":
             return False
 
-        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND IFILTER NAME={iname}")
+        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND IFILTER NAME {iname}")
         return self.parse_command_response(_reply)
 
     # +
     # method: command_ifilter_number()
     # -
     def command_ifilter_number(self, inumber: int = -1) -> bool:
-        """ BOK 90PRIME <cmd-id> COMMAND IFILTER NUMBER=<int> """
+        """ BOK 90PRIME <cmd-id> COMMAND IFILTER NUMBER <int> """
 
         if inumber not in BOK_NG_IFILTER_SLOTS:
             return False
 
-        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND IFILTER NUMBER={inumber}")
+        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND IFILTER NUMBER {inumber}")
         return self.parse_command_response(_reply)
 
     # +
@@ -453,48 +453,48 @@ class NgClient(object):
     # method: command_ifocus()
     # -
     def command_ifocus(self, focus_a: float = math.nan, focus_b: float = math.nan, focus_c: float = math.nan) -> bool:
-        """ BOK 90PRIME <cmd-id> COMMAND IFOCUS FOCUS_A=<float> FOCUS_B=<float> FOCUS_C=<float> """
+        """ BOK 90PRIME <cmd-id> COMMAND IFOCUS A <float> B <float> C <float> """
 
         if (math.nan < focus_a < -math.nan) or (math.nan < focus_b < -math.nan) or (math.nan < focus_c < -math.nan):
             return False
 
-        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND IFOCUS FOCUS_A={focus_a} FOCUS_B={focus_b} FOCUS_C={focus_c}")
+        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND IFOCUS A {focus_a} B {focus_b} C {focus_c}")
         return self.parse_command_response(_reply)
 
     # +
     # method: command_ifocusall()
     # -
     def command_ifocusall(self, ifocus: float = math.nan) -> bool:
-        """ BOK 90PRIME <cmd-id> COMMAND IFOCUSALL DIST=<float> """
+        """ BOK 90PRIME <cmd-id> COMMAND IFOCUSALL <float> """
 
         if math.nan < ifocus < -math.nan:
             return False
 
-        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND IFOCUSALL DIST={ifocus}")
+        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND IFOCUSALL {ifocus}")
         return self.parse_command_response(_reply)
 
     # +
     # method: command_lvdt()
     # -
     def command_lvdt(self, lvdt_a: float = math.nan, lvdt_b: float = math.nan, lvdt_c: float = math.nan) -> bool:
-        """ BOK 90PRIME <cmd-id> COMMAND LVDT LVDT_A=<float> LVDT_B=<float> LVDT_C=<float> """
+        """ BOK 90PRIME <cmd-id> COMMAND LVDT A <float> B <float> C <float> """
 
         if (math.nan < lvdt_a < -math.nan) or (math.nan < lvdt_b < -math.nan) or (math.nan < lvdt_c < -math.nan):
             return False
 
-        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND LVDT LVDT_A={lvdt_a} LVDT_B={lvdt_b} LVDT_C={lvdt_c}")
+        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND LVDT A {lvdt_a} B {lvdt_b} C {lvdt_c}")
         return self.parse_command_response(_reply)
 
     # +
     # method: command_lvdtall()
     # -
     def command_lvdtall(self, lvdt: float = math.nan) -> bool:
-        """ BOK 90PRIME <cmd-id> COMMAND LVDTALL LVDT=<float> """
+        """ BOK 90PRIME <cmd-id> COMMAND LVDTALL <float> """
 
         if math.nan < lvdt < -math.nan:
             return False
 
-        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND LVDTALL LVDT={lvdt}")
+        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND LVDTALL {lvdt}")
         return self.parse_command_response(_reply)
 
     # +
