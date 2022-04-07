@@ -62,12 +62,14 @@ class NgClient(object):
     # +
     # method: __init__()
     # -
-    def __init__(self, host: str = BOK_NG_HOST, port: int = BOK_NG_PORT, timeout: float = BOK_NG_TIMEOUT):
+    def __init__(self, host: str = BOK_NG_HOST, port: int = BOK_NG_PORT,
+                 timeout: float = BOK_NG_TIMEOUT, simulate: bool = False) -> None:
 
         # get input(s)
         self.host = host
         self.port = port
         self.timeout = timeout
+        self.simulate = simulate
 
         # set variable(s)
         self.__answer = f""
@@ -125,6 +127,14 @@ class NgClient(object):
     @timeout.setter
     def timeout(self, timeout: float = BOK_NG_PORT) -> None:
         self.__timeout = timeout if timeout > 0.0 else BOK_NG_TIMEOUT
+
+    @property
+    def simulate(self):
+        return self.__simulate
+
+    @simulate.setter
+    def simulate(self, simulate: bool = False) -> None:
+        self.__simulate = simulate
 
     # +
     # getter(s)
@@ -286,7 +296,14 @@ class NgClient(object):
         # initialize variable(s)
         self.__answer = f""
         self.__error = f""
-        self.__command = f"{talk}\r\n"
+
+        # change command if simulate is enabled
+        if self.__simulate:
+            _cmd = talk.split()
+            _cmd[2] = f"SIMULATE"
+            self.__command = f"{' '.join(_cmd)}\r\n"
+        else:
+            self.__command = f"{talk}\r\n"
 
         # converse
         try:
@@ -343,7 +360,7 @@ class NgClient(object):
     # method: command_gfilter_name()
     # -
     def command_gfilter_name(self, gname: str = '') -> bool:
-        """ BOK 90PRIME <cmd-id> COMMAND GFILTER NAME=<str> """
+        """ BOK 90PRIME <cmd-id> COMMAND GFILTER NAME <str> """
 
         if gname.strip() == "":
             return False
@@ -351,14 +368,14 @@ class NgClient(object):
         if not self.__gfilters:
             self.request_gfilters()
 
-        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND GFILTER NAME={gname}")
+        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND GFILTER NAME {gname}")
         return self.parse_command_response(_reply)
 
     # +
     # method: command_gfilter_number()
     # -
     def command_gfilter_number(self, gnumber: int = -1) -> bool:
-        """ BOK 90PRIME <cmd-id> COMMAND GFILTER NUMBER=<int> """
+        """ BOK 90PRIME <cmd-id> COMMAND GFILTER NUMBER <int> """
 
         if gnumber not in BOK_NG_GFILTER_SLOTS:
             return False
@@ -366,19 +383,19 @@ class NgClient(object):
         if not self.__gfilters:
             self.request_gfilters()
 
-        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND GFILTER NUMBER={gnumber}")
+        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND GFILTER NUMBER {gnumber}")
         return self.parse_command_response(_reply)
 
     # +
-    # method: command_gfocus()
+    # method: command_gfocus_delta()
     # -
-    def command_gfocus(self, gfocus: float = math.nan) -> bool:
-        """ BOK 90PRIME <cmd-id> COMMAND GFOCUS DIST=<float> """
+    def command_gfocus_delta(self, gdelta: float = math.nan) -> bool:
+        """ BOK 90PRIME <cmd-id> COMMAND GFOCUS DELTA <float> """
 
-        if math.nan < gfocus < -math.nan:
+        if math.nan < gdelta < -math.nan:
             return False
 
-        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND GFOCUS DIST={gfocus}")
+        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND GFOCUS DELTA {gdelta}")
         return self.parse_command_response(_reply)
 
     # +
@@ -858,12 +875,30 @@ def checkout_commands(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeo
     try:
 
         # instantiate client and connect to server
-        _client = NgClient(host=_host, port=_port, timeout=_timeout)
+        _client = NgClient(host=_host, port=_port, timeout=_timeout, simulate=True)
         _client.connect()
         print(f"Client instantiated: sock={_client.sock}")
 
         # command gfilter init
         if _client.command_gfilter_init():
+            print(f"client passed test")
+        else:
+            print(f"client failed test, {_client.error}")
+
+        # command gfilter name <str>
+        if _client.command_gfilter_name(gname='blue'):
+            print(f"client passed test")
+        else:
+            print(f"client failed test, {_client.error}")
+
+        # command gfilter number <int>
+        if _client.command_gfilter_number(gnumber=3):
+            print(f"client passed test")
+        else:
+            print(f"client failed test, {_client.error}")
+
+        # command gfocus delta <float>
+        if _client.command_gfocus_delta(gdelta=50.0):
             print(f"client passed test")
         else:
             print(f"client failed test, {_client.error}")
