@@ -101,6 +101,7 @@ void *thread_handler(void *thread_fd) {
   int rstat = 0;
   int wstat = 0;
   int ival = 0;
+  unsigned int countdown = 0;
   unsigned int cstat = 0;
   char *p = (char *)NULL;
   char *bok_ng_commands[BOK_NG_BUCKETS];
@@ -175,16 +176,16 @@ void *thread_handler(void *thread_fd) {
 
           /* simulate */
           is_done = false;
-          if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))==0)) {
-            (void) sleep(float(BOK_NG_GUIDER_INIT_TIME));
+          if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
+            (void) sleep(BOK_NG_GUIDER_INIT_TIME);
             is_done = true;
 
           /* talk to hardware */
           } else {
             if ((gstat=xq_gfwinit()) == G_NO_ERROR) {
-              cstat = BOK_NG_GUIDER_INIT_TIME;
-              while (--cstat > 0) {
-                (void) sleep(1.0);
+              countdown = BOK_NG_GUIDER_INIT_TIME;
+              while (--countdown > 0) {
+                (void) sleep(1);
                 if ((((int)round(tcp_shm_ptr->lv.gfiltn))) == 1) {
                   is_done = true;
                   break;
@@ -223,16 +224,16 @@ void *thread_handler(void *thread_fd) {
 
           /* simulate */
           is_done = false;
-          if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))==0)) {
-            (void) sleep(float(BOK_NG_GUIDER_FILTER_TIME));
+          if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
+            (void) sleep(BOK_NG_GUIDER_FILTER_TIME);
             is_done = true;
 
           /* talk to hardware - TO_DO */
           } else {
             if ((gstat=xq_hx()) == G_NO_ERROR) {
-              cstat = BOK_NG_GUIDER_FILTER_TIME;
-              while (--cstat > 0) {
-                (void) sleep(1.0);
+              countdown = BOK_NG_GUIDER_FILTER_TIME;
+              while (--countdown > 0) {
+                (void) sleep(1);
 //                if ((((int)round(tcp_shm_ptr->lv.gfiltn))) == 1) {
 //                  is_done = true;
 //                  break;
@@ -276,16 +277,16 @@ void *thread_handler(void *thread_fd) {
 
           /* simulate */
           is_done = false;
-          if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))==0)) {
-            (void) sleep(float(BOK_NG_GUIDER_FILTER_TIME));
+          if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
+            (void) sleep(BOK_NG_GUIDER_FILTER_TIME);
             is_done = true;
 
           /* talk to hardware - TO_DO */
           } else {
             if ((gstat=xq_hx()) == G_NO_ERROR) {
-              cstat = BOK_NG_GUIDER_FILTER_TIME;
-              while (--cstat > 0) {
-                (void) sleep(1.0);
+              countdown = BOK_NG_GUIDER_FILTER_TIME;
+              while (--countdown > 0) {
+                (void) sleep(1);
 //                if ((((int)round(tcp_shm_ptr->lv.gfiltn))) == 1) {
 //                  is_done = true;
 //                  break;
@@ -329,16 +330,16 @@ void *thread_handler(void *thread_fd) {
 
           /* simulate */
           is_done = false;
-          if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))==0)) {
-            (void) sleep(float(BOK_NG_GUIDER_FOCUS_TIME));
+          if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
+            (void) sleep(BOK_NG_GUIDER_FOCUS_TIME);
             is_done = true;
 
           /* talk to hardware - TO_DO */
           } else {
             if ((gstat=xq_hx()) == G_NO_ERROR) {
-              cstat = BOK_NG_GUIDER_FOCUS_TIME;
-              while (--cstat > 0) {
-                (void) sleep(1.0);
+              countdown = BOK_NG_GUIDER_FOCUS_TIME;
+              while (--countdown > 0) {
+                (void) sleep(1);
 //                if ((((int)round(tcp_shm_ptr->lv.distgcam))) == 1) {
 //                  is_done = true;
 //                  break;
@@ -376,16 +377,16 @@ void *thread_handler(void *thread_fd) {
 
           /* simulate */
           is_done = false;
-          if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))==0)) {
-            (void) sleep(float(BOK_NG_INSTRUMENT_INIT_TIME));
+          if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
+            (void) sleep(BOK_NG_INSTRUMENT_INIT_TIME);
             is_done = true;
 
           /* talk to hardware */
           } else {
             if ((gstat=xq_filtrd()) == G_NO_ERROR) {
-              cstat = BOK_NG_INSTRUMENT_INIT_TIME;
-              while (--cstat > 0) {
-                (void) sleep(1.0);
+              countdown = BOK_NG_INSTRUMENT_INIT_TIME;
+              while (--countdown > 0) {
+                (void) sleep(1);
                 if ((((int)round(tcp_shm_ptr->lv.gfiltn))) == 1) {
                   is_done = true;
                   break;
@@ -424,16 +425,16 @@ void *thread_handler(void *thread_fd) {
 
           /* simulate */
           is_done = false;
-          if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))==0)) {
-            (void) sleep(float(BOK_NG_INSTRUMENT_FILTER_TIME));
+          if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
+            (void) sleep(BOK_NG_INSTRUMENT_FILTER_TIME);
             is_done = true;
 
           /* talk to hardware - TO_DO */
           } else {
             if ((gstat=xq_hx()) == G_NO_ERROR) {
-              cstat = BOK_NG_INSTRUMENT_FILTER_TIME;
-              while (--cstat > 0) {
-                (void) sleep(1.0);
+              countdown = BOK_NG_INSTRUMENT_FILTER_TIME;
+              while (--countdown > 0) {
+                (void) sleep(1);
 //                if ((((int)round(tcp_shm_ptr->lv.gfiltn))) == 1) {
 //                  is_done = true;
 //                  break;
@@ -477,16 +478,16 @@ void *thread_handler(void *thread_fd) {
 
           /* simulate */
           is_done = false;
-          if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))==0)) {
-            (void) sleep(float(BOK_NG_INSTRUMENT_FILTER_TIME));
+          if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
+            (void) sleep(BOK_NG_INSTRUMENT_FILTER_TIME);
             is_done = true;
 
           /* talk to hardware - TO_DO */
           } else {
             if ((gstat=xq_hx()) == G_NO_ERROR) {
-              cstat = BOK_NG_INSTRUMENT_FILTER_TIME;
-              while (--cstat > 0) {
-                (void) sleep(1.0);
+              countdown = BOK_NG_INSTRUMENT_FILTER_TIME;
+              while (--countdown > 0) {
+                (void) sleep(1);
 //                if ((((int)round(tcp_shm_ptr->lv.gfiltn))) == 1) {
 //                  is_done = true;
 //                  break;
@@ -530,16 +531,16 @@ void *thread_handler(void *thread_fd) {
 
             /* simulate */
             is_done = false;
-            if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))==0)) {
-              (void) sleep(float(BOK_NG_INSTRUMENT_LOAD_TIME));
+            if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
+              (void) sleep(BOK_NG_INSTRUMENT_LOAD_TIME);
               is_done = true;
 
             /* talk to hardware */
             } else {
               if ((gstat=xq_filtin()) == G_NO_ERROR) {
-                cstat = BOK_NG_INSTRUMENT_LOAD_TIME;
-                while (--cstat > 0) {
-                  (void) sleep(1.0);
+                countdown = BOK_NG_INSTRUMENT_LOAD_TIME;
+                while (--countdown > 0) {
+                  (void) sleep(1);
                   if ((((int)round(tcp_shm_ptr->lv.filtisin))) == 1) {
                     is_done = true;
                     break;
@@ -585,16 +586,16 @@ void *thread_handler(void *thread_fd) {
 
             /* simulate */
             is_done = false;
-            if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))==0)) {
-              (void) sleep(float(BOK_NG_INSTRUMENT_UNLOAD_TIME));
+            if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
+              (void) sleep(BOK_NG_INSTRUMENT_UNLOAD_TIME);
               is_done = true;
 
             /* talk to hardware */
             } else {
               if ((gstat=xq_filtout()) == G_NO_ERROR) {
-                cstat = BOK_NG_INSTRUMENT_UNLOAD_TIME;
-                while (--cstat > 0) {
-                  (void) sleep(1.0);
+                countdown = BOK_NG_INSTRUMENT_UNLOAD_TIME;
+                while (--countdown > 0) {
+                  (void) sleep(1);
                   if ((((int)round(tcp_shm_ptr->lv.filtisin))) == 0) {
                     is_done = true;
                     break;
@@ -645,16 +646,16 @@ void *thread_handler(void *thread_fd) {
 
             /* simulate */
             is_done = false;
-            if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))==0)) {
-              (void) sleep(float(BOK_NG_INSTRUMENT_FOCUS_TIME));
+            if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
+              (void) sleep(BOK_NG_INSTRUMENT_FOCUS_TIME);
               is_done = true;
 
             /* talk to hardware */
             } else {
               if ((gstat=xq_focusind(focus_a, focus_b, focus_c)) == G_NO_ERROR) {
-                cstat = BOK_NG_INSTRUMENT_FOCUS_TIME;
-                while (--cstat > 0) {
-                  (void) sleep(1.0);
+                countdown = BOK_NG_INSTRUMENT_FOCUS_TIME;
+                while (--countdown > 0) {
+                  (void) sleep(1);
 //                  if ((((int)round(tcp_shm_ptr->lv.filtisin))) == 0) {
 //                    is_done = true;
 //                    break;
@@ -697,16 +698,16 @@ void *thread_handler(void *thread_fd) {
 
             /* simulate */
             is_done = false;
-            if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))==0)) {
-              (void) sleep(float(BOK_NG_INSTRUMENT_FOCUS_TIME));
+            if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
+              (void) sleep(BOK_NG_INSTRUMENT_FOCUS_TIME);
               is_done = true;
 
             /* talk to hardware */
             } else {
               if ((gstat=xq_focusall(fval)) == G_NO_ERROR) {
-                cstat = BOK_NG_INSTRUMENT_FOCUS_TIME;
-                while (--cstat > 0) {
-                  (void) sleep(1.0);
+                countdown = BOK_NG_INSTRUMENT_FOCUS_TIME;
+                while (--countdown > 0) {
+                  (void) sleep(1);
 //                  if ((((int)round(tcp_shm_ptr->lv.filtisin))) == 0) {
 //                    is_done = true;
 //                    break;
@@ -756,16 +757,16 @@ void *thread_handler(void *thread_fd) {
 
             /* simulate */
             is_done = false;
-            if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))==0)) {
-              (void) sleep(float(BOK_NG_INSTRUMENT_FOCUS_TIME));
+            if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
+              (void) sleep(BOK_NG_INSTRUMENT_FOCUS_TIME);
               is_done = true;
 
             /* talk to hardware */
             } else {
               if ((gstat=xq_focusind(lvdt_a, lvdt_b, lvdt_c)) == G_NO_ERROR) {
-                cstat = BOK_NG_INSTRUMENT_FOCUS_TIME;
-                while (--cstat > 0) {
-                  (void) sleep(1.0);
+                countdown = BOK_NG_INSTRUMENT_FOCUS_TIME;
+                while (--countdown > 0) {
+                  (void) sleep(1);
 //                  if ((((int)round(tcp_shm_ptr->lv.filtisin))) == 0) {
 //                    is_done = true;
 //                    break;
@@ -808,16 +809,16 @@ void *thread_handler(void *thread_fd) {
 
             /* simulate */
             is_done = false;
-            if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))==0)) {
-              (void) sleep(float(BOK_NG_INSTRUMENT_FOCUS_TIME));
+            if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
+              (void) sleep(BOK_NG_INSTRUMENT_FOCUS_TIME);
               is_done = true;
 
             /* talk to hardware */
             } else {
               if ((gstat=xq_focusall(fval)) == G_NO_ERROR) {
-                cstat = BOK_NG_INSTRUMENT_FOCUS_TIME;
-                while (--cstat > 0) {
-                  (void) sleep(1.0);
+                countdown = BOK_NG_INSTRUMENT_FOCUS_TIME;
+                while (--countdown > 0) {
+                  (void) sleep(1);
 //                  if ((((int)round(tcp_shm_ptr->lv.filtisin))) == 0) {
 //                    is_done = true;
 //                    break;

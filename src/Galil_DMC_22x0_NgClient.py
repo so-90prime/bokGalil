@@ -452,37 +452,37 @@ class NgClient(object):
     # +
     # method: command_ifocus()
     # -
-    def command_ifocus(self, focus_a: float = math.nan, focus_b: float = math.nan, focus_c: float = math.nan) -> bool:
+    def command_ifocus(self, a: float = math.nan, b: float = math.nan, c: float = math.nan) -> bool:
         """ BOK 90PRIME <cmd-id> COMMAND IFOCUS A <float> B <float> C <float> """
 
-        if (math.nan < focus_a < -math.nan) or (math.nan < focus_b < -math.nan) or (math.nan < focus_c < -math.nan):
+        if (math.nan < a < -math.nan) or (math.nan < b < -math.nan) or (math.nan < c < -math.nan):
             return False
 
-        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND IFOCUS A {focus_a} B {focus_b} C {focus_c}")
+        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND IFOCUS A {a} B {b} C {c}")
         return self.parse_command_response(_reply)
 
     # +
     # method: command_ifocusall()
     # -
-    def command_ifocusall(self, ifocus: float = math.nan) -> bool:
+    def command_ifocusall(self, focus: float = math.nan) -> bool:
         """ BOK 90PRIME <cmd-id> COMMAND IFOCUSALL <float> """
 
-        if math.nan < ifocus < -math.nan:
+        if math.nan < focus < -math.nan:
             return False
 
-        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND IFOCUSALL {ifocus}")
+        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND IFOCUSALL {focus}")
         return self.parse_command_response(_reply)
 
     # +
     # method: command_lvdt()
     # -
-    def command_lvdt(self, lvdt_a: float = math.nan, lvdt_b: float = math.nan, lvdt_c: float = math.nan) -> bool:
+    def command_lvdt(self, a: float = math.nan, b: float = math.nan, c: float = math.nan) -> bool:
         """ BOK 90PRIME <cmd-id> COMMAND LVDT A <float> B <float> C <float> """
 
-        if (math.nan < lvdt_a < -math.nan) or (math.nan < lvdt_b < -math.nan) or (math.nan < lvdt_c < -math.nan):
+        if (math.nan < a < -math.nan) or (math.nan < b < -math.nan) or (math.nan < c < -math.nan):
             return False
 
-        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND LVDT A {lvdt_a} B {lvdt_b} C {lvdt_c}")
+        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND LVDT A {a} B {b} C {c}")
         return self.parse_command_response(_reply)
 
     # +
@@ -854,9 +854,7 @@ def checkout_requests(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeo
         print(f"Instrument Focus C: {_client.ifocus_c}")
 
     except Exception as _x:
-        # report this error
         print(f"{_x}")
-        # report last client error
         if _client is not None and hasattr(_client, 'error'):
             print(f"{_client.error}")
 
@@ -868,78 +866,68 @@ def checkout_requests(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeo
 # +
 # function: checkout_commands()
 # -
-def checkout_commands(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeout: float = BOK_NG_TIMEOUT) -> None:
+def checkout_commands(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeout: float = BOK_NG_TIMEOUT, _simulate: bool = False) -> None:
 
     # exercise command(s) and request(s)
     _client = None
     try:
 
         # instantiate client and connect to server
-        _client = NgClient(host=_host, port=_port, timeout=_timeout, simulate=True)
+        _client = NgClient(host=_host, port=_port, timeout=_timeout, simulate=_simulate)
         _client.connect()
         print(f"Client instantiated: sock={_client.sock}")
 
         # command gfilter init
-        if _client.command_gfilter_init():
-            print(f"client passed test")
-        else:
-            print(f"client failed test, {_client.error}")
+        print(f"command_gfilter_init() {'succeeded' if _client.command_gfilter_init() else f'failed, error={_client.error}'}")
 
         # command gfilter name <str>
-        if _client.command_gfilter_name(gname='blue'):
-            print(f"client passed test")
-        else:
-            print(f"client failed test, {_client.error}")
+        print(f"command_gfilter_name('blue') {'succeeded' if _client.command_gfilter_name(gname='blue') else f'failed, error={_client.error}'}")
 
         # command gfilter number <int>
-        if _client.command_gfilter_number(gnumber=3):
-            print(f"client passed test")
-        else:
-            print(f"client failed test, {_client.error}")
+        print(f"command_gfilter_number(3) {'succeeded' if _client.command_gfilter_number(gnumber=3) else f'failed, error={_client.error}'}")
 
         # command gfocus delta <float>
-        if _client.command_gfocus_delta(gdelta=50.0):
-            print(f"client passed test")
-        else:
-            print(f"client failed test, {_client.error}")
+        print(f"command_gfocus_delta(50.0) {'succeeded' if _client.command_gfocus_delta(gdelta=50.0) else f'failed, error={_client.error}'}")
 
         # command ifilter init
-        if _client.command_ifilter_init():
-            print(f"client passed test")
-        else:
-            print(f"client failed test, {_client.error}")
+        print(f"command_ifilter_init() {'succeeded' if _client.command_ifilter_init() else f'failed, error={_client.error}'}")
+
+        # command ifilter name <str>
+        print(f"command_ifilter_name('Bob') {'succeeded' if _client.command_ifilter_name(iname='Bob') else f'failed, error={_client.error}'}")
+
+        # command ifilter number <int>
+        print(f"command_ifilter_number(4) {'succeeded' if _client.command_ifilter_number(inumber=4) else f'failed, error={_client.error}'}")
 
         # command ifilter load
-        if _client.command_ifilter_load():
-            print(f"client passed test")
-        else:
-            print(f"client failed test, {_client.error}")
+        print(f"command_ifilter_load() {'succeeded' if _client.command_ifilter_load() else f'failed, error={_client.error}'}")
 
         # command ifilter unload
-        if _client.command_ifilter_unload():
-            print(f"client passed test")
-        else:
-            print(f"client failed test, {_client.error}")
+        print(f"command_ifilter_unload() {'succeeded' if _client.command_ifilter_unload() else f'failed, error={_client.error}'}")
+
+        # command ifocus a <float> b <float> c <float>
+        print(f"command_ifocus(22.0, 33.0, 44.0) {'succeeded' if _client.command_ifocus(a=22.0, b=33.0, c=44.0) else f'failed, error={_client.error}'}")
+
+        # command ifocusall <float>
+        print(f"command_ifocusall(55.0) {'succeeded' if _client.command_ifocusall(focus=55.0) else f'failed, error={_client.error}'}")
+
+        # command lvdt a <float> b <float> c <float>
+        print(f"command_lvdt(22.0, 33.0, 44.0) {'succeeded' if _client.command_lvdt(a=22.0, b=33.0, c=44.0) else f'failed, error={_client.error}'}")
+
+        # command lvdtall <float>
+        print(f"command_lvdtall(55.0) {'succeeded' if _client.command_lvdtall(lvdt=55.0) else f'failed, error={_client.error}'}")
 
         # command test
-        if _client.command_test():
-            print(f"client passed test")
-        else:
-            print(f"client failed test, {_client.error}")
+        print(f"command_test() {'succeeded' if _client.command_test() else f'failed, error={_client.error}'}")
 
         # command exit
+        print(f"command_exit() {'succeeded' if _client.command_exit() else f'failed, error={_client.error}'}")
         if _client.command_exit():
-            print(f"client passed exit")
             if _client is not None and hasattr(_client, 'disconnect'):
                 _client.disconnect()
             _client = None
-        else:
-            print(f"client failed exit, {_client.error}")
 
     except Exception as _x:
-        # report this error
         print(f"{_x}")
-        # report last client error
         if _client is not None and hasattr(_client, 'error'):
             print(f"{_client.error}")
 
@@ -958,11 +946,12 @@ if __name__ == '__main__':
     _p.add_argument('--host', default=f"{BOK_NG_HOST}", help="""Host [%(default)s]""")
     _p.add_argument('--port', default=BOK_NG_PORT, help="""Port [%(default)s]""")
     _p.add_argument('--timeout', default=BOK_NG_TIMEOUT, help="""Timeout (s) [%(default)s]""")
+    _p.add_argument('--simulate', default=False, action='store_true', help='Simulate') 
     _args = _p.parse_args()
 
     # noinspection PyBroadException
     try:
         checkout_requests(_host=_args.host, _port=int(_args.port), _timeout=float(_args.timeout))
-        checkout_commands(_host=_args.host, _port=int(_args.port), _timeout=float(_args.timeout))
+        checkout_commands(_host=_args.host, _port=int(_args.port), _timeout=float(_args.timeout), _simulate=bool(_args.simulate))
     except Exception as _:
         print(f"{_}\nUse: {__doc__}")
