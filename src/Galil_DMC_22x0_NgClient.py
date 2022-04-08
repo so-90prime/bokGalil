@@ -31,6 +31,7 @@ BOK_NG_HOST = "127.0.0.1"
 BOK_NG_IFILTER_SLOTS = [0, 1, 2, 3, 4, 5]
 BOK_NG_INSTRUMENT = "90PRIME"
 BOK_NG_PORT = 5750
+BOK_NG_STRING = 1024
 BOK_NG_TELESCOPE = "BOK"
 BOK_NG_TIMEOUT = 60.0
 BOK_NG_TRUE = [1, '1', 'true', True]
@@ -406,6 +407,9 @@ class NgClient(object):
         if not self.__gfilters:
             self.request_gfilters()
 
+        if gname.strip() not in self.__gfilters_names:
+            return False
+
         _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND GFILTER NAME {gname}")
         return self.parse_command_response(_reply)
 
@@ -420,6 +424,9 @@ class NgClient(object):
 
         if not self.__gfilters:
             self.request_gfilters()
+
+        if gnumber not in self.__gfilters_numbers:
+            return False
 
         _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND GFILTER NUMBER {gnumber}")
         return self.parse_command_response(_reply)
@@ -463,6 +470,12 @@ class NgClient(object):
         if iname.strip() == "":
             return False
 
+        if not self.__ifilters:
+            self.request_ifilters()
+
+        if iname.strip() not in self.__ifilters_names:
+            return False
+
         _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND IFILTER NAME {iname}")
         return self.parse_command_response(_reply)
 
@@ -473,6 +486,12 @@ class NgClient(object):
         """ BOK 90PRIME <cmd-id> COMMAND IFILTER NUMBER <int> """
 
         if inumber not in BOK_NG_IFILTER_SLOTS:
+            return False
+
+        if not self.__ifilters:
+            self.request_ifilters()
+
+        if inumber not in self.__gfilters_numbers:
             return False
 
         _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND IFILTER NUMBER {inumber}")
