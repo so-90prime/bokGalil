@@ -11,6 +11,7 @@ from datetime import timedelta
 
 import argparse
 import math
+import os
 import socket
 
 
@@ -23,20 +24,16 @@ __doc__ = """ python3 Galil_DMC_22x0_NgClient.py --help """
 # +
 # constant(s)
 # -
-BOK_NG_BUCKETS = 64
-BOK_NG_COMMAND = "COMMAND"
+BOK_NG_HELP = os.path.abspath(os.path.expanduser(os.path.join(os.getenv("BOK_GALIL_DOCS", os.getcwd()), 'bok_ng_commands.txt')))
 BOK_NG_FALSE = [0, '0', 'false', False]
 BOK_NG_GFILTER_SLOTS = [1, 2, 3, 4, 5, 6]
 BOK_NG_HOST = "127.0.0.1"
 BOK_NG_IFILTER_SLOTS = [0, 1, 2, 3, 4, 5]
 BOK_NG_INSTRUMENT = "90PRIME"
 BOK_NG_PORT = 5750
-BOK_NG_REQUEST = "REQUEST"
-BOK_NG_STRING = 1024
 BOK_NG_TELESCOPE = "BOK"
 BOK_NG_TIMEOUT = 60.0
 BOK_NG_TRUE = [1, '1', 'true', True]
-BOK_NG_WORD = 256
 
 
 # +
@@ -250,6 +247,47 @@ class NgClient(object):
     @property
     def sock(self):
         return self.__sock
+
+    # +
+    # (hidden) method: __dump__()
+    # -
+    def __dump__(self):
+        """ dump(s) variable(s) """
+
+        print(f"self = {self}")
+        print(f"self.__host = {self.__host}")
+        print(f"self.__port = {self.__port}")
+        print(f"self.__timeout = {self.__timeout}")
+        print(f"self.__simulate = {self.__simulate}")
+
+        print(f"self.__answer = {self.__answer}")
+        print(f"self.__command = {self.__command}")
+        print(f"self.__encoder_a = {self.__encoder_a}")
+        print(f"self.__encoder_b = {self.__encoder_b}")
+        print(f"self.__encoder_c = {self.__encoder_c}")
+        print(f"self.__error = {self.__error}")
+        print(f"self.__gfilters = {self.__gfilters}")
+        print(f"self.__gfilters_names = {self.__gfilters_names}")
+        print(f"self.__gfilters_numbers = {self.__gfilters_numbers}")
+        print(f"self.__gfilters_slots = {self.__gfilters_slots}")
+        print(f"self.__gfilter_name = {self.__gfilter_name}")
+        print(f"self.__gfilter_number = {self.__gfilter_number}")
+        print(f"self.__gfilter_rotating = {self.__gfilter_rotating}")
+        print(f"self.__gfocus = {self.__gfocus}")
+        print(f"self.__ifilters = {self.__ifilters}")
+        print(f"self.__ifilters_names = {self.__ifilters_names}")
+        print(f"self.__ifilters_numbers = {self.__ifilters_numbers}")
+        print(f"self.__ifilters_slots = {self.__ifilters_slots}")
+        print(f"self.__ifilter_inbeam = {self.__ifilter_inbeam}")
+        print(f"self.__ifilter_name = {self.__ifilter_name}")
+        print(f"self.__ifilter_number = {self.__ifilter_number}")
+        print(f"self.__ifilter_rotating = {self.__ifilter_rotating}")
+        print(f"self.__ifilter_translating = {self.__ifilter_translating}")
+        print(f"self.__ifocus_a = {self.__ifocus_a}")
+        print(f"self.__ifocus_b = {self.__ifocus_b}")
+        print(f"self.__ifocus_c = {self.__ifocus_c}")
+        print(f"self.__ifocus_mean = {self.__ifocus_mean}")
+        print(f"self.__sock = None {self.__sock}")
 
     # +
     # method: connect()
@@ -807,7 +845,8 @@ def checkout_requests(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeo
         # instantiate client and connect to server
         _client = NgClient(host=_host, port=_port, timeout=_timeout)
         _client.connect()
-        print(f"Client instantiated: sock={_client.sock}")
+        print(f"Client instantiated OK")
+        print(f"{_client.__dump__()}")
 
         # request encoders
         _client.request_encoders()
@@ -875,51 +914,24 @@ def checkout_commands(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeo
         # instantiate client and connect to server
         _client = NgClient(host=_host, port=_port, timeout=_timeout, simulate=_simulate)
         _client.connect()
-        print(f"Client instantiated: sock={_client.sock}")
+        print(f"Client instantiated OK")
+        print(f"{_client.__dump__()}")
 
-        # command gfilter init
+        # test command(s)
         print(f"command_gfilter_init() {'succeeded' if _client.command_gfilter_init() else f'failed, error={_client.error}'}")
-
-        # command gfilter name <str>
         print(f"command_gfilter_name('blue') {'succeeded' if _client.command_gfilter_name(gname='blue') else f'failed, error={_client.error}'}")
-
-        # command gfilter number <int>
         print(f"command_gfilter_number(3) {'succeeded' if _client.command_gfilter_number(gnumber=3) else f'failed, error={_client.error}'}")
-
-        # command gfocus delta <float>
         print(f"command_gfocus_delta(50.0) {'succeeded' if _client.command_gfocus_delta(gdelta=50.0) else f'failed, error={_client.error}'}")
-
-        # command ifilter init
         print(f"command_ifilter_init() {'succeeded' if _client.command_ifilter_init() else f'failed, error={_client.error}'}")
-
-        # command ifilter name <str>
         print(f"command_ifilter_name('Bob') {'succeeded' if _client.command_ifilter_name(iname='Bob') else f'failed, error={_client.error}'}")
-
-        # command ifilter number <int>
         print(f"command_ifilter_number(4) {'succeeded' if _client.command_ifilter_number(inumber=4) else f'failed, error={_client.error}'}")
-
-        # command ifilter load
         print(f"command_ifilter_load() {'succeeded' if _client.command_ifilter_load() else f'failed, error={_client.error}'}")
-
-        # command ifilter unload
         print(f"command_ifilter_unload() {'succeeded' if _client.command_ifilter_unload() else f'failed, error={_client.error}'}")
-
-        # command ifocus a <float> b <float> c <float>
         print(f"command_ifocus(22.0, 33.0, 44.0) {'succeeded' if _client.command_ifocus(a=22.0, b=33.0, c=44.0) else f'failed, error={_client.error}'}")
-
-        # command ifocusall <float>
         print(f"command_ifocusall(55.0) {'succeeded' if _client.command_ifocusall(focus=55.0) else f'failed, error={_client.error}'}")
-
-        # command lvdt a <float> b <float> c <float>
         print(f"command_lvdt(22.0, 33.0, 44.0) {'succeeded' if _client.command_lvdt(a=22.0, b=33.0, c=44.0) else f'failed, error={_client.error}'}")
-
-        # command lvdtall <float>
         print(f"command_lvdtall(55.0) {'succeeded' if _client.command_lvdtall(lvdt=55.0) else f'failed, error={_client.error}'}")
-
-        # command test
         print(f"command_test() {'succeeded' if _client.command_test() else f'failed, error={_client.error}'}")
-
-        # command exit
         print(f"command_exit() {'succeeded' if _client.command_exit() else f'failed, error={_client.error}'}")
         if _client.command_exit():
             if _client is not None and hasattr(_client, 'disconnect'):
@@ -943,15 +955,20 @@ if __name__ == '__main__':
 
     # get command line argument(s)
     _p = argparse.ArgumentParser(description='Galil_DMC_22x0_TCP_Read', formatter_class=argparse.RawTextHelpFormatter)
+    _p.add_argument('--commands', default=False, action='store_true', help='Show supported commands')
     _p.add_argument('--host', default=f"{BOK_NG_HOST}", help="""Host [%(default)s]""")
     _p.add_argument('--port', default=BOK_NG_PORT, help="""Port [%(default)s]""")
     _p.add_argument('--timeout', default=BOK_NG_TIMEOUT, help="""Timeout (s) [%(default)s]""")
-    _p.add_argument('--simulate', default=False, action='store_true', help='Simulate') 
+    _p.add_argument('--simulate', default=False, action='store_true', help='Simulate')
     _args = _p.parse_args()
 
     # noinspection PyBroadException
     try:
-        checkout_requests(_host=_args.host, _port=int(_args.port), _timeout=float(_args.timeout))
-        checkout_commands(_host=_args.host, _port=int(_args.port), _timeout=float(_args.timeout), _simulate=bool(_args.simulate))
+        if bool(_args.commands):
+            with open(BOK_NG_HELP, 'r') as _f:
+                print(f"{_f.read()}")
+        else:
+            checkout_requests(_host=_args.host, _port=int(_args.port), _timeout=float(_args.timeout))
+            checkout_commands(_host=_args.host, _port=int(_args.port), _timeout=float(_args.timeout), _simulate=bool(_args.simulate))
     except Exception as _:
         print(f"{_}\nUse: {__doc__}")
