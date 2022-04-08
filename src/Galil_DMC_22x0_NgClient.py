@@ -517,7 +517,7 @@ class NgClient(object):
 
         _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND IFOCUS A {a} B {b} C {c}")
         return self.parse_command_response(_reply)
-
+œ
     # +
     # method: command_ifocusall()
     # -
