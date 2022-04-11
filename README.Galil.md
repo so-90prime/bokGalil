@@ -89,8 +89,8 @@ Oriel Filter Wheel (DMC code mapping):
                                   0                7       
 ```
 
-During the tests FNUM was inconsistent but it's not really used by the DMC code either!
-So, bok_gfilters.txtn should read:
+During the tests FNUM was inconsistent, but it's not really used by the DMC code either!
+So, bok_gfilters.txt should read:
 
 ```bash
 #This file contains the master look-up table for the 90prime guider filter wheel.
