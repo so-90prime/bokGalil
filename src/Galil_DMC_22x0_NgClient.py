@@ -261,17 +261,17 @@ class NgClient(object):
         print(f"self.__timeout = {self.__timeout}")
         print(f"self.__simulate = {self.__simulate}")
 
-        print(f"self.__answer = {self.__answer}")
-        print(f"self.__command = {self.__command}")
+        print(f"self.__answer = '{self.__answer}'")
+        print(f"self.__command = '{self.__command}'")
         print(f"self.__encoder_a = {self.__encoder_a}")
         print(f"self.__encoder_b = {self.__encoder_b}")
         print(f"self.__encoder_c = {self.__encoder_c}")
-        print(f"self.__error = {self.__error}")
+        print(f"self.__error = '{self.__error}'")
         print(f"self.__gfilters = {self.__gfilters}")
         print(f"self.__gfilters_names = {self.__gfilters_names}")
         print(f"self.__gfilters_numbers = {self.__gfilters_numbers}")
         print(f"self.__gfilters_slots = {self.__gfilters_slots}")
-        print(f"self.__gfilter_name = {self.__gfilter_name}")
+        print(f"self.__gfilter_name = '{self.__gfilter_name}'")
         print(f"self.__gfilter_number = {self.__gfilter_number}")
         print(f"self.__gfilter_rotating = {self.__gfilter_rotating}")
         print(f"self.__gfocus = {self.__gfocus}")
@@ -280,7 +280,7 @@ class NgClient(object):
         print(f"self.__ifilters_numbers = {self.__ifilters_numbers}")
         print(f"self.__ifilters_slots = {self.__ifilters_slots}")
         print(f"self.__ifilter_inbeam = {self.__ifilter_inbeam}")
-        print(f"self.__ifilter_name = {self.__ifilter_name}")
+        print(f"self.__ifilter_name = '{self.__ifilter_name}'")
         print(f"self.__ifilter_number = {self.__ifilter_number}")
         print(f"self.__ifilter_rotating = {self.__ifilter_rotating}")
         print(f"self.__ifilter_translating = {self.__ifilter_translating}")
@@ -517,7 +517,7 @@ class NgClient(object):
 
         _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND IFOCUS A {a} B {b} C {c}")
         return self.parse_command_response(_reply)
-œ
+
     # +
     # method: command_ifocusall()
     # -
