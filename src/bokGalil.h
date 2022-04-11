@@ -48,7 +48,7 @@
 #define BOK_GFILTER_COLUMNS  3
 #define BOK_GFILTER_SLOTS    7
 #define BOK_IAXIS_INPUTS     10
-#define BOK_NG_HOST          "127.0.0.1"
+#define BOK_NG_HOST          "10.30.1.2"
 #define BOK_NG_PORT          5750
 #define BOK_NG_TELESCOPE     "BOK"
 #define BOK_NG_INSTRUMENT    "90PRIME"

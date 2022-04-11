@@ -26,6 +26,7 @@ This software only supports /dev/shm shared memory under Unix.
  % source etc/bokGalil.sh `pwd` load
  % cd $BOK_GALIL_HOME
  % sudo python3 -m pip install -r requirements.txt
+ % mkdir lib log
  % cd $BOK_GALIL_SRC
  % make everything
 ```
