@@ -64,7 +64,7 @@ void client_handler(int handler_fd) {
     (void) printf("Client handler from server: '%s'\n", incoming);
 
     /* exit */
-    if ((p=strstr(incoming, "EXIT")) != (char *)NULL) {
+    if ((p=strstr(outgoing, " EXIT"))!=(char *)NULL && (p=strstr(incoming, " OK"))!=(char *)NULL) {
       (void) printf("Client handler exiting\n");
       running = false;
       break;

@@ -3,23 +3,6 @@
  * Galil_DMC_22x0_NgServer.c
  *
  * Command(s) supported:
- *   BOK 90PRIME <cmd-id> COMMAND EXIT           - Done
- *   BOK 90PRIME <cmd-id> COMMAND GFILTER INIT   - Done
- *   BOK 90PRIME <cmd-id> COMMAND IFILTER INIT   - Done
- *   BOK 90PRIME <cmd-id> COMMAND IFILTER LOAD   - Done
- *   BOK 90PRIME <cmd-id> COMMAND IFILTER UNLOAD - Done
- *   BOK 90PRIME <cmd-id> COMMAND TEST           - Done
- *
- *   BOK 90PRIME <cmd_id> COMMAND GFILTER NUMBER=<int>
- *       xq_hx; xq_gfiltn(GFILTN=x); xq_gfwmov()
- *   BOK 90PRIME <cmd_id> COMMAND GFILTER NAME=<str>
- *       xq_hx; xq_gfiltn(convert(NAME)); xq_gfwmov
- *   BOK 90PRIME <cmd-id> COMMAND GFOCUS DIST=<float>
- *       distgcam = DIST
- *       xq_hx; xq_gfocus(distgcam) *
- *
- *   BOK 90PRIME <cmd_id> COMMAND IFILTER NUMBER=<int>
- *   BOK 90PRIME <cmd_id> COMMAND IFILTER NAME=<str>
  *
  *   BOK 90PRIME <cmd-id> COMMAND IFOCUS DISTA=<float> DISTB=<float> DISTC=<float>
  *       xq_hx; xq_focusind(dista, distb, distc)
@@ -35,14 +18,6 @@
  *       distall = round((distall / 1000.0) * BOK_LVDT_ATOD));
  *       xq_hx; xq_focusind(distall, distall, distall)
  *
- * Request(s) supported:
- *   BOK 90PRIME <cmd-id> REQUEST ENCODERS
- *   BOK 90PRIME <cmd-id> REQUEST GFOCUS
- *   BOK 90PRIME <cmd-id> REQUEST GFILTERS
- *   BOK 90PRIME <cmd-id> REQUEST GFILTER
- *   BOK 90PRIME <cmd-id> REQUEST IFILTERS
- *   BOK 90PRIME <cmd-id> REQUEST IFILTER
- *   BOK 90PRIME <cmd-id> REQUEST IFOCUS
  *
  ******************************************************************************/
 
@@ -129,7 +104,8 @@ void *thread_handler(void *thread_fd) {
     /* report incoming */
     if ((p=strchr(incoming, '\n')) != (char *)NULL) { *p = '\0'; }
     if ((p=strchr(incoming, '\r')) != (char *)NULL) { *p = '\0'; }
-    (void) printf("Server thread handler received from client: '%s'\n", incoming);
+    (void) fprintf(stdout, "Server thread handler received from client: '%s'\n", incoming);
+    (void) fflush(stdout);
 
     /* parse */
     cliInit(BOK_NG_BUCKETS, BOK_NG_WORD, bok_ng_commands);
@@ -165,46 +141,53 @@ void *thread_handler(void *thread_fd) {
           (istat=strncasecmp(bok_ng_commands[4], "GFILTER", strlen("GFILTER"))==0) &&
           (istat=strncasecmp(bok_ng_commands[5], "INIT", strlen("INIT"))==0) ) {
 
-        /* read memory */
-        tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
-        tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
+        /* output message */
+        (void) fprintf(stdout, "Server thread is initializing guider filter wheel\n");
+        (void) fflush(stdout);
 
-        if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
-          (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
+        /* in simulation, wait and return success */
+        if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
+          (void) sleep(BOK_NG_GUIDER_INIT_TIME);
+          (void) strcat(outgoing, " OK\n");
 
+        /* talk to hardware */
         } else {
 
-          /* simulate */
-          is_done = false;
-          if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
-            (void) sleep(BOK_NG_GUIDER_INIT_TIME);
-            is_done = true;
+          /* read memory */
+          tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
+          tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
 
-          /* talk to hardware */
+          /* check memory */
+          if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
+            (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
+
+          /* check hardware is idle */
+          } else if (IS_BIT_SET(tcp_shm_ptr->status, 7) == 1) {
+            (void) strcat(outgoing, " ERROR (hardware busy)\n");
+
+          /* execute */
           } else {
+            is_done = false;
             if ((gstat=xq_gfwinit()) == G_NO_ERROR) {
               countdown = BOK_NG_GUIDER_INIT_TIME;
               while (--countdown > 0) {
                 (void) sleep(1);
-                if ((((int)round(tcp_shm_ptr->lv.gfiltn))) == 1) {
-                  is_done = true;
-                  break;
-                }
+                ival = (int)round(tcp_shm_ptr->lv.gfiltn);
+                (void) fprintf(stdout, "Server thread is checking gfiltn %d\n", ival); (void) fflush(stdout);
+                if (ival>0 && ival<BOK_GFILTER_SLOTS) { is_done = true; break; }
               }
+            }
+            if (is_done) {
+              (void) strcat(outgoing, " OK\n");
+            } else {
+              (void) strcat(outgoing, " ERROR (timeout or hardware unresponsive)\n");
             }
           }
 
-          /* report success or timeout */
-          if (is_done) {
-            (void) strcat(outgoing, " OK\n");
-          } else {
-            (void) strcat(outgoing, " ERROR (timeout or hardware unresponsive)\n");
-          }
+          /* close memory */
+          if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
+          if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
         }
-
-        /* close memory */
-        if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
-        if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
 
       /*******************************************************************************
        * BOK 90PRIME <cmd-id> COMMAND GFILTER NAME <str>
@@ -214,45 +197,84 @@ void *thread_handler(void *thread_fd) {
           (istat=strncasecmp(bok_ng_commands[5], "NAME", strlen("NAME"))==0) &&
           (istat=(int)strlen(bok_ng_commands[6])>0) ) {
 
-        /* read memory */
-        tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
-        tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
-
-        if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
-          (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
-        } else {
-
-          /* simulate */
-          is_done = false;
-          if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
-            (void) sleep(BOK_NG_GUIDER_FILTER_TIME);
-            is_done = true;
-
-          /* talk to hardware - TO_DO */
-          } else {
-            if ((gstat=xq_hx()) == G_NO_ERROR) {
-              countdown = BOK_NG_GUIDER_FILTER_TIME;
-              while (--countdown > 0) {
-                (void) sleep(1);
-//                if ((((int)round(tcp_shm_ptr->lv.gfiltn))) == 1) {
-//                  is_done = true;
-//                  break;
-//                }
-              }
-            }
-          }
-
-          /* report success or timeout */
-          if (is_done) {
-            (void) strcat(outgoing, " OK\n");
-          } else {
-            (void) strcat(outgoing, " ERROR (timeout or hardware unresponsive)\n");
+        /* convert name to number */
+        ival = INT_MAX;
+        for (int j=0; j<BOK_GFILTERS; j++) {
+          if ((istat=strncasecmp(bok_gfilters[j].name, bok_ng_commands[6], strlen(bok_ng_commands[6]))) == 0) {
+            ival = j;
+            break;
           }
         }
 
-        /* close memory */
-        if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
-        if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
+        /* output message */
+        (void) fprintf(stdout, "Server thread is moving guider filter to '%s' (%d)\n", bok_ng_commands[6], ival);
+        (void) fflush(stdout);
+
+        /* in simulation, wait and return success */
+        if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
+          if (ival>0 && ival<BOK_GFILTER_SLOTS) {
+            (void) sleep(BOK_NG_GUIDER_FILTER_TIME);
+            (void) strcat(outgoing, " OK\n");
+          } else {
+            (void) strcat(outgoing, " ERROR (number out of range)\n");
+          }
+
+        /* talk to hardware */
+        } else {
+
+          /* read memory */
+          tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
+          tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
+
+          /* check memory */
+          if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
+            (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
+
+          /* check hardware is idle */
+          } else if (IS_BIT_SET(tcp_shm_ptr->status, 7) == 1) {
+            (void) strcat(outgoing, " ERROR (hardware busy)\n");
+
+          /* check gfilter wheel has been initialized */
+          } else if ((int)abs(round(tcp_shm_ptr->lv.gfiltn)) > BOK_GFILTER_SLOTS) {
+            (void) strcat(outgoing, " ERROR (guider filter wheel not initialized)\n");
+
+          /* check decoded value is good */
+          } else if (ival == INT_MIN) {
+            (void) strcat(outgoing, " ERROR (number bad value)\n");
+
+          /* check decoded value is valid */
+          } else if (ival<0 || ival>BOK_GFILTER_SLOTS) {
+            (void) strcat(outgoing, " ERROR (number out of range)\n");
+
+          /* execute */
+          } else {
+            is_done = false;
+            if ((gstat=xq_gfiltn((float)ival))==G_NO_ERROR && (gstat=xq_gfwmov())==G_NO_ERROR) {
+              countdown = BOK_NG_GUIDER_FILTER_TIME;
+              while (--countdown > 0) {
+                (void) sleep(1);
+                (void) fprintf(stdout, "Server thread is checking gfiltn %d and snum %d\n",
+                  (int)round(tcp_shm_ptr->lv.gfiltn), (int)round(tcp_shm_ptr->lv.snum));
+                (void) fflush(stdout);
+                if ((int)round(tcp_shm_ptr->lv.gfiltn)==1 && (int)round(tcp_shm_ptr->lv.snum)==1) { is_done = true; break; }
+                if ((int)round(tcp_shm_ptr->lv.gfiltn)==2 && (int)round(tcp_shm_ptr->lv.snum)==3) { is_done = true; break; }
+                if ((int)round(tcp_shm_ptr->lv.gfiltn)==3 && (int)round(tcp_shm_ptr->lv.snum)==2) { is_done = true; break; }
+                if ((int)round(tcp_shm_ptr->lv.gfiltn)==4 && (int)round(tcp_shm_ptr->lv.snum)==6) { is_done = true; break; }
+                if ((int)round(tcp_shm_ptr->lv.gfiltn)==5 && (int)round(tcp_shm_ptr->lv.snum)==4) { is_done = true; break; }
+                if ((int)round(tcp_shm_ptr->lv.gfiltn)==6 && (int)round(tcp_shm_ptr->lv.snum)==5) { is_done = true; break; }
+              }
+            }
+            if (is_done) {
+              (void) strcat(outgoing, " OK\n");
+            } else {
+              (void) strcat(outgoing, " ERROR (timeout or hardware unresponsive)\n");
+            }
+          }
+
+          /* close memory */
+          if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
+          if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
+        }
 
       /*******************************************************************************
        * BOK 90PRIME <cmd-id> COMMAND GFILTER NUMBER <int>
@@ -262,103 +284,154 @@ void *thread_handler(void *thread_fd) {
           (istat=strncasecmp(bok_ng_commands[5], "NUMBER", strlen("NUMBER"))==0) &&
           (istat=(int)strlen(bok_ng_commands[6])>0) ) {
 
-        /* read memory */
-        tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
-        tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
+        /* output message */
         decode_integer(bok_ng_commands[6], &ival);
+        if (ival>0 && ival<BOK_GFILTER_SLOTS) {
+          (void) fprintf(stdout, "Server thread is moving guider filter to %d ('%s')\n", ival, bok_gfilters[ival].name);
+        } else {
+          (void) fprintf(stdout, "Server thread is moving guider filter to %d\n", ival);
+        }
+        (void) fflush(stdout);
 
-        if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
-          (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
+        /* in simulation, wait and return success */
+        if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
+          if (ival>0 && ival<BOK_GFILTER_SLOTS) {
+            (void) sleep(BOK_NG_GUIDER_FILTER_TIME);
+            (void) strcat(outgoing, " OK\n");
+          } else {
+            (void) strcat(outgoing, " ERROR (number out of range)\n");
+          }
 
-        } else if (ival == INT_MIN) {
-          (void) strcat(outgoing, " ERROR (invalid number)\n");
-
+        /* talk to hardware */
         } else {
 
-          /* simulate */
-          is_done = false;
-          if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
-            (void) sleep(BOK_NG_GUIDER_FILTER_TIME);
-            is_done = true;
+          /* read memory */
+          tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
+          tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
 
-          /* talk to hardware - TO_DO */
+          /* check memory */
+          if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
+            (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
+
+          /* check hardware is idle */
+          } else if (IS_BIT_SET(tcp_shm_ptr->status, 7) == 1) {
+            (void) strcat(outgoing, " ERROR (hardware busy)\n");
+
+          /* check gfilter wheel has been initialized */
+          } else if ((int)abs(round(tcp_shm_ptr->lv.gfiltn)) > BOK_GFILTER_SLOTS) {
+            (void) strcat(outgoing, " ERROR (guider filter wheel not initialized)\n");
+
+          /* check decoded value is good */
+          } else if (ival == INT_MIN) {
+            (void) strcat(outgoing, " ERROR (number bad value)\n");
+
+          /* check decoded value is valid */
+          } else if (ival<0 || ival>BOK_GFILTER_SLOTS) {
+            (void) strcat(outgoing, " ERROR (number out of range)\n");
+
+          /* execute */
           } else {
-            if ((gstat=xq_hx()) == G_NO_ERROR) {
+            is_done = false;
+            if ((gstat=xq_gfiltn((float)ival))==G_NO_ERROR && (gstat=xq_gfwmov())==G_NO_ERROR) {
               countdown = BOK_NG_GUIDER_FILTER_TIME;
               while (--countdown > 0) {
                 (void) sleep(1);
-//                if ((((int)round(tcp_shm_ptr->lv.gfiltn))) == 1) {
-//                  is_done = true;
-//                  break;
-//                }
+                (void) fprintf(stdout, "Server thread is checking gfiltn %d and snum %d\n",
+                  (int)round(tcp_shm_ptr->lv.gfiltn), (int)round(tcp_shm_ptr->lv.snum));
+                (void) fflush(stdout);
+                if ((int)round(tcp_shm_ptr->lv.gfiltn)==1 && (int)round(tcp_shm_ptr->lv.snum)==1) { is_done = true; break; }
+                if ((int)round(tcp_shm_ptr->lv.gfiltn)==2 && (int)round(tcp_shm_ptr->lv.snum)==3) { is_done = true; break; }
+                if ((int)round(tcp_shm_ptr->lv.gfiltn)==3 && (int)round(tcp_shm_ptr->lv.snum)==2) { is_done = true; break; }
+                if ((int)round(tcp_shm_ptr->lv.gfiltn)==4 && (int)round(tcp_shm_ptr->lv.snum)==6) { is_done = true; break; }
+                if ((int)round(tcp_shm_ptr->lv.gfiltn)==5 && (int)round(tcp_shm_ptr->lv.snum)==4) { is_done = true; break; }
+                if ((int)round(tcp_shm_ptr->lv.gfiltn)==6 && (int)round(tcp_shm_ptr->lv.snum)==5) { is_done = true; break; }
               }
+            }
+            if (is_done) {
+              (void) strcat(outgoing, " OK\n");
+            } else {
+              (void) strcat(outgoing, " ERROR (timeout or hardware unresponsive)\n");
             }
           }
 
-          /* report success or timeout */
-          if (is_done) {
-            (void) strcat(outgoing, " OK\n");
-          } else {
-            (void) strcat(outgoing, " ERROR (timeout or hardware unresponsive)\n");
-          }
+          /* close memory */
+          if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
+          if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
         }
 
-        /* close memory */
-        if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
-        if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
-
       /*******************************************************************************
-       * BOK 90PRIME <cmd-id> COMMAND GFOCUS DELTA <float>
+       * BOK 90PRIME <cmd-id> COMMAND GFOCUS DISTGCAM <float>
        ******************************************************************************/
       } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
           (istat=strncasecmp(bok_ng_commands[4], "GFOCUS", strlen("GFOCUS"))==0) &&
-          (istat=strncasecmp(bok_ng_commands[5], "DELTA", strlen("DELTA"))==0) &&
+          (istat=strncasecmp(bok_ng_commands[5], "DISTGCAM", strlen("DISTGCAM"))==0) &&
           (istat=(int)strlen(bok_ng_commands[6])>0) ) {
 
-        /* read memory */
-        tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
-        tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
+        /* output message */
         decode_float(bok_ng_commands[6], &fval);
+        (void) fprintf(stdout, "Server thread is moving guider focus to %.4f\n", fval);
+        (void) fflush(stdout);
 
-        if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
-          (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
+        /* in simulation, wait and return success */
+        if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
+          if (fval != NAN) {
+            (void) sleep(BOK_NG_GUIDER_FOCUS_TIME);
+            (void) strcat(outgoing, " OK\n");
+          } else {
+            (void) strcat(outgoing, " ERROR (number out of range)\n");
+          }
 
-        } else if (fval == NAN) {
-          (void) strcat(outgoing, " ERROR (invalid number)\n");
-
+        /* talk to hardware */
         } else {
 
-          /* simulate */
-          is_done = false;
-          if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
-            (void) sleep(BOK_NG_GUIDER_FOCUS_TIME);
-            is_done = true;
+          /* read memory */
+          tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
+          tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
+          udp_shm_fd = shm_open(BOK_SHM_UDP_NAME, O_RDONLY, 0666);
+          udp_shm_ptr = (udp_val_p)mmap(0, UDP_VAL_SIZE, PROT_READ, MAP_SHARED, udp_shm_fd, 0);
 
-          /* talk to hardware - TO_DO */
+          /* check tcp memory */
+          if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
+            (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
+
+          /* check udp memory */
+          } else if (udp_shm_fd<0 || udp_shm_ptr==(udp_val_p)NULL) {
+            (void) strcat(outgoing, " ERROR (invalid udp memory)\n");
+
+          /* check hardware is idle */
+          } else if (IS_BIT_SET(tcp_shm_ptr->status, 7) == 1) {
+            (void) strcat(outgoing, " ERROR (hardware busy)\n");
+
+          /* check input is valid */
+          } else if (fval == NAN) {
+            (void) strcat(outgoing, " ERROR (invalid number)\n");
+
+          /* execute */
           } else {
-            if ((gstat=xq_hx()) == G_NO_ERROR) {
+            is_done = false;
+            if ((gstat=xq_gfocus(fval)) == G_NO_ERROR) {
               countdown = BOK_NG_GUIDER_FOCUS_TIME;
               while (--countdown > 0) {
                 (void) sleep(1);
-//                if ((((int)round(tcp_shm_ptr->lv.distgcam))) == 1) {
-//                  is_done = true;
-//                  break;
-//                }
+                (void) fprintf(stdout, "Server thread is checking distgcam %.4f and eaxis_reference_position %.4f\n",
+                  tcp_shm_ptr->lv.distgcam, (float)udp_shm_ptr->eaxis_reference_position);
+                (void) fflush(stdout);
+                if (abs(tcp_shm_ptr->lv.distgcam - (float)udp_shm_ptr->eaxis_reference_position) < 1.0) { is_done = true; break; }
               }
+            }
+            if (is_done) {
+              (void) strcat(outgoing, " OK\n");
+            } else {
+              (void) strcat(outgoing, " ERROR (timeout or hardware unresponsive)\n");
             }
           }
 
-          /* report success or timeout */
-          if (is_done) {
-            (void) strcat(outgoing, " OK\n");
-          } else {
-            (void) strcat(outgoing, " ERROR (timeout or hardware unresponsive)\n");
-          }
+          /* close memory */
+          if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
+          if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
+          if (udp_shm_ptr != (udp_val_p)NULL) { (void) munmap(udp_shm_ptr, UDP_VAL_SIZE); }
+          if (udp_shm_fd >= 0) { (void) close(udp_shm_fd); }
         }
-
-        /* close memory */
-        if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
-        if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
 
       /*******************************************************************************
        * BOK 90PRIME <cmd-id> COMMAND IFILTER INIT
@@ -367,47 +440,117 @@ void *thread_handler(void *thread_fd) {
           (istat=strncasecmp(bok_ng_commands[4], "IFILTER", strlen("IFILTER"))==0) &&
           (istat=strncasecmp(bok_ng_commands[5], "INIT", strlen("INIT"))==0) ) {
 
-        /* read memory */
-        tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
-        tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
+        /* output message */
+        (void) fprintf(stdout, "Server thread is initializing instrument filter wheel\n");
+        (void) fflush(stdout);
 
-        if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
-          (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
+        /* in simulation, wait and return success */
+        if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
+          (void) sleep(BOK_NG_INSTRUMENT_INIT_TIME);
+          (void) strcat(outgoing, " OK\n");
+
+        /* talk to hardware */
         } else {
 
-          /* simulate */
-          is_done = false;
-          if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
-            (void) sleep(BOK_NG_INSTRUMENT_INIT_TIME);
-            is_done = true;
+          /* read memory */
+          tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
+          tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
 
-          /* talk to hardware */
+          /* check memory */
+          if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
+            (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
+
+          /* check hardware is idle */
+          } else if (IS_BIT_SET(tcp_shm_ptr->status, 7) == 1) {
+            (void) strcat(outgoing, " ERROR (hardware busy)\n");
+
+          /* cannot initialize when a filter is loaded */
+          } else if (((int)round(tcp_shm_ptr->lv.filtisin)) == 1) {
+              (void) strcat(outgoing, " ERROR (filter in beam)\n");
+
+          /* execute */
           } else {
-            if ((gstat=xq_filtrd()) == G_NO_ERROR) {
+            is_done = false;
+            if ((gstat=xq_filtldm())==G_NO_ERROR && ((istat=(int)sleep(BOK_NG_INSTRUMENT_LOAD_TIME))==0) &&
+              (gstat=xq_hx())==G_NO_ERROR && (gstat=xq_filtrd())==G_NO_ERROR) {
               countdown = BOK_NG_INSTRUMENT_INIT_TIME;
               while (--countdown > 0) {
                 (void) sleep(1);
-                if ((((int)round(tcp_shm_ptr->lv.gfiltn))) == 1) {
-                  is_done = true;
-                  break;
-                }
+                (void) fprintf(stdout, "Server thread is checking initfilt %d\n", (int)round(tcp_shm_ptr->lv.initfilt));
+                (void) fflush(stdout);
+                if (((int)round(tcp_shm_ptr->lv.initfilt)) == 1) { is_done = true; break; }
               }
             }
           }
-
-          /* report success or timeout */
           if (is_done) {
             (void) strcat(outgoing, " OK\n");
           } else {
             (void) strcat(outgoing, " ERROR (timeout or hardware unresponsive)\n");
           }
+
+          /* close memory */
+          if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
+          if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
         }
 
-        /* close memory */
-        if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
-        if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
-
       /*******************************************************************************
+       * BOK 90PRIME <cmd-id> COMMAND IFILTER LOAD
+       ******************************************************************************/
+      } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
+          (istat=strncasecmp(bok_ng_commands[4], "IFILTER", strlen("IFILTER"))==0) &&
+          (istat=strncasecmp(bok_ng_commands[5], "LOAD", strlen("LOAD"))==0) ) {
+
+        /* output message */
+        (void) fprintf(stdout, "Server thread is loading instrument filter\n");
+        (void) fflush(stdout);
+
+        /* in simulation, wait and return success */
+        if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
+          (void) sleep(BOK_NG_INSTRUMENT_LOAD_TIME);
+          (void) strcat(outgoing, " OK\n");
+
+        /* talk to hardware */
+        } else {
+
+          /* read memory */
+          tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
+          tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
+
+          /* check memory */
+          if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
+            (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
+
+          /* check hardware is idle */
+          } else if (IS_BIT_SET(tcp_shm_ptr->status, 7) == 1) {
+            (void) strcat(outgoing, " ERROR (hardware busy)\n");
+
+          /* do nothing if filter already loaded */
+          } else if (((int)round(tcp_shm_ptr->lv.filtisin)) == 1) {
+              (void) strcat(outgoing, " OK\n");
+
+          /* talk to hardware */
+          } else {
+            is_done = false;
+            if ((gstat=xq_filtin()) == G_NO_ERROR) {
+              countdown = BOK_NG_INSTRUMENT_LOAD_TIME;
+              while (--countdown > 0) {
+                (void) sleep(1);
+                if (((int)round(tcp_shm_ptr->lv.filtisin)) == 1) { is_done = true; break; }
+              }
+            }
+            if (is_done) {
+              (void) strcat(outgoing, " OK\n");
+            } else {
+              (void) strcat(outgoing, " ERROR (timeout or hardware unresponsive)\n");
+            }
+          }
+
+          /* close memory */
+          if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
+          if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
+        }
+
+       /*******************************************************************************
        * BOK 90PRIME <cmd-id> COMMAND IFILTER NAME <str>
        ******************************************************************************/
       } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
@@ -415,45 +558,79 @@ void *thread_handler(void *thread_fd) {
           (istat=strncasecmp(bok_ng_commands[5], "NAME", strlen("NAME"))==0) &&
           (istat=(int)strlen(bok_ng_commands[6])>0) ) {
 
-        /* read memory */
-        tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
-        tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
-
-        if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
-          (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
-        } else {
-
-          /* simulate */
-          is_done = false;
-          if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
-            (void) sleep(BOK_NG_INSTRUMENT_FILTER_TIME);
-            is_done = true;
-
-          /* talk to hardware - TO_DO */
-          } else {
-            if ((gstat=xq_hx()) == G_NO_ERROR) {
-              countdown = BOK_NG_INSTRUMENT_FILTER_TIME;
-              while (--countdown > 0) {
-                (void) sleep(1);
-//                if ((((int)round(tcp_shm_ptr->lv.gfiltn))) == 1) {
-//                  is_done = true;
-//                  break;
-//                }
-              }
-            }
-          }
-
-          /* report success or timeout */
-          if (is_done) {
-            (void) strcat(outgoing, " OK\n");
-          } else {
-            (void) strcat(outgoing, " ERROR (timeout or hardware unresponsive)\n");
+        /* convert name to number */
+        ival = INT_MAX;
+        for (int j=0; j<BOK_IFILTERS; j++) {
+          if ((istat=strncasecmp(bok_ifilters[j].name, bok_ng_commands[6], strlen(bok_ng_commands[6]))) == 0) {
+            ival = j;
+            break;
           }
         }
 
-        /* close memory */
-        if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
-        if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
+        /* output message */
+        (void) fprintf(stdout, "Server thread is moving instrument filter to '%s' (%d)\n", bok_ng_commands[6], ival);
+        (void) fflush(stdout);
+
+        /* in simulation, wait and return success */
+        if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
+          if (ival>0 && ival<BOK_IFILTER_SLOTS) {
+            (void) sleep(BOK_NG_INSTRUMENT_FILTER_TIME);
+            (void) strcat(outgoing, " OK\n");
+          } else {
+            (void) strcat(outgoing, " ERROR (number out of range)\n");
+          }
+
+        /* talk to hardware */
+        } else {
+
+          /* read memory */
+          tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
+          tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
+
+          /* check memory */
+          if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
+            (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
+
+          /* check hardware is idle */
+          } else if (IS_BIT_SET(tcp_shm_ptr->status, 7) == 1) {
+            (void) strcat(outgoing, " ERROR (hardware busy)\n");
+
+          /* check filter wheel has been initialized */
+          } else if ((int)abs(round(tcp_shm_ptr->lv.initfilt)) != 1) {
+            (void) strcat(outgoing, " ERROR (instrument filter wheel not initialized)\n");
+
+          /* check decoded value is good */
+          } else if (ival == INT_MIN) {
+            (void) strcat(outgoing, " ERROR (number bad value)\n");
+
+          /* check decoded value is valid */
+          } else if (ival<0 || ival>BOK_IFILTER_SLOTS) {
+            (void) strcat(outgoing, " ERROR (number out of range)\n");
+
+          /* execute */
+          } else {
+            is_done = false;
+            if ((gstat=xq_reqfilt((float)ival))==G_NO_ERROR && (gstat=xq_filtmov())==G_NO_ERROR) {
+              countdown = BOK_NG_INSTRUMENT_FILTER_TIME;
+              while (--countdown > 0) {
+                (void) sleep(1);
+                (void) fprintf(stdout, "Server thread is checking reqfilt %d and filtval %d\n",
+                  (int)round(tcp_shm_ptr->lv.reqfilt), (int)round(tcp_shm_ptr->lv.filtval));
+                (void) fflush(stdout);
+                if ((int)round(tcp_shm_ptr->lv.reqfilt) == (int)round(tcp_shm_ptr->lv.filtval)) { is_done = true; break; }
+              }
+            }
+            if (is_done) {
+              (void) strcat(outgoing, " OK\n");
+            } else {
+              (void) strcat(outgoing, " ERROR (timeout or hardware unresponsive)\n");
+            }
+          }
+
+          /* close memory */
+          if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
+          if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
+        }
 
       /*******************************************************************************
        * BOK 90PRIME <cmd-id> COMMAND IFILTER NUMBER <int>
@@ -463,104 +640,75 @@ void *thread_handler(void *thread_fd) {
           (istat=strncasecmp(bok_ng_commands[5], "NUMBER", strlen("NUMBER"))==0) &&
           (istat=(int)strlen(bok_ng_commands[6])>0) ) {
 
-        /* read memory */
-        tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
-        tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
+        /* output message */
         decode_integer(bok_ng_commands[6], &ival);
+        if (ival>0 && ival<BOK_IFILTER_SLOTS) {
+          (void) fprintf(stdout, "Server thread is moving instrument filter to %d ('%s')\n", ival, bok_ifilters[ival].name);
+        } else {
+          (void) fprintf(stdout, "Server thread is moving instrument filter to %d\n", ival);
+        }
+        (void) fflush(stdout);
 
-        if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
-          (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
+        /* in simulation, wait and return success */
+        if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
+          if (ival>0 && ival<BOK_IFILTER_SLOTS) {
+            (void) sleep(BOK_NG_INSTRUMENT_FILTER_TIME);
+            (void) strcat(outgoing, " OK\n");
+          } else {
+            (void) strcat(outgoing, " ERROR (number out of range)\n");
+          }
 
-        } else if (ival == INT_MIN) {
-          (void) strcat(outgoing, " ERROR (invalid number)\n");
-
+        /* talk to hardware */
         } else {
 
-          /* simulate */
-          is_done = false;
-          if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
-            (void) sleep(BOK_NG_INSTRUMENT_FILTER_TIME);
-            is_done = true;
+          /* read memory */
+          tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
+          tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
 
-          /* talk to hardware - TO_DO */
+          /* check memory */
+          if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
+            (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
+
+          /* check hardware is idle */
+          } else if (IS_BIT_SET(tcp_shm_ptr->status, 7) == 1) {
+            (void) strcat(outgoing, " ERROR (hardware busy)\n");
+
+          /* check filter wheel has been initialized */
+          } else if ((int)abs(round(tcp_shm_ptr->lv.initfilt)) != 1) {
+            (void) strcat(outgoing, " ERROR (instrument filter wheel not initialized)\n");
+
+          /* check decoded value is good */
+          } else if (ival == INT_MIN) {
+            (void) strcat(outgoing, " ERROR (number bad value)\n");
+
+          /* check decoded value is valid */
+          } else if (ival<0 || ival>BOK_IFILTER_SLOTS) {
+            (void) strcat(outgoing, " ERROR (number out of range)\n");
+
+          /* execute */
           } else {
-            if ((gstat=xq_hx()) == G_NO_ERROR) {
+            is_done = false;
+            if ((gstat=xq_reqfilt((float)ival))==G_NO_ERROR && (gstat=xq_filtmov())==G_NO_ERROR) {
               countdown = BOK_NG_INSTRUMENT_FILTER_TIME;
               while (--countdown > 0) {
                 (void) sleep(1);
-//                if ((((int)round(tcp_shm_ptr->lv.gfiltn))) == 1) {
-//                  is_done = true;
-//                  break;
-//                }
+                (void) fprintf(stdout, "Server thread is checking reqfilt %d and filtval %d\n",
+                  (int)round(tcp_shm_ptr->lv.reqfilt), (int)round(tcp_shm_ptr->lv.filtval));
+                (void) fflush(stdout);
+                if ((int)round(tcp_shm_ptr->lv.reqfilt) == (int)round(tcp_shm_ptr->lv.filtval)) { is_done = true; break; }
               }
             }
-          }
-
-          /* report success or timeout */
-          if (is_done) {
-            (void) strcat(outgoing, " OK\n");
-          } else {
-            (void) strcat(outgoing, " ERROR (timeout or hardware unresponsive)\n");
-          }
-        }
-
-        /* close memory */
-        if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
-        if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
-
-      /*******************************************************************************
-       * BOK 90PRIME <cmd-id> COMMAND IFILTER LOAD
-       ******************************************************************************/
-      } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
-          (istat=strncasecmp(bok_ng_commands[4], "IFILTER", strlen("IFILTER"))==0) &&
-          (istat=strncasecmp(bok_ng_commands[5], "LOAD", strlen("LOAD"))==0) ) {
-
-        /* read memory */
-        tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
-        tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
-
-        if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
-          (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
-
-        } else {
-
-          /* if filter is already in, do nothing */
-          if ((((int)round(tcp_shm_ptr->lv.filtisin))) == 1) {
-            (void) strcat(outgoing, " OK\n");
-          } else {
-
-            /* simulate */
-            is_done = false;
-            if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
-              (void) sleep(BOK_NG_INSTRUMENT_LOAD_TIME);
-              is_done = true;
-
-            /* talk to hardware */
-            } else {
-              if ((gstat=xq_filtin()) == G_NO_ERROR) {
-                countdown = BOK_NG_INSTRUMENT_LOAD_TIME;
-                while (--countdown > 0) {
-                  (void) sleep(1);
-                  if ((((int)round(tcp_shm_ptr->lv.filtisin))) == 1) {
-                    is_done = true;
-                    break;
-                  }
-                }
-              }
-            }
-
-            /* report success or timeout */
             if (is_done) {
               (void) strcat(outgoing, " OK\n");
             } else {
               (void) strcat(outgoing, " ERROR (timeout or hardware unresponsive)\n");
             }
           }
-        }
 
-        /* close memory */
-        if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
-        if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
+          /* close memory */
+          if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
+          if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
+        }
 
       /*******************************************************************************
        * BOK 90PRIME <cmd-id> COMMAND IFILTER UNLOAD
@@ -569,53 +717,55 @@ void *thread_handler(void *thread_fd) {
           (istat=strncasecmp(bok_ng_commands[4], "IFILTER", strlen("IFILTER"))==0) &&
           (istat=strncasecmp(bok_ng_commands[5], "UNLOAD", strlen("UNLOAD"))==0) ) {
 
-        /* read memory */
-        tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
-        tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
+        /* output message */
+        (void) fprintf(stdout, "Server thread is unloading ifilter\n");
+        (void) fflush(stdout);
 
-        if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
-          (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
+        /* in simulation, wait and return success */
+        if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
+          (void) sleep(BOK_NG_INSTRUMENT_LOAD_TIME);
+          (void) strcat(outgoing, " OK\n");
 
+        /* talk to hardware */
         } else {
 
-          /* if filter is already out, do nothing */
-          if ((((int)round(tcp_shm_ptr->lv.filtisin))) == 0) {
-            (void) strcat(outgoing, " OK\n");
+          /* read memory */
+          tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
+          tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
 
+          /* check memory */
+          if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
+            (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
+
+          /* check hardware is idle */
+          } else if (IS_BIT_SET(tcp_shm_ptr->status, 7) == 1) {
+            (void) strcat(outgoing, " ERROR (hardware busy)\n");
+
+          /* do nothing if filter already unloaded */
+          } else if (((int)round(tcp_shm_ptr->lv.filtisin)) == 0) {
+              (void) strcat(outgoing, " OK\n");
+
+          /* talk to hardware */
           } else {
-
-            /* simulate */
             is_done = false;
-            if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
-              (void) sleep(BOK_NG_INSTRUMENT_UNLOAD_TIME);
-              is_done = true;
-
-            /* talk to hardware */
-            } else {
-              if ((gstat=xq_filtout()) == G_NO_ERROR) {
-                countdown = BOK_NG_INSTRUMENT_UNLOAD_TIME;
-                while (--countdown > 0) {
-                  (void) sleep(1);
-                  if ((((int)round(tcp_shm_ptr->lv.filtisin))) == 0) {
-                    is_done = true;
-                    break;
-                  }
-                }
+            if ((gstat=xq_filtin()) == G_NO_ERROR) {
+              countdown = BOK_NG_INSTRUMENT_LOAD_TIME;
+              while (--countdown > 0) {
+                (void) sleep(1);
+                if (((int)round(tcp_shm_ptr->lv.filtisin)) == 0) { is_done = true; break; }
               }
             }
-
-            /* report success or timeout */
             if (is_done) {
               (void) strcat(outgoing, " OK\n");
             } else {
               (void) strcat(outgoing, " ERROR (timeout or hardware unresponsive)\n");
             }
           }
-        }
 
-        /* close memory */
-        if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
-        if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
+          /* close memory */
+          if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
+          if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
+        }
 
       /*******************************************************************************
        * BOK 90PRIME <cmd-id> COMMAND IFOCUS A <float> B <float> C <float>
@@ -638,6 +788,9 @@ void *thread_handler(void *thread_fd) {
 
         if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
           (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
+
+        } else if (IS_BIT_SET(tcp_shm_ptr->status, 7) == 1) {
+          (void) strcat(outgoing, " ERROR (hardware busy)\n");
 
         } else if (focus_a==NAN || focus_b==NAN || focus_c==NAN) {
           (void) strcat(outgoing, " ERROR (invalid number)\n");
@@ -690,6 +843,9 @@ void *thread_handler(void *thread_fd) {
 
         if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
           (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
+
+        } else if (IS_BIT_SET(tcp_shm_ptr->status, 7) == 1) {
+          (void) strcat(outgoing, " ERROR (hardware busy)\n");
 
         } else if (fval == NAN) {
           (void) strcat(outgoing, " ERROR (invalid number)\n");
@@ -750,6 +906,9 @@ void *thread_handler(void *thread_fd) {
         if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
           (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
 
+        } else if (IS_BIT_SET(tcp_shm_ptr->status, 7) == 1) {
+          (void) strcat(outgoing, " ERROR (hardware busy)\n");
+
         } else if (focus_a==NAN || focus_b==NAN || focus_c==NAN) {
           (void) strcat(outgoing, " ERROR (invalid number)\n");
 
@@ -801,6 +960,9 @@ void *thread_handler(void *thread_fd) {
 
         if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
           (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
+
+        } else if (IS_BIT_SET(tcp_shm_ptr->status, 7) == 1) {
+          (void) strcat(outgoing, " ERROR (hardware busy)\n");
 
         } else if (fval == NAN) {
           (void) strcat(outgoing, " ERROR (invalid number)\n");
@@ -858,6 +1020,7 @@ void *thread_handler(void *thread_fd) {
 
         if (udp_shm_fd<0 || udp_shm_ptr==(udp_val_p)NULL) {
           (void) strcat(outgoing, " ERROR (invalid udp memory)\n");
+
         } else {
 
           /* report encoder(s) */
@@ -877,37 +1040,24 @@ void *thread_handler(void *thread_fd) {
       } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_REQUEST, strlen(BOK_NG_REQUEST))==0) &&
                  (istat=strncasecmp(bok_ng_commands[4], "GFILTERS", strlen("GFILTERS"))==0) ) {
 
-        /* read memory */
-        tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
-        tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
-
-        if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
-          (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
+        /* read filter(s) file */
+        (void) memset(buffer, '\0', sizeof(buffer));
+        if ((p=getenv("BOK_GALIL_DOCS")) == (char *)NULL) {
+          (void) sprintf(buffer, "%s", BOK_GFILTER_FILE);
         } else {
-
-          /* read filter(s) file */
-          (void) memset(buffer, '\0', sizeof(buffer));
-          if ((p=getenv("BOK_GALIL_DOCS")) == (char *)NULL) {
-            (void) sprintf(buffer, "%s", BOK_GFILTER_FILE);
-          } else {
-            (void) sprintf(buffer, "%s/%s", p, BOK_GFILTER_FILE);
-          }
-          for (int i=0; i<BOK_GFILTER_SLOTS; i++) {(void) memset((void *)&bok_gfilters[i], 0, sizeof(filter_file_t));}
-          read_filters_from_file(buffer, (filter_file_t *)bok_gfilters, BOK_GFILTER_SLOTS, BOK_GFILTER_COLUMNS);
-
-          /* report filters */
-          (void) strcat(outgoing, " OK");
-          for (int j=0; j<BOK_GFILTERS; j++) {
-            (void) memset(buffer, '\0', sizeof(buffer));
-            (void) sprintf(buffer, " %d=%d:%s", j+1, j+1, bok_gfilters[j+1].name);
-            (void) strcat(outgoing, buffer);
-          }
-          (void) strcat(outgoing, "\n");
+          (void) sprintf(buffer, "%s/%s", p, BOK_GFILTER_FILE);
         }
+        for (int i=0; i<BOK_GFILTER_SLOTS; i++) {(void) memset((void *)&bok_gfilters[i], 0, sizeof(filter_file_t));}
+        read_filters_from_file(buffer, (filter_file_t *)bok_gfilters, BOK_GFILTER_SLOTS, BOK_GFILTER_COLUMNS);
 
-        /* close memory */
-        if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
-        if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
+        /* report filters */
+        (void) strcat(outgoing, " OK");
+        for (int j=0; j<BOK_GFILTERS; j++) {
+          (void) memset(buffer, '\0', sizeof(buffer));
+          (void) sprintf(buffer, " %d=%d:%s", j+1, j+1, bok_gfilters[j+1].name);
+          (void) strcat(outgoing, buffer);
+        }
+        (void) strcat(outgoing, "\n");
 
       /*******************************************************************************
        * BOK 90PRIME <cmd-id> REQUEST GFILTER
@@ -924,8 +1074,10 @@ void *thread_handler(void *thread_fd) {
 
         if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
           (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
+
         } else if (udp_shm_fd<0 || udp_shm_ptr==(udp_val_p)NULL) {
           (void) strcat(outgoing, " ERROR (invalid udp memory)\n");
+
         } else {
 
           /* read filter(s) file */
@@ -965,6 +1117,7 @@ void *thread_handler(void *thread_fd) {
 
         if (udp_shm_fd<0 || udp_shm_ptr==(udp_val_p)NULL) {
           (void) strcat(outgoing, " ERROR (invalid udp memory)\n");
+
         } else {
 
           /* report gfocus(s) */
@@ -989,6 +1142,7 @@ void *thread_handler(void *thread_fd) {
 
         if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
           (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
+
         } else {
 
           /* read filter(s) file */
@@ -1013,8 +1167,8 @@ void *thread_handler(void *thread_fd) {
         }
 
         /* close memory */
-        if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
-        if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
+        if (udp_shm_ptr != (udp_val_p)NULL) { (void) munmap(udp_shm_ptr, UDP_VAL_SIZE); }
+        if (udp_shm_fd >= 0) { (void) close(udp_shm_fd); }
 
       /*******************************************************************************
        * BOK 90PRIME <cmd-id> REQUEST IFILTER
@@ -1031,8 +1185,10 @@ void *thread_handler(void *thread_fd) {
 
         if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
           (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
+
         } else if (udp_shm_fd<0 || udp_shm_ptr==(udp_val_p)NULL) {
           (void) strcat(outgoing, " ERROR (invalid udp memory)\n");
+
         } else {
 
           /* read filter(s) file */
@@ -1074,6 +1230,7 @@ void *thread_handler(void *thread_fd) {
 
         if (udp_shm_fd<0 || udp_shm_ptr==(udp_val_p)NULL) {
           (void) strcat(outgoing, " ERROR (invalid udp memory)\n");
+
         } else {
 
           /* report ifocus(s) */
@@ -1104,7 +1261,7 @@ void *thread_handler(void *thread_fd) {
       (void) printf("Server thread handler write() failed\n");
       break;
     }
-    (void) printf("Server thread handler sent to client: '%s'\n", outgoing);
+    (void) printf("Server thread handler sent to client: '%s'", outgoing);
 
     /* reset string(s) */
     (void) memset(incoming, '\0', sizeof(incoming));

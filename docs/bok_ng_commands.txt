@@ -23,8 +23,8 @@ BOK 90PRIME NG COMMAND / REQUEST SET
       On success: BOK 90PRIME <cmd-id> OK
       On failure: BOK 90PRIME <cmd-id> ERROR (reason)
 
-    BOK 90PRIME <cmd-id> COMMAND GFOCUS DELTA <float>
-      Explanation: client commands server to change guider focus by given amount
+    BOK 90PRIME <cmd-id> COMMAND GFOCUS DISTGCAM <float>
+      Explanation: client commands server to change guider focus to given value
       On success: BOK 90PRIME <cmd-id> OK
       On failure: BOK 90PRIME <cmd-id> ERROR (reason)
 

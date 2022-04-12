@@ -12,6 +12,7 @@ from datetime import timedelta
 import argparse
 import math
 import os
+import random
 import socket
 
 
@@ -35,6 +36,12 @@ BOK_NG_STRING = 1024
 BOK_NG_TELESCOPE = "BOK"
 BOK_NG_TIMEOUT = 60.0
 BOK_NG_TRUE = [1, '1', 'true', True]
+
+
+# +
+# initialize
+# -
+random.seed(os.getpid())
 
 
 # +
@@ -373,8 +380,11 @@ class NgClient(object):
         else:
             if " OK" in _reply:
                 return True
+            elif " ERROR" in _reply:
+                self.__error = f"{_reply}".replace('\n', '')
+                return False
             else:
-                self.__error = f"{_reply} ERROR (no response)"
+                self.__error = f"{_reply} ERROR (unknown response)".replace('\n', '')
                 return False
 
     # +
@@ -432,15 +442,15 @@ class NgClient(object):
         return self.parse_command_response(_reply)
 
     # +
-    # method: command_gfocus_delta()
+    # method: command_gfocus()
     # -
-    def command_gfocus_delta(self, gdelta: float = math.nan) -> bool:
-        """ BOK 90PRIME <cmd-id> COMMAND GFOCUS DELTA <float> """
+    def command_gfocus(self, gfocus: float = math.nan) -> bool:
+        """ BOK 90PRIME <cmd-id> COMMAND GFOCUS DISTGCAM <float> """
 
-        if math.nan < gdelta < -math.nan:
+        if math.nan < gfocus < -math.nan:
             return False
 
-        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND GFOCUS DELTA {gdelta}")
+        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND GFOCUS DISTGCAM {gfocus}")
         return self.parse_command_response(_reply)
 
     # +
@@ -937,20 +947,27 @@ def checkout_commands(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeo
         print(f"Client instantiated OK, host={_client.host}, port={_client.port}")
         print(f"{_client.__dump__()}")
 
+        # get filter(s)
+        _client.request_gfilters()
+        _gfilter = random.choice(_client.gfilters_names)
+        _client.request_ifilters()
+        _ifilter = random.choice(_client.ifilters_names)
+
         # test command(s)
         print(f"command_gfilter_init() {'succeeded' if _client.command_gfilter_init() else f'failed, error={_client.error}'}")
-        print(f"command_gfilter_name('blue') {'succeeded' if _client.command_gfilter_name(gname='blue') else f'failed, error={_client.error}'}")
+        print(f"command_gfilter_name('{_gfilter}') {'succeeded' if _client.command_gfilter_name(gname=_gfilter) else f'failed, error={_client.error}'}")
         print(f"command_gfilter_number(3) {'succeeded' if _client.command_gfilter_number(gnumber=3) else f'failed, error={_client.error}'}")
-        print(f"command_gfocus_delta(50.0) {'succeeded' if _client.command_gfocus_delta(gdelta=50.0) else f'failed, error={_client.error}'}")
-        print(f"command_ifilter_init() {'succeeded' if _client.command_ifilter_init() else f'failed, error={_client.error}'}")
-        print(f"command_ifilter_name('V') {'succeeded' if _client.command_ifilter_name(iname='V') else f'failed, error={_client.error}'}")
-        print(f"command_ifilter_number(4) {'succeeded' if _client.command_ifilter_number(inumber=4) else f'failed, error={_client.error}'}")
-        print(f"command_ifilter_load() {'succeeded' if _client.command_ifilter_load() else f'failed, error={_client.error}'}")
-        print(f"command_ifilter_unload() {'succeeded' if _client.command_ifilter_unload() else f'failed, error={_client.error}'}")
-        print(f"command_ifocus(22.0, 33.0, 44.0) {'succeeded' if _client.command_ifocus(a=22.0, b=33.0, c=44.0) else f'failed, error={_client.error}'}")
-        print(f"command_ifocusall(55.0) {'succeeded' if _client.command_ifocusall(focus=55.0) else f'failed, error={_client.error}'}")
-        print(f"command_lvdt(22.0, 33.0, 44.0) {'succeeded' if _client.command_lvdt(a=22.0, b=33.0, c=44.0) else f'failed, error={_client.error}'}")
-        print(f"command_lvdtall(55.0) {'succeeded' if _client.command_lvdtall(lvdt=55.0) else f'failed, error={_client.error}'}")
+        print(f"command_gfocus(50.0) {'succeeded' if _client.command_gfocus(gfocus=50.0) else f'failed, error={_client.error}'}")
+
+        # print(f"command_ifilter_init() {'succeeded' if _client.command_ifilter_init() else f'failed, error={_client.error}'}")
+        # print(f"command_ifilter_name('{_ifilter}') {'succeeded' if _client.command_ifilter_name(iname=_ifilter) else f'failed, error={_client.error}'}")
+        # print(f"command_ifilter_number(4) {'succeeded' if _client.command_ifilter_number(inumber=4) else f'failed, error={_client.error}'}")
+        # print(f"command_ifilter_load() {'succeeded' if _client.command_ifilter_load() else f'failed, error={_client.error}'}")
+        # print(f"command_ifilter_unload() {'succeeded' if _client.command_ifilter_unload() else f'failed, error={_client.error}'}")
+        # print(f"command_ifocus(22.0, 33.0, 44.0) {'succeeded' if _client.command_ifocus(a=22.0, b=33.0, c=44.0) else f'failed, error={_client.error}'}")
+        # print(f"command_ifocusall(55.0) {'succeeded' if _client.command_ifocusall(focus=55.0) else f'failed, error={_client.error}'}")
+        # print(f"command_lvdt(22.0, 33.0, 44.0) {'succeeded' if _client.command_lvdt(a=22.0, b=33.0, c=44.0) else f'failed, error={_client.error}'}")
+        # print(f"command_lvdtall(55.0) {'succeeded' if _client.command_lvdtall(lvdt=55.0) else f'failed, error={_client.error}'}")
         print(f"command_test() {'succeeded' if _client.command_test() else f'failed, error={_client.error}'}")
         print(f"command_exit() {'succeeded' if _client.command_exit() else f'failed, error={_client.error}'}")
         if _client.command_exit():
