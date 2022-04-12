@@ -27,7 +27,7 @@ __doc__ = """ python3 Galil_DMC_22x0_NgClient.py --help """
 BOK_NG_HELP = os.path.abspath(os.path.expanduser(os.path.join(os.getenv("BOK_GALIL_DOCS", os.getcwd()), 'bok_ng_commands.txt')))
 BOK_NG_FALSE = [0, '0', 'false', False]
 BOK_NG_GFILTER_SLOTS = [1, 2, 3, 4, 5, 6]
-BOK_NG_HOST = "127.0.0.1"
+BOK_NG_HOST = "10.30.1.2"
 BOK_NG_IFILTER_SLOTS = [0, 1, 2, 3, 4, 5]
 BOK_NG_INSTRUMENT = "90PRIME"
 BOK_NG_PORT = 5750
@@ -864,7 +864,7 @@ def checkout_requests(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeo
         # instantiate client and connect to server
         _client = NgClient(host=_host, port=_port, timeout=_timeout)
         _client.connect()
-        print(f"Client instantiated OK")
+        print(f"Client instantiated OK, host={_client.host}, port={_client.port}")
         print(f"{_client.__dump__()}")
 
         # request encoders
@@ -911,6 +911,7 @@ def checkout_requests(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeo
         print(f"Instrument Focus B: {_client.ifocus_b}")
         print(f"Instrument Focus C: {_client.ifocus_c}")
 
+        print(f"{_client.__dump__()}")
     except Exception as _x:
         print(f"{_x}")
         if _client is not None and hasattr(_client, 'error'):
@@ -933,7 +934,7 @@ def checkout_commands(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeo
         # instantiate client and connect to server
         _client = NgClient(host=_host, port=_port, timeout=_timeout, simulate=_simulate)
         _client.connect()
-        print(f"Client instantiated OK")
+        print(f"Client instantiated OK, host={_client.host}, port={_client.port}")
         print(f"{_client.__dump__()}")
 
         # test command(s)
@@ -942,7 +943,7 @@ def checkout_commands(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeo
         print(f"command_gfilter_number(3) {'succeeded' if _client.command_gfilter_number(gnumber=3) else f'failed, error={_client.error}'}")
         print(f"command_gfocus_delta(50.0) {'succeeded' if _client.command_gfocus_delta(gdelta=50.0) else f'failed, error={_client.error}'}")
         print(f"command_ifilter_init() {'succeeded' if _client.command_ifilter_init() else f'failed, error={_client.error}'}")
-        print(f"command_ifilter_name('Bob') {'succeeded' if _client.command_ifilter_name(iname='Bob') else f'failed, error={_client.error}'}")
+        print(f"command_ifilter_name('V') {'succeeded' if _client.command_ifilter_name(iname='V') else f'failed, error={_client.error}'}")
         print(f"command_ifilter_number(4) {'succeeded' if _client.command_ifilter_number(inumber=4) else f'failed, error={_client.error}'}")
         print(f"command_ifilter_load() {'succeeded' if _client.command_ifilter_load() else f'failed, error={_client.error}'}")
         print(f"command_ifilter_unload() {'succeeded' if _client.command_ifilter_unload() else f'failed, error={_client.error}'}")
