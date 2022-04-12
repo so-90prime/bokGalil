@@ -535,6 +535,8 @@ void *thread_handler(void *thread_fd) {
               countdown = BOK_NG_INSTRUMENT_LOAD_TIME;
               while (--countdown > 0) {
                 (void) sleep(1);
+                (void) fprintf(stdout, "Server thread is checking filtisin %d\n", (int)round(tcp_shm_ptr->lv.filtisin));
+                (void) fflush(stdout);
                 if (((int)round(tcp_shm_ptr->lv.filtisin)) == 1) { is_done = true; break; }
               }
             }
@@ -752,6 +754,8 @@ void *thread_handler(void *thread_fd) {
               countdown = BOK_NG_INSTRUMENT_LOAD_TIME;
               while (--countdown > 0) {
                 (void) sleep(1);
+                (void) fprintf(stdout, "Server thread is checking filtisin %d\n", (int)round(tcp_shm_ptr->lv.filtisin));
+                (void) fflush(stdout);
                 if (((int)round(tcp_shm_ptr->lv.filtisin)) == 0) { is_done = true; break; }
               }
             }
@@ -779,55 +783,75 @@ void *thread_handler(void *thread_fd) {
           (istat=strncasecmp(bok_ng_commands[9], "C", strlen("C"))==0) &&
           (istat=(int)strlen(bok_ng_commands[10])>0) ) {
 
-        /* read memory */
-        tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
-        tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
+        /* output message */
         decode_float(bok_ng_commands[6], &focus_a);
         decode_float(bok_ng_commands[8], &focus_b);
         decode_float(bok_ng_commands[10], &focus_c);
+        (void) fprintf(stdout, "Server thread is setting instrument focus to %.4f %.4f %.4f\n", focus_a, focus_b, focus_c);
+        (void) fflush(stdout);
 
-        if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
-          (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
+        /* in simulation, wait and return success */
+        if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
+          (void) sleep(BOK_NG_INSTRUMENT_FOCUS_TIME);
+          (void) strcat(outgoing, " OK\n");
 
-        } else if (IS_BIT_SET(tcp_shm_ptr->status, 7) == 1) {
-          (void) strcat(outgoing, " ERROR (hardware busy)\n");
-
-        } else if (focus_a==NAN || focus_b==NAN || focus_c==NAN) {
-          (void) strcat(outgoing, " ERROR (invalid number)\n");
-
+        /* talk to hardware */
         } else {
 
-            /* simulate */
-            is_done = false;
-            if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
-              (void) sleep(BOK_NG_INSTRUMENT_FOCUS_TIME);
-              is_done = true;
+          /* read memory */
+          tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
+          tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
+          udp_shm_fd = shm_open(BOK_SHM_UDP_NAME, O_RDONLY, 0666);
+          udp_shm_ptr = (udp_val_p)mmap(0, UDP_VAL_SIZE, PROT_READ, MAP_SHARED, udp_shm_fd, 0);
 
-            /* talk to hardware */
-            } else {
-              if ((gstat=xq_focusind(focus_a, focus_b, focus_c)) == G_NO_ERROR) {
-                countdown = BOK_NG_INSTRUMENT_FOCUS_TIME;
-                while (--countdown > 0) {
-                  (void) sleep(1);
-//                  if ((((int)round(tcp_shm_ptr->lv.filtisin))) == 0) {
-//                    is_done = true;
-//                    break;
-//                  }
-                }
+          /* check tcp memory */
+          if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
+            (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
+
+          /* check tcp memory */
+          } else if (udp_shm_fd<0 || udp_shm_ptr==(udp_val_p)NULL) {
+            (void) strcat(outgoing, " ERROR (invalid udp memory)\n");
+
+          /* check hardware is idle */
+          } else if (IS_BIT_SET(tcp_shm_ptr->status, 7) == 1) {
+            (void) strcat(outgoing, " ERROR (hardware busy)\n");
+
+          /* check inputs are valid */
+          } else if (focus_a==NAN || focus_b==NAN || focus_c==NAN) {
+            (void) strcat(outgoing, " ERROR (invalid number)\n");
+
+          /* execute */
+          } else {
+            is_done = false;
+            if ((gstat=xq_focusind(focus_a, focus_b, focus_c)) == G_NO_ERROR) {
+              countdown = BOK_NG_INSTRUMENT_FOCUS_TIME;
+              while (--countdown > 0) {
+                (void) sleep(1);
+                float vala = (float)udp_val.baxis_analog_in * BOK_LVDT_STEPS;
+                float valb = (float)udp_val.daxis_analog_in * BOK_LVDT_STEPS;
+                float valc = (float)udp_val.faxis_analog_in * BOK_LVDT_STEPS;
+                (void) fprintf(stdout, "Server thread is checking instrument focus a %.4f\n", vala);
+                (void) fprintf(stdout, "Server thread is checking instrument focus b %.4f\n", valb);
+                (void) fprintf(stdout, "Server thread is checking instrument focus c %.4f\n", valc);
+                (void) fflush(stdout);
+                /* ??? */
+                is_done = true;
+                break;
               }
             }
-
-            /* report success or timeout */
             if (is_done) {
               (void) strcat(outgoing, " OK\n");
             } else {
               (void) strcat(outgoing, " ERROR (timeout or hardware unresponsive)\n");
             }
-        }
+          }
 
-        /* close memory */
-        if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
-        if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
+          /* close memory */
+          if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
+          if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
+          if (udp_shm_ptr != (udp_val_p)NULL) { (void) munmap(udp_shm_ptr, UDP_VAL_SIZE); }
+          if (udp_shm_fd >= 0) { (void) close(udp_shm_fd); }
+        }
 
       /*******************************************************************************
        * BOK 90PRIME <cmd-id> COMMAND IFOCUSALL <float>
@@ -836,53 +860,73 @@ void *thread_handler(void *thread_fd) {
           (istat=strncasecmp(bok_ng_commands[4], "IFOCUSALL", strlen("IFOCUSALL"))==0) &&
           (istat=(int)strlen(bok_ng_commands[5])>0) ) {
 
-        /* read memory */
-        tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
-        tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
+        /* output message */
         decode_float(bok_ng_commands[5], &fval);
+        (void) fprintf(stdout, "Server thread is setting instrument focusall to %.4f\n", fval);
+        (void) fflush(stdout);
 
-        if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
-          (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
+        /* in simulation, wait and return success */
+        if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
+          (void) sleep(BOK_NG_INSTRUMENT_FOCUS_TIME);
+          (void) strcat(outgoing, " OK\n");
 
-        } else if (IS_BIT_SET(tcp_shm_ptr->status, 7) == 1) {
-          (void) strcat(outgoing, " ERROR (hardware busy)\n");
-
-        } else if (fval == NAN) {
-          (void) strcat(outgoing, " ERROR (invalid number)\n");
-
+        /* talk to hardware */
         } else {
 
-            /* simulate */
-            is_done = false;
-            if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
-              (void) sleep(BOK_NG_INSTRUMENT_FOCUS_TIME);
-              is_done = true;
+          /* read memory */
+          tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
+          tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
+          udp_shm_fd = shm_open(BOK_SHM_UDP_NAME, O_RDONLY, 0666);
+          udp_shm_ptr = (udp_val_p)mmap(0, UDP_VAL_SIZE, PROT_READ, MAP_SHARED, udp_shm_fd, 0);
 
-            /* talk to hardware */
-            } else {
-              if ((gstat=xq_focusall(fval)) == G_NO_ERROR) {
-                countdown = BOK_NG_INSTRUMENT_FOCUS_TIME;
-                while (--countdown > 0) {
-                  (void) sleep(1);
-//                  if ((((int)round(tcp_shm_ptr->lv.filtisin))) == 0) {
-//                    is_done = true;
-//                    break;
-//                  }
-                }
+          /* check tcp memory */
+          if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
+            (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
+
+          /* check tcp memory */
+          } else if (udp_shm_fd<0 || udp_shm_ptr==(udp_val_p)NULL) {
+            (void) strcat(outgoing, " ERROR (invalid udp memory)\n");
+
+          /* check hardware is idle */
+          } else if (IS_BIT_SET(tcp_shm_ptr->status, 7) == 1) {
+            (void) strcat(outgoing, " ERROR (hardware busy)\n");
+
+          /* check inputs are valid */
+          } else if (fval == NAN) {
+            (void) strcat(outgoing, " ERROR (invalid number)\n");
+
+          /* execute */
+          } else {
+            is_done = false;
+            if ((gstat=xq_focusall(fval)) == G_NO_ERROR) {
+              countdown = BOK_NG_INSTRUMENT_FOCUS_TIME;
+              while (--countdown > 0) {
+                (void) sleep(1);
+                float vala = (float)udp_val.baxis_analog_in * BOK_LVDT_STEPS;
+                float valb = (float)udp_val.daxis_analog_in * BOK_LVDT_STEPS;
+                float valc = (float)udp_val.faxis_analog_in * BOK_LVDT_STEPS;
+                (void) fprintf(stdout, "Server thread is checking instrument focusall a %.4f\n", vala);
+                (void) fprintf(stdout, "Server thread is checking instrument focusall b %.4f\n", valb);
+                (void) fprintf(stdout, "Server thread is checking instrument focusall c %.4f\n", valc);
+                (void) fflush(stdout);
+                /* ??? */
+                is_done = true;
+                break;
               }
             }
-
-            /* report success or timeout */
             if (is_done) {
               (void) strcat(outgoing, " OK\n");
             } else {
               (void) strcat(outgoing, " ERROR (timeout or hardware unresponsive)\n");
             }
-        }
+          }
 
-        /* close memory */
-        if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
-        if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
+          /* close memory */
+          if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
+          if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
+          if (udp_shm_ptr != (udp_val_p)NULL) { (void) munmap(udp_shm_ptr, UDP_VAL_SIZE); }
+          if (udp_shm_fd >= 0) { (void) close(udp_shm_fd); }
+        }
 
       /*******************************************************************************
        * BOK 90PRIME <cmd-id> COMMAND LVDT A <float> B <float> C <float>
@@ -896,55 +940,81 @@ void *thread_handler(void *thread_fd) {
           (istat=strncasecmp(bok_ng_commands[9], "C", strlen("C"))==0) &&
           (istat=(int)strlen(bok_ng_commands[10])>0) ) {
 
-        /* read memory */
-        tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
-        tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
+        /* output message */
         decode_float(bok_ng_commands[6], &lvdt_a);
         decode_float(bok_ng_commands[8], &lvdt_b);
         decode_float(bok_ng_commands[10], &lvdt_c);
+        (void) fprintf(stdout, "Server thread is setting instrument lvdt to %.4f %.4f %.4f\n", lvdt_a, lvdt_b, lvdt_c);
+        (void) fflush(stdout);
 
-        if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
-          (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
+        /* in simulation, wait and return success */
+        if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
+          (void) sleep(BOK_NG_INSTRUMENT_FOCUS_TIME);
+          (void) strcat(outgoing, " OK\n");
 
-        } else if (IS_BIT_SET(tcp_shm_ptr->status, 7) == 1) {
-          (void) strcat(outgoing, " ERROR (hardware busy)\n");
-
-        } else if (focus_a==NAN || focus_b==NAN || focus_c==NAN) {
-          (void) strcat(outgoing, " ERROR (invalid number)\n");
-
+        /* talk to hardware */
         } else {
 
-            /* simulate */
-            is_done = false;
-            if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
-              (void) sleep(BOK_NG_INSTRUMENT_FOCUS_TIME);
-              is_done = true;
+          /* read memory */
+          tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
+          tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
+          udp_shm_fd = shm_open(BOK_SHM_UDP_NAME, O_RDONLY, 0666);
+          udp_shm_ptr = (udp_val_p)mmap(0, UDP_VAL_SIZE, PROT_READ, MAP_SHARED, udp_shm_fd, 0);
 
-            /* talk to hardware */
-            } else {
-              if ((gstat=xq_focusind(lvdt_a, lvdt_b, lvdt_c)) == G_NO_ERROR) {
-                countdown = BOK_NG_INSTRUMENT_FOCUS_TIME;
-                while (--countdown > 0) {
-                  (void) sleep(1);
-//                  if ((((int)round(tcp_shm_ptr->lv.filtisin))) == 0) {
-//                    is_done = true;
-//                    break;
-//                  }
-                }
+          /* check tcp memory */
+          if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
+            (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
+
+          /* check tcp memory */
+          } else if (udp_shm_fd<0 || udp_shm_ptr==(udp_val_p)NULL) {
+            (void) strcat(outgoing, " ERROR (invalid udp memory)\n");
+
+          /* check hardware is idle */
+          } else if (IS_BIT_SET(tcp_shm_ptr->status, 7) == 1) {
+            (void) strcat(outgoing, " ERROR (hardware busy)\n");
+
+          /* check inputs are valid */
+          } else if (lvdt_a==NAN || lvdt_b==NAN || lvdt_c==NAN) {
+            (void) strcat(outgoing, " ERROR (invalid number)\n");
+
+          /* execute */
+          } else {
+            is_done = false;
+            float vala = (float)udp_val.baxis_analog_in * BOK_LVDT_STEPS;
+            float valb = (float)udp_val.daxis_analog_in * BOK_LVDT_STEPS;
+            float valc = (float)udp_val.faxis_analog_in * BOK_LVDT_STEPS;
+            float dista = round((values[0] / 1000.0 - vala) * BOK_LVDT_ATOD);
+            float distb = round((values[1] / 1000.0 - valb) * BOK_LVDT_ATOD);
+            float distc = round((values[2] / 1000.0 - valc) * BOK_LVDT_ATOD);
+            if ((gstat=xq_focusind(dista, distb, distc)) == G_NO_ERROR) {
+              countdown = BOK_NG_INSTRUMENT_FOCUS_TIME;
+              while (--countdown > 0) {
+                (void) sleep(1);
+                float vala = (float)udp_val.baxis_analog_in * BOK_LVDT_STEPS;
+                float valb = (float)udp_val.daxis_analog_in * BOK_LVDT_STEPS;
+                float valc = (float)udp_val.faxis_analog_in * BOK_LVDT_STEPS;
+                (void) fprintf(stdout, "Server thread is checking instrument focus a %.4f\n", vala);
+                (void) fprintf(stdout, "Server thread is checking instrument focus b %.4f\n", valb);
+                (void) fprintf(stdout, "Server thread is checking instrument focus c %.4f\n", valc);
+                (void) fflush(stdout);
+                /* ??? */
+                is_done = true;
+                break;
               }
             }
-
-            /* report success or timeout */
             if (is_done) {
               (void) strcat(outgoing, " OK\n");
             } else {
               (void) strcat(outgoing, " ERROR (timeout or hardware unresponsive)\n");
             }
-        }
+          }
 
-        /* close memory */
-        if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
-        if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
+          /* close memory */
+          if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
+          if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
+          if (udp_shm_ptr != (udp_val_p)NULL) { (void) munmap(udp_shm_ptr, UDP_VAL_SIZE); }
+          if (udp_shm_fd >= 0) { (void) close(udp_shm_fd); }
+        }
 
       /*******************************************************************************
        * BOK 90PRIME <cmd-id> COMMAND LVDTALL <float>
@@ -953,53 +1023,74 @@ void *thread_handler(void *thread_fd) {
           (istat=strncasecmp(bok_ng_commands[4], "LVDTALL", strlen("LVDTALL"))==0) &&
           (istat=(int)strlen(bok_ng_commands[5])>0) ) {
 
-        /* read memory */
-        tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
-        tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
+        /* output message */
         decode_float(bok_ng_commands[5], &fval);
+        (void) fprintf(stdout, "Server thread is setting instrument lvdtall to %.4f\n", fval);
+        (void) fflush(stdout);
 
-        if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
-          (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
+        /* in simulation, wait and return success */
+        if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
+          (void) sleep(BOK_NG_INSTRUMENT_FOCUS_TIME);
+          (void) strcat(outgoing, " OK\n");
 
-        } else if (IS_BIT_SET(tcp_shm_ptr->status, 7) == 1) {
-          (void) strcat(outgoing, " ERROR (hardware busy)\n");
-
-        } else if (fval == NAN) {
-          (void) strcat(outgoing, " ERROR (invalid number)\n");
-
+        /* talk to hardware */
         } else {
 
-            /* simulate */
-            is_done = false;
-            if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
-              (void) sleep(BOK_NG_INSTRUMENT_FOCUS_TIME);
-              is_done = true;
+          /* read memory */
+          tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
+          tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
+          udp_shm_fd = shm_open(BOK_SHM_UDP_NAME, O_RDONLY, 0666);
+          udp_shm_ptr = (udp_val_p)mmap(0, UDP_VAL_SIZE, PROT_READ, MAP_SHARED, udp_shm_fd, 0);
 
-            /* talk to hardware */
-            } else {
-              if ((gstat=xq_focusall(fval)) == G_NO_ERROR) {
-                countdown = BOK_NG_INSTRUMENT_FOCUS_TIME;
-                while (--countdown > 0) {
-                  (void) sleep(1);
-//                  if ((((int)round(tcp_shm_ptr->lv.filtisin))) == 0) {
-//                    is_done = true;
-//                    break;
-//                  }
-                }
+          /* check tcp memory */
+          if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
+            (void) strcat(outgoing, " ERROR (invalid tcp memory)\n");
+
+          /* check tcp memory */
+          } else if (udp_shm_fd<0 || udp_shm_ptr==(udp_val_p)NULL) {
+            (void) strcat(outgoing, " ERROR (invalid udp memory)\n");
+
+          /* check hardware is idle */
+          } else if (IS_BIT_SET(tcp_shm_ptr->status, 7) == 1) {
+            (void) strcat(outgoing, " ERROR (hardware busy)\n");
+
+          /* check inputs are valid */
+          } else if (fval == NAN) {
+            (void) strcat(outgoing, " ERROR (invalid number)\n");
+
+          /* execute */
+          } else {
+            is_done = false;
+            float distall = round((fval / 1000.0) * BOK_LVDT_ATOD);
+            if ((gstat=xq_focusind(distall, distall, distall)) == G_NO_ERROR) {
+              countdown = BOK_NG_INSTRUMENT_FOCUS_TIME;
+              while (--countdown > 0) {
+                (void) sleep(1);
+                float vala = (float)udp_val.baxis_analog_in * BOK_LVDT_STEPS;
+                float valb = (float)udp_val.daxis_analog_in * BOK_LVDT_STEPS;
+                float valc = (float)udp_val.faxis_analog_in * BOK_LVDT_STEPS;
+                (void) fprintf(stdout, "Server thread is checking instrument focus a %.4f\n", vala);
+                (void) fprintf(stdout, "Server thread is checking instrument focus b %.4f\n", valb);
+                (void) fprintf(stdout, "Server thread is checking instrument focus c %.4f\n", valc);
+                (void) fflush(stdout);
+                /* ??? */
+                is_done = true;
+                break;
               }
             }
-
-            /* report success or timeout */
             if (is_done) {
               (void) strcat(outgoing, " OK\n");
             } else {
               (void) strcat(outgoing, " ERROR (timeout or hardware unresponsive)\n");
             }
-        }
+          }
 
-        /* close memory */
-        if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
-        if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
+          /* close memory */
+          if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
+          if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
+          if (udp_shm_ptr != (udp_val_p)NULL) { (void) munmap(udp_shm_ptr, UDP_VAL_SIZE); }
+          if (udp_shm_fd >= 0) { (void) close(udp_shm_fd); }
+        }
 
        /*******************************************************************************
        * BOK 90PRIME <cmd-id> COMMAND TEST
