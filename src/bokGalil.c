@@ -185,6 +185,8 @@ void dump_tcp_structure(tcp_val_t *p) {
     "lv.filttsc=%.1f, "
     "lv.filttsp=%.1f, "
     "lv.filtval=%.1f, "
+    "lv.fnum=%.1f, "
+    "lv.fnum_in=%.1f, "
     "lv.focac=%.1f, "
     "lv.focbl=%.1f, "
     "lv.focdc=%.1f, "
@@ -201,12 +203,16 @@ void dump_tcp_structure(tcp_val_t *p) {
     "lv.gfiltdc=%.1f, "
     "lv.gfiltn=%.1f, "
     "lv.gfiltq=%.1f, "
+    "lv.gfiltreq=%.1f, "
     "lv.gfiltsp=%.1f, "
     "lv.gfsp=%.1f, "
+    "lv.gifltn=%.1f, "
     "lv.initfilt=%.1f, "
     "lv.nmoves=%.1f, "
     "lv.nrot=%.1f, "
     "lv.reqfilt=%.1f, "
+    "lv.snum=%.1f, "
+    "lv.snum_in=%.1f, "
     "lv.totfoca=%.1f, "
     "lv.totfocb=%.1f, "
     "lv.totfocc=%.1f, "
@@ -267,6 +273,8 @@ void dump_tcp_structure(tcp_val_t *p) {
     p->lv.filttsc,
     p->lv.filttsp,
     p->lv.filtval,
+    p->lv.fnum,
+    p->lv.fnum_in,
     p->lv.focac,
     p->lv.focbl,
     p->lv.focdc,
@@ -283,12 +291,16 @@ void dump_tcp_structure(tcp_val_t *p) {
     p->lv.gfiltdc,
     p->lv.gfiltn,
     p->lv.gfiltq,
+    p->lv.gfiltreq,
     p->lv.gfiltsp,
     p->lv.gfsp,
+    p->lv.gifltn,
     p->lv.initfilt,
     p->lv.nmoves,
     p->lv.nrot,
     p->lv.reqfilt,
+    p->lv.snum,
+    p->lv.snum_in,
     p->lv.totfoca,
     p->lv.totfocb,
     p->lv.totfocc,
@@ -995,7 +1007,7 @@ void read_filters_from_file(char *fname, filter_file_t filters[], int max_filter
   if ((fp=fopen(fname, "r")) != (FILE *)NULL) {
     while ((p=fgets(buffer, sizeof(buffer), fp)) != (char *)NULL) {
       (void) memset((void *)&this_filter, '\0', sizeof(this_filter));
-      if (buffer[0] != '#' && strlen(buffer)>0) {
+      if (strlen(buffer)>0 && buffer[0]!='#') {
         chomp(buffer, "\n");
         if ((istat=sscanf(buffer, "%d\t%s\t%s", &idx, this_filter.code, this_filter.name)) == ncolumns) {
           (void) strcpy(filters[idx].code, this_filter.code);

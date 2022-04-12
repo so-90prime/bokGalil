@@ -138,43 +138,38 @@ int main( int argc, char *argv[] ) {
       tcp_val.position[5]   = NAN;
       tcp_val.position[6]   = NAN;
       tcp_val.position[7]   = NAN;
-      tcp_val.lv.dista      = -3.0;
-      tcp_val.lv.distall    = -180.0;
-      tcp_val.lv.distb      = 3.0;
-      tcp_val.lv.distc      = 0.0;
-      tcp_val.lv.distgcam   = -50.0;
+      tcp_val.lv.dista      = 200.0;
+      tcp_val.lv.distall    = 200.0;
+      tcp_val.lv.distb      = 200.0;
+      tcp_val.lv.distc      = 200.0;
+      tcp_val.lv.distgcam   = 100.0;
       tcp_val.lv.errfilt    = 0.0;
-      tcp_val.lv.filtbit1   = 1.0;
+      tcp_val.lv.filtbit1   = 0.0;
       tcp_val.lv.filtbit2   = 0.0;
-      tcp_val.lv.filtbit3   = 1.0;
+      tcp_val.lv.filtbit3   = 0.0;
       tcp_val.lv.filtbit4   = 1.0;
       tcp_val.lv.filtbit5   = 0.0;
       tcp_val.lv.filtbit6   = 1.0;
       tcp_val.lv.filtbit7   = 1.0;
       tcp_val.lv.filtbit8   = 1.0;
       tcp_val.lv.filthigh   = 224.0;
-      if (counter % 25 == 0) {
-        tcp_val.lv.filtisin = 0.0;
-      } else {
-        tcp_val.lv.filtisin = 1.0;
-      }
-      tcp_val.lv.filtlow    = 13.0;
+      tcp_val.lv.filtisin   = 0.0;
+      tcp_val.lv.filtlow    = 8.0;
       tcp_val.lv.filtnum    = 6.0;
       tcp_val.lv.filtrac    = 5120.0;
       tcp_val.lv.filtrbl    = -99999.0;
-      tcp_val.lv.filtrdc    = 14335.0;
+      tcp_val.lv.filtrdc    = 14336.0;
       tcp_val.lv.filtrfl    = 99999.0;
       tcp_val.lv.filtrsp    = 500.0;
       tcp_val.lv.filttac    = 5120.0;
       tcp_val.lv.filttdc    = 99999.0;
-      tcp_val.lv.filttdis   = 2100.0;
+      tcp_val.lv.filttdis   = 21000.0;
       tcp_val.lv.filttnud   = 200.0;
-      tcp_val.lv.filttsc    = 2.0;
+      tcp_val.lv.filttsc    = 3.0;
       tcp_val.lv.filttsp    = 5000.0;
-      tcp_val.lv.filtval    = 18.0;
-      // tcp_val.lv.filtvals = 5.0;
-      // tcp_val.lv.fnum     = 2.0;
-      // tcp_val.lv.fnum_in  = 2.0;
+      tcp_val.lv.filtval    = 23.0;
+      tcp_val.lv.fnum       = 0.0;
+      tcp_val.lv.fnum_in    = 0.0;
       tcp_val.lv.focac      = 9216.0;
       tcp_val.lv.focbl      = -99999.0;
       tcp_val.lv.focdc      = 9216.0;
@@ -189,23 +184,23 @@ int main( int argc, char *argv[] ) {
       tcp_val.lv.gfdc       = 1024.0;
       tcp_val.lv.gfiltac    = 9216.0;
       tcp_val.lv.gfiltdc    = 9216.0;
-      tcp_val.lv.gfiltn     = 2.0;
+      tcp_val.lv.gfiltn     = 99999.0;
       tcp_val.lv.gfiltq     = 99999.0;
-      // tcp_val.lv.gfiltreq = 0.0;
+      tcp_val.lv.gfiltreq   = 0.0;
       tcp_val.lv.gfiltsp    = 500.0;
       tcp_val.lv.gfsp       = 100.0;
-      // tcp_val.lv.gifltn   = 0.0;
+      tcp_val.lv.gifltn     = 0.0;
       tcp_val.lv.initfilt   = 1.0;
-      tcp_val.lv.nmoves     = 0.0;
+      tcp_val.lv.nmoves     = 5.0;
       tcp_val.lv.nrot       = 1.0;
-      tcp_val.lv.reqfilt    = 18.0;
-      // tcp_val.lv.snum     = 3.0;
-      // tcp_val.lv.snum_in  = 3.0;
+      tcp_val.lv.reqfilt    = 15.0;
+      tcp_val.lv.snum       = 0.0;
+      tcp_val.lv.snum_in    = 0.0;
       tcp_val.lv.totfoca    = 0.0;
       tcp_val.lv.totfocb    = 0.0;
       tcp_val.lv.totfocc    = 0.0;
-      tcp_val.lv.vecac      = 9126.0;
-      tcp_val.lv.vecdc      = 9126.0;
+      tcp_val.lv.vecac      = 9216.0;
+      tcp_val.lv.vecdc      = 9216.0;
       tcp_val.lv.vecsp      = 1040.0;
       tcp_val.gstatus       = (GReturn)0;
 
@@ -261,12 +256,6 @@ int main( int argc, char *argv[] ) {
               decode_float(buffer, &tcp_val.filtvals[4]);
             } else if (strncasecmp(pr, "FILTVALS[5]=?;", strlen("FILTVALS[5]=?;")) == 0) {
               decode_float(buffer, &tcp_val.filtvals[5]);
-            //} else if (strncasecmp(pr, "FILTVAL=?;", strlen("FILTVAL=?;")) == 0) {
-            //  decode_float(buffer, &tcp_val.filtval);
-            //} else if (strncasecmp(pr, "FNUM=?;", strlen("FNUM=?;")) == 0) {
-            //  decode_float(buffer, &tcp_val.fnum);
-            //} else if (strncasecmp(pr, "FNUM_IN=?;", strlen("FNUM_IN=?;")) == 0) {
-            //  decode_float(buffer, &tcp_val.fnum_in);
             } else if (strncasecmp(pr, "LV;", strlen("LV;")) == 0) {
               replace_word(buffer, sizeof(buffer), "  ", "\\");
               tok = strtok(buffer, "\\");
@@ -338,6 +327,10 @@ int main( int argc, char *argv[] ) {
                     tcp_val.lv.filttsp = fval;
                   } else if (strncasecmp(lv_name, "FILTVAL=", strlen("FILTVAL=")) == 0) {
                     tcp_val.lv.filtval = fval;
+                  } else if (strncasecmp(lv_name, "FNUM=", strlen("FNUM=")) == 0) {
+                    tcp_val.lv.fnum = fval;
+                  } else if (strncasecmp(lv_name, "FNUM_IN=", strlen("FNUM_IN=")) == 0) {
+                    tcp_val.lv.fnum_in = fval;
                   } else if (strncasecmp(lv_name, "FOCAC=", strlen("FOCAC=")) == 0) {
                     tcp_val.lv.focac = fval;
                   } else if (strncasecmp(lv_name, "FOCBL=", strlen("FOCBL=")) == 0) {
@@ -370,14 +363,14 @@ int main( int argc, char *argv[] ) {
                     tcp_val.lv.gfiltn = fval;
                   } else if (strncasecmp(lv_name, "GFILTQ=", strlen("GFILTQ=")) == 0) {
                     tcp_val.lv.gfiltq = fval;
-                  //} else if (strncasecmp(lv_name, "GFILTREQ=", strlen("GFILTREQ=")) == 0) {
-                  //  tcp_val.lv.gfiltreq = fval;
+                  } else if (strncasecmp(lv_name, "GFILTREQ=", strlen("GFILTREQ=")) == 0) {
+                    tcp_val.lv.gfiltreq = fval;
                   } else if (strncasecmp(lv_name, "GFILTSP=", strlen("GFILTSP=")) == 0) {
                     tcp_val.lv.gfiltsp = fval;
                   } else if (strncasecmp(lv_name, "GFSP=", strlen("GFSP=")) == 0) {
                     tcp_val.lv.gfsp = fval;
-                  //} else if (strncasecmp(lv_name, "GIFLTN=", strlen("GIFLTN=")) == 0) {
-                  //  tcp_val.lv.gifltn = fval;
+                  } else if (strncasecmp(lv_name, "GIFLTN=", strlen("GIFLTN=")) == 0) {
+                    tcp_val.lv.gifltn = fval;
                   } else if (strncasecmp(lv_name, "INITFILT=", strlen("INITFILT=")) == 0) {
                     tcp_val.lv.initfilt = fval;
                   } else if (strncasecmp(lv_name, "NMOVES=", strlen("NMOVES=")) == 0) {
@@ -386,10 +379,10 @@ int main( int argc, char *argv[] ) {
                     tcp_val.lv.nrot = fval;
                   } else if (strncasecmp(lv_name, "REQFILT=", strlen("REQFILT=")) == 0) {
                     tcp_val.lv.reqfilt = fval;
-                  //} else if (strncasecmp(lv_name, "SNUM_IN=", strlen("SNUM_IN=")) == 0) {
-                  //  tcp_val.lv.snum_in = fval;
-                  //} else if (strncasecmp(lv_name, "SNUM=", strlen("SNUM=")) == 0) {
-                  //  tcp_val.lv.snum = fval;
+                  } else if (strncasecmp(lv_name, "SNUM=", strlen("SNUM=")) == 0) {
+                    tcp_val.lv.snum = fval;
+                  } else if (strncasecmp(lv_name, "SNUM_IN=", strlen("SNUM_IN=")) == 0) {
+                    tcp_val.lv.snum_in = fval;
                   } else if (strncasecmp(lv_name, "TOTFOCA=", strlen("TOTFOCA=")) == 0) {
                     tcp_val.lv.totfoca = fval;
                   } else if (strncasecmp(lv_name, "TOTFOCB=", strlen("TOTFOCB=")) == 0) {

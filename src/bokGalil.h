@@ -684,6 +684,8 @@ typedef struct lv_vals_type {
   float filttsc;
   float filttsp;
   float filtval;
+  float fnum;
+  float fnum_in;
   float focac;
   float focbl;
   float focdc;
@@ -700,12 +702,16 @@ typedef struct lv_vals_type {
   float gfiltdc;
   float gfiltn;
   float gfiltq;
+  float gfiltreq;
   float gfiltsp;
   float gfsp;
+  float gifltn;
   float initfilt;
   float nmoves;
   float nrot;
   float reqfilt;
+  float snum;
+  float snum_in;
   float totfoca;
   float totfocb;
   float totfocc;
