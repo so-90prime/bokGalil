@@ -39,8 +39,8 @@ usage () {
   write_magenta ""                                                                                               2>&1
   write_cyan    "Flag(s):"                                                                                       2>&1
   write_cyan    "  --dry-run,        show (but do not execute) commands,               default=false"            2>&1
-  # write_cyan    "  --c-read,         start shared memory read in C (debugging),        default=false"            2>&1
-  # write_cyan    "  --py-read,        start shared memory read in Python (debugging),   default=false"            2>&1
+  # write_cyan  "  --c-read,         start shared memory read in C (debugging),        default=false"            2>&1
+  # write_cyan  "  --py-read,        start shared memory read in Python (debugging),   default=false"            2>&1
   write_cyan    "  --web-site,       start web-site (debugging),                       default=false"            2>&1
   echo          ""                                                                                               2>&1
 }
@@ -94,6 +94,7 @@ _prc7="indiserver"
 _prc8="/dev/shm/tcp_shm"
 _prc9="/dev/shm/udp_shm"
 _prca="pyindi_bok.py"
+_prcb="Galil_DMC_22x0_NgServer"
 
 _nam0="Galil_DMC_22x0_TCP_Write           "
 # _nam1="Galil_DMC_22x0_TCP_Read            "
@@ -106,6 +107,7 @@ _nam7="indiserver                         "
 _nam8="TCP Shared Memory File             "
 _nam9="UDP Shared Memory File             "
 _nama="PyINDI Bok Web-site (pyindi_bok.py)"
+_namb="Galil_DMC_22x0_NgServer            "
 
 _pid0=$(ps -ef | grep ${_prc0} | grep -v grep | awk '{print $2}')
 # _pid1=$(ps -ef | grep ${_prc1} | grep -v py | grep -v grep | awk '{print $2}')
@@ -118,6 +120,7 @@ _pid7=$(ps -ef | grep ${_prc7} | grep -v grep | awk '{print $2}')
 _pid8=''
 _pid9=''
 _pida=$(ps -ef | grep ${_prca} | grep -v grep | awk '{print $2}')
+_pidb=$(ps -ef | grep ${_prcb} | grep -v grep | awk '{print $2}')
 
 _pyindi_bok=$(service mtnops.pyindi status | grep 'Active:' | cut -d':' -f2 | cut -d'(' -f2 | cut -d')' -f1)
 
@@ -146,6 +149,9 @@ case $(echo ${_command}) in
       if [[ ${web_site} -eq 1 ]]; then
         write_magenta "Dry-Run> service mtnops.pyindi start"
       fi
+      write_magenta "Dry-Run> sleep 1"
+      write_magenta "Dry-Run> nohup ${BOK_GALIL_BIN}/${_prcb} >> ${BOK_GALIL_LOG}/${_prcb}.log 2>&1 &"
+
     else
       write_green "Executing> nohup ${BOK_GALIL_BIN}/${_prc0} >> ${BOK_GALIL_LOG}/${_prc0}.log 2>&1 &"
       [[ -z ${_pid0} ]] && (nohup ${BOK_GALIL_BIN}/${_prc0} >> ${BOK_GALIL_LOG}/${_prc0}.log 2>&1 &) || write_error "${_nam0}" "ALREADY RUNNING"
@@ -185,6 +191,9 @@ case $(echo ${_command}) in
         write_green "Executing> service mtnops.pyindi start"
         service mtnops.pyindi start
       fi
+      write_green "Executing> sleep 1"
+      sleep 1
+      [[ -z ${_pidb} ]] && (nohup ${BOK_GALIL_BIN}/${_prcb} >> ${BOK_GALIL_LOG}/${_prcb}.log 2>&1 &) || write_error "${_namb}" "ALREADY RUNNING"
     fi
     ;;
 
@@ -204,6 +213,7 @@ case $(echo ${_command}) in
       if [[ ${web_site} -eq 1 ]]; then
         write_magenta "Dry-Run> service mtnops.pyindi stop"
       fi
+      write_magenta "Dry-Run> kill -SIGINT pidof(${_prcb})"
     else
       write_green "Executing> kill -SIGINT pidof(${_prc0})"
       [[ ! -z ${_pid0} ]] && kill -SIGINT ${_pid0} || write_error "${_nam0}" "NOT RUNNING"
@@ -229,6 +239,8 @@ case $(echo ${_command}) in
         write_green "Executing> service mtnops.pyindi stop"
         service mtnops.pyindi stop
       fi
+      write_green "Executing> kill -SIGINT pidof(${_prcb})"
+      [[ ! -z ${_pidb} ]] && kill -SIGINT ${_pidb} || write_error "${_namb}" "NOT RUNNING"
     fi
    ;;
 
@@ -246,6 +258,7 @@ case $(echo ${_command}) in
       write_magenta "Dry-Run> [[ -f ${_prc8} ]]  && write_ok '${_prc8}' 'EXISTS' || write_error '${_prc8}' 'NOT FOUND'"
       write_magenta "Dry-Run> [[ -f ${_prc9} ]]  && write_ok '${_prc9}' 'EXISTS' || write_error '${_prc9}' 'NOT FOUND'"
       write_magenta "Dry-Run> [[ ! -z pidof(${_prca}) ]] && write_ok '${_prca}' 'OK (pidof(${_prca}))' || write_error '${_prca}' 'NOT RUNNING'"
+      write_magenta "Dry-Run> [[ ! -z pidof(${_prcb}) ]] && write_ok '${_prcb}' 'OK (pidof(${_prcb}))' || write_error '${_prcb}' 'NOT RUNNING'"
     else
       [[ ! -z ${_pid0} ]] && write_ok "${_nam0}" "OK (${_pid0})" || write_error "${_nam0}" "NOT RUNNING"
       # [[ ! -z ${_pid1} ]] && write_ok "${_nam1}" "OK (${_pid1})" || write_error "${_nam1}" "NOT RUNNING"
@@ -258,6 +271,7 @@ case $(echo ${_command}) in
       [[ -f ${_prc8} ]]   && write_ok "${_nam8}" "EXISTS"        || write_error "${_nam8}" "NOT FOUND"
       [[ -f ${_prc9} ]]   && write_ok "${_nam9}" "EXISTS"        || write_error "${_nam9}" "NOT FOUND"
       [[ ! -z ${_pida} ]] && write_ok "${_nama}" "OK (http://10.30.1.2:5905/ninety-prime)" || write_error "${_nama}" "NOT RUNNING"
+      [[ ! -z ${_pidb} ]] && write_ok "${_namb}" "OK (${_pidb})" || write_error "${_namb}" "NOT RUNNING"
     fi
     ;;
 esac

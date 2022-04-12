@@ -827,9 +827,9 @@ void *thread_handler(void *thread_fd) {
               countdown = BOK_NG_INSTRUMENT_FOCUS_TIME;
               while (--countdown > 0) {
                 (void) sleep(1);
-                float vala = (float)udp_val.baxis_analog_in * BOK_LVDT_STEPS;
-                float valb = (float)udp_val.daxis_analog_in * BOK_LVDT_STEPS;
-                float valc = (float)udp_val.faxis_analog_in * BOK_LVDT_STEPS;
+                float vala = (float)udp_shm_ptr->baxis_analog_in * BOK_LVDT_STEPS;
+                float valb = (float)udp_shm_ptr->daxis_analog_in * BOK_LVDT_STEPS;
+                float valc = (float)udp_shm_ptr->faxis_analog_in * BOK_LVDT_STEPS;
                 (void) fprintf(stdout, "Server thread is checking instrument focus a %.4f\n", vala);
                 (void) fprintf(stdout, "Server thread is checking instrument focus b %.4f\n", valb);
                 (void) fprintf(stdout, "Server thread is checking instrument focus c %.4f\n", valc);
@@ -902,9 +902,9 @@ void *thread_handler(void *thread_fd) {
               countdown = BOK_NG_INSTRUMENT_FOCUS_TIME;
               while (--countdown > 0) {
                 (void) sleep(1);
-                float vala = (float)udp_val.baxis_analog_in * BOK_LVDT_STEPS;
-                float valb = (float)udp_val.daxis_analog_in * BOK_LVDT_STEPS;
-                float valc = (float)udp_val.faxis_analog_in * BOK_LVDT_STEPS;
+                float vala = (float)udp_shm_ptr->baxis_analog_in * BOK_LVDT_STEPS;
+                float valb = (float)udp_shm_ptr->daxis_analog_in * BOK_LVDT_STEPS;
+                float valc = (float)udp_shm_ptr->faxis_analog_in * BOK_LVDT_STEPS;
                 (void) fprintf(stdout, "Server thread is checking instrument focusall a %.4f\n", vala);
                 (void) fprintf(stdout, "Server thread is checking instrument focusall b %.4f\n", valb);
                 (void) fprintf(stdout, "Server thread is checking instrument focusall c %.4f\n", valc);
@@ -980,19 +980,19 @@ void *thread_handler(void *thread_fd) {
           /* execute */
           } else {
             is_done = false;
-            float vala = (float)udp_val.baxis_analog_in * BOK_LVDT_STEPS;
-            float valb = (float)udp_val.daxis_analog_in * BOK_LVDT_STEPS;
-            float valc = (float)udp_val.faxis_analog_in * BOK_LVDT_STEPS;
-            float dista = round((values[0] / 1000.0 - vala) * BOK_LVDT_ATOD);
-            float distb = round((values[1] / 1000.0 - valb) * BOK_LVDT_ATOD);
-            float distc = round((values[2] / 1000.0 - valc) * BOK_LVDT_ATOD);
+            float vala = (float)udp_shm_ptr->baxis_analog_in * BOK_LVDT_STEPS;
+            float valb = (float)udp_shm_ptr->daxis_analog_in * BOK_LVDT_STEPS;
+            float valc = (float)udp_shm_ptr->faxis_analog_in * BOK_LVDT_STEPS;
+            float dista = round((lvdt_a / 1000.0 - vala) * BOK_LVDT_ATOD);
+            float distb = round((lvdt_b / 1000.0 - valb) * BOK_LVDT_ATOD);
+            float distc = round((lvdt_c / 1000.0 - valc) * BOK_LVDT_ATOD);
             if ((gstat=xq_focusind(dista, distb, distc)) == G_NO_ERROR) {
               countdown = BOK_NG_INSTRUMENT_FOCUS_TIME;
               while (--countdown > 0) {
                 (void) sleep(1);
-                float vala = (float)udp_val.baxis_analog_in * BOK_LVDT_STEPS;
-                float valb = (float)udp_val.daxis_analog_in * BOK_LVDT_STEPS;
-                float valc = (float)udp_val.faxis_analog_in * BOK_LVDT_STEPS;
+                float vala = (float)udp_shm_ptr->baxis_analog_in * BOK_LVDT_STEPS;
+                float valb = (float)udp_shm_ptr->daxis_analog_in * BOK_LVDT_STEPS;
+                float valc = (float)udp_shm_ptr->faxis_analog_in * BOK_LVDT_STEPS;
                 (void) fprintf(stdout, "Server thread is checking instrument focus a %.4f\n", vala);
                 (void) fprintf(stdout, "Server thread is checking instrument focus b %.4f\n", valb);
                 (void) fprintf(stdout, "Server thread is checking instrument focus c %.4f\n", valc);
@@ -1066,9 +1066,9 @@ void *thread_handler(void *thread_fd) {
               countdown = BOK_NG_INSTRUMENT_FOCUS_TIME;
               while (--countdown > 0) {
                 (void) sleep(1);
-                float vala = (float)udp_val.baxis_analog_in * BOK_LVDT_STEPS;
-                float valb = (float)udp_val.daxis_analog_in * BOK_LVDT_STEPS;
-                float valc = (float)udp_val.faxis_analog_in * BOK_LVDT_STEPS;
+                float vala = (float)udp_shm_ptr->baxis_analog_in * BOK_LVDT_STEPS;
+                float valb = (float)udp_shm_ptr->daxis_analog_in * BOK_LVDT_STEPS;
+                float valc = (float)udp_shm_ptr->faxis_analog_in * BOK_LVDT_STEPS;
                 (void) fprintf(stdout, "Server thread is checking instrument focus a %.4f\n", vala);
                 (void) fprintf(stdout, "Server thread is checking instrument focus b %.4f\n", valb);
                 (void) fprintf(stdout, "Server thread is checking instrument focus c %.4f\n", valc);
