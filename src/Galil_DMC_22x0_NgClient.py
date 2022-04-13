@@ -863,79 +863,9 @@ class NgClient(object):
 
 
 # +
-# function: checkout_requests()
+# function: ngclient_test()
 # -
-def checkout_requests(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeout: float = BOK_NG_TIMEOUT) -> None:
-
-    # exercise command(s) and request(s)
-    _client = None
-    try:
-
-        # instantiate client and connect to server
-        _client = NgClient(host=_host, port=_port, timeout=_timeout)
-        _client.connect()
-        print(f"Client instantiated OK, host={_client.host}, port={_client.port}")
-        print(f"{_client.__dump__()}")
-
-        # request encoders
-        _client.request_encoders()
-        print(f"Encoder A: {_client.encoder_a}")
-        print(f"Encoder B: {_client.encoder_b}")
-        print(f"Encoder C: {_client.encoder_c}")
-
-        # request guider filters
-        _client.request_gfilters()
-        print(f"Guider filters loaded: {_client.gfilters}")
-        print(f"Guider filters names: {_client.gfilters_names}")
-        print(f"Guider filters numbers: {_client.gfilters_numbers}")
-        print(f"Guider filters slots: {_client.gfilters_slots}")
-
-        # request current guider filter
-        _client.request_gfilter()
-        print(f"Guider current filter name: {_client.gfilter_name}")
-        print(f"Guider current filter number: {_client.gfilter_number}")
-        print(f"Guider current filter rotating: {_client.gfilter_rotating}")
-
-        # request guider focus
-        _client.request_gfocus()
-        print(f"Guider Focus: {_client.gfocus}")
-
-        # request instrument filters
-        _client.request_ifilters()
-        print(f"Instrument filters loaded: {_client.ifilters}")
-        print(f"Instrument filters names: {_client.ifilters_names}")
-        print(f"Instrument filters numbers: {_client.ifilters_numbers}")
-        print(f"Instrument filters slots: {_client.ifilters_slots}")
-
-        # request current instrument filter
-        _client.request_ifilter()
-        print(f"Instrument current filter inbeam: {_client.ifilter_inbeam}")
-        print(f"Instrument current filter name: {_client.ifilter_name}")
-        print(f"Instrument current filter number: {_client.ifilter_number}")
-        print(f"Instrument current filter rotating: {_client.ifilter_rotating}")
-        print(f"Instrument current filter translating: {_client.ifilter_translating}")
-
-        # request instrument focus
-        _client.request_ifocus()
-        print(f"Instrument Focus A: {_client.ifocus_a}")
-        print(f"Instrument Focus B: {_client.ifocus_b}")
-        print(f"Instrument Focus C: {_client.ifocus_c}")
-
-        print(f"{_client.__dump__()}")
-    except Exception as _x:
-        print(f"{_x}")
-        if _client is not None and hasattr(_client, 'error'):
-            print(f"{_client.error}")
-
-    # disconnect from server
-    if _client is not None and hasattr(_client, 'disconnect'):
-        _client.disconnect()
-
-
-# +
-# function: checkout_commands()
-# -
-def checkout_commands(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeout: float = BOK_NG_TIMEOUT, _simulate: bool = False) -> None:
+def ngclient_test(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeout: float = BOK_NG_TIMEOUT, _simulate: bool = False) -> None:
 
     # exercise command(s) and request(s)
     _client = None
@@ -944,16 +874,25 @@ def checkout_commands(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeo
         # instantiate client and connect to server
         _client = NgClient(host=_host, port=_port, timeout=_timeout, simulate=_simulate)
         _client.connect()
-        print(f"Client instantiated OK, host={_client.host}, port={_client.port}")
+        print(f"Client instantiated OK, host={_client.host}, port={_client.port}, sock={_client.sock}")
+
+        # request(s)
+        _client.request_encoders()
+        _client.request_gfilters()
+        _client.request_gfilter()
+        _client.request_gfocus()
+        _client.request_ifilters()
+        _client.request_ifilter()
+        _client.request_ifocus()
+
+        # dump
         print(f"{_client.__dump__()}")
 
         # get filter(s)
-        _client.request_gfilters()
         _gfilter = random.choice(_client.gfilters_names)
-        _client.request_ifilters()
         _ifilter = random.choice(_client.ifilters_names)
 
-        # test command(s)
+        # test guider filter wheel and focus
         print(f"command_gfilter_init() {'succeeded' if _client.command_gfilter_init() else f'failed, error={_client.error}'}")
         print(f"command_gfilter_name('{_gfilter}') {'succeeded' if _client.command_gfilter_name(gname=_gfilter) else f'failed, error={_client.error}'}")
         print(f"command_gfilter_number(3) {'succeeded' if _client.command_gfilter_number(gnumber=3) else f'failed, error={_client.error}'}")
@@ -1005,7 +944,6 @@ if __name__ == '__main__':
             with open(BOK_NG_HELP, 'r') as _f:
                 print(f"{_f.read()}")
         else:
-            checkout_requests(_host=_args.host, _port=int(_args.port), _timeout=float(_args.timeout))
-            checkout_commands(_host=_args.host, _port=int(_args.port), _timeout=float(_args.timeout), _simulate=bool(_args.simulate))
+            ngclient_test(_host=_args.host, _port=int(_args.port), _timeout=float(_args.timeout), _simulate=bool(_args.simulate))
     except Exception as _:
         print(f"{_}\nUse: {__doc__}")

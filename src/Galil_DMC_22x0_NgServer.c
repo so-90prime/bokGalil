@@ -29,9 +29,9 @@
 /*******************************************************************************
  * times for action(s)
  ******************************************************************************/
-#define BOK_NG_GUIDER_INIT_TIME        10
 #define BOK_NG_GUIDER_FILTER_TIME      15
 #define BOK_NG_GUIDER_FOCUS_TIME       10
+#define BOK_NG_GUIDER_INIT_TIME        10
 #define BOK_NG_INSTRUMENT_INIT_TIME    10
 #define BOK_NG_INSTRUMENT_FILTER_TIME  15
 #define BOK_NG_INSTRUMENT_FOCUS_TIME   10
@@ -151,14 +151,15 @@ void *thread_handler(void *thread_fd) {
           /* execute */
           } else {
             is_done = false;
-            if ((gstat=xq_gfwinit()) == G_NO_ERROR) {
+            if ((gstat=xq_hx())==G_NO_ERROR && (gstat=xq_gfwinit())==G_NO_ERROR) {
               countdown = BOK_NG_GUIDER_INIT_TIME;
               while (--countdown > 0) {
+                /* there is nothing to check on the initialization! */
                 (void) sleep(1);
-                ival = (int)round(tcp_shm_ptr->lv.gfiltn);
-                (void) fprintf(stdout, "Server thread is checking gfiltn %d\n", ival); (void) fflush(stdout);
-                if (ival>0 && ival<BOK_GFILTER_SLOTS) { is_done = true; break; }
+                (void) fprintf(stdout, "Server thread is waiting for gfwinit() to finish %d\n", countdown);
+                (void) fflush(stdout);
               }
+              is_done = true;
             }
             if (is_done) {
               (void) strcat(outgoing, " OK\n");
@@ -182,7 +183,7 @@ void *thread_handler(void *thread_fd) {
 
         /* convert name to number */
         ival = INT_MAX;
-        for (int j=0; j<BOK_GFILTERS; j++) {
+        for (int j=0; j<BOK_GFILTER_SLOTS; j++) {
           if ((istat=strncasecmp(bok_gfilters[j].name, bok_ng_commands[6], strlen(bok_ng_commands[6]))) == 0) {
             ival = j;
             break;
