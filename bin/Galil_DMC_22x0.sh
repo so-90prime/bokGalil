@@ -151,7 +151,6 @@ case $(echo ${_command}) in
       fi
       write_magenta "Dry-Run> sleep 1"
       write_magenta "Dry-Run> nohup ${BOK_GALIL_BIN}/${_prcb} >> ${BOK_GALIL_LOG}/${_prcb}.log 2>&1 &"
-
     else
       write_green "Executing> nohup ${BOK_GALIL_BIN}/${_prc0} >> ${BOK_GALIL_LOG}/${_prc0}.log 2>&1 &"
       [[ -z ${_pid0} ]] && (nohup ${BOK_GALIL_BIN}/${_prc0} >> ${BOK_GALIL_LOG}/${_prc0}.log 2>&1 &) || write_error "${_nam0}" "ALREADY RUNNING"
@@ -193,6 +192,7 @@ case $(echo ${_command}) in
       fi
       write_green "Executing> sleep 1"
       sleep 1
+      write_green "Executing> nohup ${BOK_GALIL_BIN}/${_prcb} >> ${BOK_GALIL_LOG}/${_prcb}.log 2>&1 &"
       [[ -z ${_pidb} ]] && (nohup ${BOK_GALIL_BIN}/${_prcb} >> ${BOK_GALIL_LOG}/${_prcb}.log 2>&1 &) || write_error "${_namb}" "ALREADY RUNNING"
     fi
     ;;
@@ -213,7 +213,7 @@ case $(echo ${_command}) in
       if [[ ${web_site} -eq 1 ]]; then
         write_magenta "Dry-Run> service mtnops.pyindi stop"
       fi
-      write_magenta "Dry-Run> kill -SIGINT pidof(${_prcb})"
+      write_magenta "Dry-Run> kill -9 pidof(${_prcb})"
     else
       write_green "Executing> kill -SIGINT pidof(${_prc0})"
       [[ ! -z ${_pid0} ]] && kill -SIGINT ${_pid0} || write_error "${_nam0}" "NOT RUNNING"
@@ -239,8 +239,8 @@ case $(echo ${_command}) in
         write_green "Executing> service mtnops.pyindi stop"
         service mtnops.pyindi stop
       fi
-      write_green "Executing> kill -SIGINT pidof(${_prcb})"
-      [[ ! -z ${_pidb} ]] && kill -SIGINT ${_pidb} || write_error "${_namb}" "NOT RUNNING"
+      write_green "Executing> kill -9 pidof(${_prcb})"
+      [[ ! -z ${_pidb} ]] && kill -9 ${_pidb} || write_error "${_namb}" "NOT RUNNING"
     fi
    ;;
 

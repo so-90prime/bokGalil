@@ -2,23 +2,6 @@
  *
  * Galil_DMC_22x0_NgServer.c
  *
- * Command(s) supported:
- *
- *   BOK 90PRIME <cmd-id> COMMAND IFOCUS DISTA=<float> DISTB=<float> DISTC=<float>
- *       xq_hx; xq_focusind(dista, distb, distc)
- *   BOK 90PRIME <cmd-id> COMMAND IFOCUSALL DIST=<float>
- *       distall = DIST
- *       xq_hx; xq_focusall(distall)
- *   BOK 90PRIME <cmd-id> COMMAND LVDT DISTA=<float> DISTB=<float> DISTC=<float>
- *       dista = round((values[0] / 1000.0 - ifoci.vala) * BOK_LVDT_ATOD);
- *       distb = round((values[1] / 1000.0 - ifoci.valb) * BOK_LVDT_ATOD);
- *       distc = round((values[2] / 1000.0 - ifoci.valc) * BOK_LVDT_ATOD);
- *       xq_hx;
- *   BOK 90PRIME <cmd-id> COMMAND LVDTALL DIST=<float>
- *       distall = round((distall / 1000.0) * BOK_LVDT_ATOD));
- *       xq_hx; xq_focusind(distall, distall, distall)
- *
- *
  ******************************************************************************/
 
 
@@ -1381,8 +1364,10 @@ int main(int argc, char *argv[]) {
   int istat = 0;
   int *new_sock = (int *)NULL;
 
+  char clientname[BOK_STR_256];
   struct sockaddr_in server_addr;
   struct sockaddr_in client_addr;
+  (void) memset(&clientname, '\0', sizeof(clientname));
   (void) memset(&server_addr, '\0', sizeof(server_addr));
   (void) memset(&client_addr, '\0', sizeof(client_addr));
 
@@ -1421,6 +1406,9 @@ int main(int argc, char *argv[]) {
       (void) printf("Server pthread_create() failed\n");
       (void) free(new_sock);
       return istat;
+    } else {
+      (void) printf("Server pthread_create() success\n");
+      (void) printf("Server handling client '%s'\n", inet_ntop(AF_INET, &client_addr.sin_addr, clientname, sizeof(clientname)));
     }
   }
   if (client_fd < 0) {
