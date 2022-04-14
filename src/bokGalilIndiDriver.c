@@ -107,7 +107,7 @@ typedef struct telemetrydata {
   char ifilter_5[BOK_STR_64];
   char ifilter_6[BOK_STR_64];
   char gfiltn[BOK_STR_64];
-  char gfiltreq[BOK_STR_64];
+  char fnum_in[BOK_STR_64];
   char reqfilt[BOK_STR_64];
   char snum[BOK_STR_64];
   char snum_in[BOK_STR_64];
@@ -373,7 +373,7 @@ static IText telemetryT[] = {
   {"ifilter_6",       "iFilter 6 (filtvals[5])         ", telemetrys.ifilter_6,       0, 0, 0},
   {"reqfilt",         "iFilter (requested, reqfilt)    ", telemetrys.reqfilt,         0, 0, 0},
   {"filtval",         "iFilter (selected, filtval)     ", telemetrys.filtval,         0, 0, 0},
-  {"gfiltreq",        "gFilter (requested, gfiltreq)   ", telemetrys.gfiltreq,        0, 0, 0},
+  {"fnum_in",         "gFilter (requested, fnum_in)    ", telemetrys.fnum_in,         0, 0, 0},
   {"gfiltn",          "gFilter (selected, gfiltn)      ", telemetrys.gfiltn,          0, 0, 0},
   {"snum_in",         "gSensor (requested, snum_in)    ", telemetrys.snum_in,         0, 0, 0},
   {"snum",            "Sensor (selected, snum)         ", telemetrys.snum,            0, 0, 0},
@@ -1751,7 +1751,7 @@ static void execute_timer(void *p) {
   }
   for (int k=0; k<BOK_GFILTER_SLOTS; k++) {
     if (tcp_val.lv.gfiltn == (float)k) { (void) sprintf(telemetrys.gfiltn, "%s (%d)", bok_gfilters[k].name, k); }
-    if (tcp_val.lv.gfiltreq == (float)k) { (void) sprintf(telemetrys.gfiltreq, "%s (%d)", bok_gfilters[k].name, k); }
+    if (tcp_val.lv.fnum_in == (float)k) { (void) sprintf(telemetrys.fnum_in, "%s (%d)", bok_gfilters[k].name, k); }
   }
   (void) sprintf(telemetrys.hardware,     "%s",             tcp_val.hardware);
   (void) sprintf(telemetrys.software,     "%s",             tcp_val.software);

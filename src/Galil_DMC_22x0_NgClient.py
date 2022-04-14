@@ -90,6 +90,7 @@ class NgClient(object):
         self.__gfilter_name = f""
         self.__gfilter_number = -1
         self.__gfilter_rotating = False
+        self.__gdelta = math.nan
         self.__gfocus = math.nan
         self.__ifilters = {}
         self.__ifilters_names = []
@@ -197,6 +198,10 @@ class NgClient(object):
         return self.__gfilter_rotating
 
     @property
+    def gdelta(self):
+        return self.__gdelta
+
+    @property
     def gfocus(self):
         return self.__gfocus
 
@@ -281,6 +286,7 @@ class NgClient(object):
         print(f"self.__gfilter_name = '{self.__gfilter_name}'")
         print(f"self.__gfilter_number = {self.__gfilter_number}")
         print(f"self.__gfilter_rotating = {self.__gfilter_rotating}")
+        print(f"self.__gdelta = {self.__gdelta}")
         print(f"self.__gfocus = {self.__gfocus}")
         print(f"self.__ifilters = {self.__ifilters}")
         print(f"self.__ifilters_names = {self.__ifilters_names}")
@@ -442,15 +448,15 @@ class NgClient(object):
         return self.parse_command_response(_reply)
 
     # +
-    # method: command_gfocus()
+    # method: command_gfocus_delta()
     # -
-    def command_gfocus(self, gfocus: float = math.nan) -> bool:
-        """ BOK 90PRIME <cmd-id> COMMAND GFOCUS DISTGCAM <float> """
+    def command_gfocus_delta(self, gdelta: float = math.nan) -> bool:
+        """ BOK 90PRIME <cmd-id> COMMAND GFOCUS DELTA <float> """
 
         if math.nan < gfocus < -math.nan:
             return False
 
-        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND GFOCUS DISTGCAM {gfocus}")
+        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND GFOCUS DELTA {gdelta}")
         return self.parse_command_response(_reply)
 
     # +
@@ -865,7 +871,8 @@ class NgClient(object):
 # +
 # function: ngclient_test()
 # -
-def ngclient_test(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeout: float = BOK_NG_TIMEOUT, _simulate: bool = False) -> None:
+def ngclient_test(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeout: float = BOK_NG_TIMEOUT, 
+                  _simulate: bool = False, _verbose: bool = False) -> None:
 
     # exercise command(s) and request(s)
     _client = None
@@ -876,39 +883,104 @@ def ngclient_test(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeout: 
         _client.connect()
         print(f"Client instantiated OK, host={_client.host}, port={_client.port}, sock={_client.sock}")
 
+        # +
         # request(s)
+        # -
         _client.request_encoders()
+        if _verbose:
+            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
+            print(f"request_encoders() answer='{_ans}', error='{_err}'")
+
         _client.request_gfilters()
+        if _verbose:
+            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
+            print(f"request_gfilters() answer='{_ans}', error='{_err}'")
+
         _client.request_gfilter()
+        if _verbose:
+            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
+            print(f"request_gfilter()>  answer='{_ans}', error='{_err}'")
+
         _client.request_gfocus()
+        if _verbose:
+            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
+            print(f"request_gfocus()>   answer='{_ans}', error='{_err}'")
+
         _client.request_ifilters()
+        if _verbose:
+            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
+            print(f"request_ifilters() answer='{_ans}', error='{_err}'")
+
         _client.request_ifilter()
+        if _verbose:
+            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
+            print(f"request_ifilter()>  answer='{_ans}', error='{_err}'")
+
         _client.request_ifocus()
+        if _verbose:
+            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
+            print(f"request_ifocus()>   answer='{_ans}', error='{_err}'")
 
         # dump
         print(f"{_client.__dump__()}")
 
-        # get filter(s)
-        _gfilter = random.choice(_client.gfilters_names)
-        _ifilter = random.choice(_client.ifilters_names)
 
-        # test guider filter wheel and focus
-        print(f"command_gfilter_init() {'succeeded' if _client.command_gfilter_init() else f'failed, error={_client.error}'}")
-        print(f"command_gfilter_name('{_gfilter}') {'succeeded' if _client.command_gfilter_name(gname=_gfilter) else f'failed, error={_client.error}'}")
-        print(f"command_gfilter_number(3) {'succeeded' if _client.command_gfilter_number(gnumber=3) else f'failed, error={_client.error}'}")
-        print(f"command_gfocus(50.0) {'succeeded' if _client.command_gfocus(gfocus=50.0) else f'failed, error={_client.error}'}")
+        # +
+        # command(s)
+        # -
+        print(f"command_gfilter_init() {'succeeded' if _client.command_gfilter_init() else 'failed'}")
+        if _verbose:
+            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
+            print(f"command_gfilter_init() answer='{_ans}', error='{_err}'")
+
+        _gfilter_name = random.choice(_client.gfilters_names)
+        print(f"command_gfilter_name('{_gfilter_name}') {'succeeded' if _client.command_gfilter_name(gname=_gfilter_name) else 'failed'}")
+        if _verbose:
+            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
+            print(f"command_gfilter_name() answer='{_ans}', error='{_err}'")
+
+        _gfilter_number = random.choice(_client.gfilters_numbers)
+        print(f"command_gfilter_number({_gfilter_number}) {'succeeded' if _client.command_gfilter_number(gnumber=_gfilter_number) else 'failed'}")
+        if _verbose:
+            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
+            print(f"command_gfilter_number() answer='{_ans}', error='{_err}'")
+
+        # test guider focus
+        _gfocus_delta = random.uniform(-100.0, 100.0)
+        print(f"command_gfocus_delta({_gfocus_delta}) {'succeeded' if _client.command_gfocus_delta(gdelta=_gfocus_delta) else 'failed'}")
+        if _verbose:
+            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
+            print(f"command_gfocus_delta({_gfocus_delta}) answer='{_ans}', error='{_err}'")
+
+        _gfocus_delta *= -1.0
+        print(f"command_gfocus_delta({_gfocus_delta}) {'succeeded' if _client.command_gfocus_delta(gdelta=_gfocus_delta) else 'failed'}")
+        if _verbose:
+            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
+            print(f"command_gfocus_delta({_gfocus_delta}) answer='{_ans}', error='{_err}'")
+
+        # test instrument filter wheel
+        print(f"command_ifilter_init() {'succeeded' if _client.command_ifilter_init() else 'failed'}")
+        if _verbose:
+            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
+            print(f"command_ifilter_init() answer='{_ans}', error='{_err}'")
 
         # print(f"command_ifilter_init() {'succeeded' if _client.command_ifilter_init() else f'failed, error={_client.error}'}")
+        # print(f"answer='{_client.answer}', error='{_client.error}'")
+        # _ifilter_name = random.choice(_client.ifilters_names)
         # print(f"command_ifilter_name('{_ifilter}') {'succeeded' if _client.command_ifilter_name(iname=_ifilter) else f'failed, error={_client.error}'}")
+        # print(f"answer='{_client.answer}', error='{_client.error}'")
         # print(f"command_ifilter_number(4) {'succeeded' if _client.command_ifilter_number(inumber=4) else f'failed, error={_client.error}'}")
+        # print(f"answer='{_client.answer}', error='{_client.error}'")
         # print(f"command_ifilter_load() {'succeeded' if _client.command_ifilter_load() else f'failed, error={_client.error}'}")
         # print(f"command_ifilter_unload() {'succeeded' if _client.command_ifilter_unload() else f'failed, error={_client.error}'}")
+        # print(f"answer='{_client.answer}', error='{_client.error}'")
+
         # print(f"command_ifocus(22.0, 33.0, 44.0) {'succeeded' if _client.command_ifocus(a=22.0, b=33.0, c=44.0) else f'failed, error={_client.error}'}")
         # print(f"command_ifocusall(55.0) {'succeeded' if _client.command_ifocusall(focus=55.0) else f'failed, error={_client.error}'}")
         # print(f"command_lvdt(22.0, 33.0, 44.0) {'succeeded' if _client.command_lvdt(a=22.0, b=33.0, c=44.0) else f'failed, error={_client.error}'}")
         # print(f"command_lvdtall(55.0) {'succeeded' if _client.command_lvdtall(lvdt=55.0) else f'failed, error={_client.error}'}")
-        print(f"command_test() {'succeeded' if _client.command_test() else f'failed, error={_client.error}'}")
-        print(f"command_exit() {'succeeded' if _client.command_exit() else f'failed, error={_client.error}'}")
+        # print(f"command_test() {'succeeded' if _client.command_test() else f'failed, error={_client.error}'}")
+        # print(f"command_exit() {'succeeded' if _client.command_exit() else f'failed, error={_client.error}'}")
         if _client.command_exit():
             if _client is not None and hasattr(_client, 'disconnect'):
                 _client.disconnect()
@@ -936,6 +1008,7 @@ if __name__ == '__main__':
     _p.add_argument('--port', default=BOK_NG_PORT, help="""Port [%(default)s]""")
     _p.add_argument('--timeout', default=BOK_NG_TIMEOUT, help="""Timeout (s) [%(default)s]""")
     _p.add_argument('--simulate', default=False, action='store_true', help='Simulate')
+    _p.add_argument('--verbose', default=False, action='store_true', help='Verbose')
     _args = _p.parse_args()
 
     # noinspection PyBroadException
@@ -944,6 +1017,6 @@ if __name__ == '__main__':
             with open(BOK_NG_HELP, 'r') as _f:
                 print(f"{_f.read()}")
         else:
-            ngclient_test(_host=_args.host, _port=int(_args.port), _timeout=float(_args.timeout), _simulate=bool(_args.simulate))
+            ngclient_test(_host=_args.host, _port=int(_args.port), _timeout=float(_args.timeout), _simulate=bool(_args.simulate), _verbose=bool(_args.verbose))
     except Exception as _:
         print(f"{_}\nUse: {__doc__}")
