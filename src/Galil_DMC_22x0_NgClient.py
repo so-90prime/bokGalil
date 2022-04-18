@@ -36,12 +36,59 @@ BOK_NG_STRING = 1024
 BOK_NG_TELESCOPE = "BOK"
 BOK_NG_TIMEOUT = 60.0
 BOK_NG_TRUE = [1, '1', 'true', True]
+BOK_COLORS = ['black', 'blue', 'cyan', 'green', 'yellow', 'magenta', 'red']
 
 
 # +
 # initialize
 # -
 random.seed(os.getpid())
+
+
+# +
+# function: pdh()
+# -
+def pdh(msg: str = '', color: str = BOK_COLORS[0], height: int = 1):
+    """ print double (or single) height and in color """
+
+    # check input(s)
+    color = color.lower() if color.lower() in BOK_COLORS else BOK_COLORS[0].lower()
+    height = height if (1 <= height <= 2) else 1
+
+    # output
+    if msg != '':
+        # single height
+        if height == 1:
+            if color == 'red':
+                print(f"\033[0;31m{msg}\033[0m")
+            elif color == 'green':
+                print(f"\033[0;32m{msg}\033[0m")
+            elif color == 'yellow':
+                print(f"\033[0;33m{msg}\033[0m")
+            elif color == 'blue':
+                print(f"\033[0;34m{msg}\033[0m")
+            elif color == 'magenta':
+                print(f"\033[0;35m{msg}\033[0m")
+            elif color == 'cyan':
+                print(f"\033[0;36m{msg}\033[0m")
+            else:
+                print(f"\033[0;30m{msg}\033[0m")
+        # double height
+        elif height == 2:
+            if color == 'red':
+                print(f"\033[0;31m\033#3{msg}\n\033#4{msg}\033[0m")
+            elif color == 'green':
+                print(f"\033[0;32m\033#3{msg}\n\033#4{msg}\033[0m")
+            elif color == 'yellow':
+                print(f"\033[0;33m\033#3{msg}\n\033#4{msg}\033[0m")
+            elif color == 'blue':
+                print(f"\033[0;34m\033#3{msg}\n\033#4{msg}\033[0m")
+            elif color == 'magenta':
+                print(f"\033[0;35m\033#3{msg}\n\033#4{msg}\033[0m")
+            elif color == 'cyan':
+                print(f"\033[0;36m\033#3{msg}\n\033#4{msg}\033[0m")
+            else:
+                print(f"\033#3{msg}\n\033#4{msg}")
 
 
 # +
@@ -68,13 +115,14 @@ class NgClient(object):
     # method: __init__()
     # -
     def __init__(self, host: str = BOK_NG_HOST, port: int = BOK_NG_PORT,
-                 timeout: float = BOK_NG_TIMEOUT, simulate: bool = False) -> None:
+                 timeout: float = BOK_NG_TIMEOUT, simulate: bool = False, verbose: bool = False) -> None:
 
         # get input(s)
         self.host = host
         self.port = port
         self.timeout = timeout
         self.simulate = simulate
+        self.verbose = verbose
 
         # set variable(s)
         self.__answer = f""
@@ -141,6 +189,14 @@ class NgClient(object):
     @simulate.setter
     def simulate(self, simulate: bool = False) -> None:
         self.__simulate = simulate
+
+    @property
+    def verbose(self):
+        return self.__verbose
+
+    @verbose.setter
+    def verbose(self, verbose: bool = False) -> None:
+        self.__verbose = verbose
 
     # +
     # getter(s)
@@ -267,41 +323,42 @@ class NgClient(object):
     def __dump__(self):
         """ dump(s) variable(s) """
 
-        print(f"self = {self}")
-        print(f"self.__host = {self.__host}")
-        print(f"self.__port = {self.__port}")
-        print(f"self.__timeout = {self.__timeout}")
-        print(f"self.__simulate = {self.__simulate}")
+        pdh(f"self = {self}")
+        pdh(f"self.__host = {self.__host}")
+        pdh(f"self.__port = {self.__port}")
+        pdh(f"self.__timeout = {self.__timeout}")
+        pdh(f"self.__simulate = {self.__simulate}")
+        pdh(f"self.__verbose = {self.__verbose}")
 
-        print(f"self.__answer = '{self.__answer}'")
-        print(f"self.__command = '{self.__command}'")
-        print(f"self.__encoder_a = {self.__encoder_a}")
-        print(f"self.__encoder_b = {self.__encoder_b}")
-        print(f"self.__encoder_c = {self.__encoder_c}")
-        print(f"self.__error = '{self.__error}'")
-        print(f"self.__gfilters = {self.__gfilters}")
-        print(f"self.__gfilters_names = {self.__gfilters_names}")
-        print(f"self.__gfilters_numbers = {self.__gfilters_numbers}")
-        print(f"self.__gfilters_slots = {self.__gfilters_slots}")
-        print(f"self.__gfilter_name = '{self.__gfilter_name}'")
-        print(f"self.__gfilter_number = {self.__gfilter_number}")
-        print(f"self.__gfilter_rotating = {self.__gfilter_rotating}")
-        print(f"self.__gdelta = {self.__gdelta}")
-        print(f"self.__gfocus = {self.__gfocus}")
-        print(f"self.__ifilters = {self.__ifilters}")
-        print(f"self.__ifilters_names = {self.__ifilters_names}")
-        print(f"self.__ifilters_numbers = {self.__ifilters_numbers}")
-        print(f"self.__ifilters_slots = {self.__ifilters_slots}")
-        print(f"self.__ifilter_inbeam = {self.__ifilter_inbeam}")
-        print(f"self.__ifilter_name = '{self.__ifilter_name}'")
-        print(f"self.__ifilter_number = {self.__ifilter_number}")
-        print(f"self.__ifilter_rotating = {self.__ifilter_rotating}")
-        print(f"self.__ifilter_translating = {self.__ifilter_translating}")
-        print(f"self.__ifocus_a = {self.__ifocus_a}")
-        print(f"self.__ifocus_b = {self.__ifocus_b}")
-        print(f"self.__ifocus_c = {self.__ifocus_c}")
-        print(f"self.__ifocus_mean = {self.__ifocus_mean}")
-        print(f"self.__sock = None {self.__sock}")
+        pdh(f"self.__answer = '{self.__answer}'")
+        pdh(f"self.__command = '{self.__command}'")
+        pdh(f"self.__encoder_a = {self.__encoder_a}")
+        pdh(f"self.__encoder_b = {self.__encoder_b}")
+        pdh(f"self.__encoder_c = {self.__encoder_c}")
+        pdh(f"self.__error = '{self.__error}'")
+        pdh(f"self.__gfilters = {self.__gfilters}")
+        pdh(f"self.__gfilters_names = {self.__gfilters_names}")
+        pdh(f"self.__gfilters_numbers = {self.__gfilters_numbers}")
+        pdh(f"self.__gfilters_slots = {self.__gfilters_slots}")
+        pdh(f"self.__gfilter_name = '{self.__gfilter_name}'")
+        pdh(f"self.__gfilter_number = {self.__gfilter_number}")
+        pdh(f"self.__gfilter_rotating = {self.__gfilter_rotating}")
+        pdh(f"self.__gdelta = {self.__gdelta}")
+        pdh(f"self.__gfocus = {self.__gfocus}")
+        pdh(f"self.__ifilters = {self.__ifilters}")
+        pdh(f"self.__ifilters_names = {self.__ifilters_names}")
+        pdh(f"self.__ifilters_numbers = {self.__ifilters_numbers}")
+        pdh(f"self.__ifilters_slots = {self.__ifilters_slots}")
+        pdh(f"self.__ifilter_inbeam = {self.__ifilter_inbeam}")
+        pdh(f"self.__ifilter_name = '{self.__ifilter_name}'")
+        pdh(f"self.__ifilter_number = {self.__ifilter_number}")
+        pdh(f"self.__ifilter_rotating = {self.__ifilter_rotating}")
+        pdh(f"self.__ifilter_translating = {self.__ifilter_translating}")
+        pdh(f"self.__ifocus_a = {self.__ifocus_a}")
+        pdh(f"self.__ifocus_b = {self.__ifocus_b}")
+        pdh(f"self.__ifocus_c = {self.__ifocus_c}")
+        pdh(f"self.__ifocus_mean = {self.__ifocus_mean}")
+        pdh(f"self.__sock = None {self.__sock}")
 
     # +
     # method: connect()
@@ -358,6 +415,8 @@ class NgClient(object):
             self.__command = f"{talk}\r\n"
 
         # converse
+        if self.__verbose:
+            pdh(msg=f"\tSend> '{self.__command[:-2]}'", color='magenta', height=1)
         try:
             self.__sock.send(self.__command.encode())
             self.__answer = self.__sock.recv(BOK_NG_STRING).decode()
@@ -368,6 +427,8 @@ class NgClient(object):
             self.__error = f""
 
         # return
+        if self.__verbose:
+            pdh(msg=f"\tRecv> '{self.__answer[:-1]}'", color='magenta', height=1)
         return self.__answer
 
     # +
@@ -453,10 +514,10 @@ class NgClient(object):
     def command_gfocus_delta(self, gdelta: float = math.nan) -> bool:
         """ BOK 90PRIME <cmd-id> COMMAND GFOCUS DELTA <float> """
 
-        if math.nan < gfocus < -math.nan:
+        if math.nan < gdelta < -math.nan:
             return False
 
-        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND GFOCUS DELTA {gdelta}")
+        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND GFOCUS DELTA {gdelta:.4f}")
         return self.parse_command_response(_reply)
 
     # +
@@ -531,7 +592,7 @@ class NgClient(object):
         if (math.nan < a < -math.nan) or (math.nan < b < -math.nan) or (math.nan < c < -math.nan):
             return False
 
-        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND IFOCUS A {a} B {b} C {c}")
+        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND IFOCUS A {a:.4f} B {b:.4f} C {c:.4f}")
         return self.parse_command_response(_reply)
 
     # +
@@ -543,7 +604,7 @@ class NgClient(object):
         if math.nan < focus < -math.nan:
             return False
 
-        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND IFOCUSALL {focus}")
+        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND IFOCUSALL {focus:.4f}")
         return self.parse_command_response(_reply)
 
     # +
@@ -555,7 +616,7 @@ class NgClient(object):
         if (math.nan < a < -math.nan) or (math.nan < b < -math.nan) or (math.nan < c < -math.nan):
             return False
 
-        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND LVDT A {a} B {b} C {c}")
+        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND LVDT A {a:.4f} B {b:.4f} C {c:.4f}")
         return self.parse_command_response(_reply)
 
     # +
@@ -567,7 +628,7 @@ class NgClient(object):
         if math.nan < lvdt < -math.nan:
             return False
 
-        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND LVDTALL {lvdt}")
+        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND LVDTALL {lvdt:.4f}")
         return self.parse_command_response(_reply)
 
     # +
@@ -869,9 +930,9 @@ class NgClient(object):
 
 
 # +
-# function: ngclient_test()
+# function: ngclient_check()
 # -
-def ngclient_test(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeout: float = BOK_NG_TIMEOUT, 
+def ngclient_check(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeout: float = BOK_NG_TIMEOUT, 
                   _simulate: bool = False, _verbose: bool = False) -> None:
 
     # exercise command(s) and request(s)
@@ -879,101 +940,201 @@ def ngclient_test(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeout: 
     try:
 
         # instantiate client and connect to server
-        _client = NgClient(host=_host, port=_port, timeout=_timeout, simulate=_simulate)
+        pdh(msg=f"Executing> NgClient(host='{_host}', port={_port}, timeout={_timeout}, simulate={_simulate}, verbose={_verbose})", color='green', height=1)
+        _client = NgClient(host=_host, port=_port, timeout=_timeout, simulate=_simulate, verbose=_verbose)
         _client.connect()
-        print(f"Client instantiated OK, host={_client.host}, port={_client.port}, sock={_client.sock}")
+        if _client.sock is not None:
+            pdh(msg=f"\tInstantiation OK, sock={_client.sock}", color='green', height=1)
+        else:
+            pdh(msg=f"\tInstantiation FAILED, error={_client.error}", color='red', height=1)
+            return
 
         # +
         # request(s)
         # -
+
+        # request_encoders()
+        pdh(msg=f"Executing> request_encoders()", color='green', height=1)
         _client.request_encoders()
+        if _client.error == '':
+            pdh(msg=f"\tencoder_a = {_client.encoder_a}", color='green', height=1)
+            pdh(msg=f"\tencoder_b = {_client.encoder_b}", color='green', height=1)
+            pdh(msg=f"\tencoder_c = {_client.encoder_c}", color='green', height=1)
         if _verbose:
             _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
-            print(f"request_encoders() answer='{_ans}', error='{_err}'")
+            pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
 
+        # request_gfilters()
+        pdh(msg=f"Executing> request_gfilters()", color='green', height=1)
         _client.request_gfilters()
+        if _client.error == '':
+            pdh(msg=f"\tgfilters = {_client.gfilters}", color='green', height=1)
+            pdh(msg=f"\tgfilters_names = {_client.gfilters_names}", color='green', height=1)
+            pdh(msg=f"\tgfilters_numbers = {_client.gfilters_numbers}", color='green', height=1)
+            pdh(msg=f"\tgfilters_slots = {_client.gfilters_slots}", color='green', height=1)
         if _verbose:
             _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
-            print(f"request_gfilters() answer='{_ans}', error='{_err}'")
+            pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
 
+        # request_gfilter()
+        pdh(msg=f"Executing> request_gfilter()", color='green', height=1)
         _client.request_gfilter()
+        if _client.error == '':
+            pdh(msg=f"\tgfilter_name = '{_client.gfilter_name}'", color='green', height=1)
+            pdh(msg=f"\tgfilter_number = {_client.gfilter_number}", color='green', height=1)
+            pdh(msg=f"\tgfilter_rotating = {_client.gfilter_rotating}", color='green', height=1)
         if _verbose:
             _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
-            print(f"request_gfilter()>  answer='{_ans}', error='{_err}'")
+            pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
 
+        # request_gfocus()
+        pdh(msg=f"Executing> request_gfocus()", color='green', height=1)
         _client.request_gfocus()
+        if _client.error == '':
+            pdh(msg=f"\tgfocus = {_client.gfocus}", color='green', height=1)
         if _verbose:
             _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
-            print(f"request_gfocus()>   answer='{_ans}', error='{_err}'")
+            pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
 
+        # request_ifilters()
+        pdh(msg=f"Executing> request_ifilters()", color='green', height=1)
         _client.request_ifilters()
+        if _client.error == '':
+            pdh(msg=f"\tifilters = {_client.ifilters}", color='green', height=1)
+            pdh(msg=f"\tifilters_names = {_client.ifilters_names}", color='green', height=1)
+            pdh(msg=f"\tifilters_numbers = {_client.ifilters_numbers}", color='green', height=1)
+            pdh(msg=f"\tifilters_slots = {_client.ifilters_slots}", color='green', height=1)
         if _verbose:
             _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
-            print(f"request_ifilters() answer='{_ans}', error='{_err}'")
+            pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
 
+        # request_ifilter()
+        pdh(msg=f"Executing> request_ifilter()", color='green', height=1)
         _client.request_ifilter()
+        if _client.error == '':
+            pdh(msg=f"\tifilter_inbeam = {_client.ifilter_inbeam}", color='green', height=1)
+            pdh(msg=f"\tifilter_name = {_client.ifilter_name}", color='green', height=1)
+            pdh(msg=f"\tifilter_number = {_client.ifilter_number}", color='green', height=1)
+            pdh(msg=f"\tifilter_rotating = {_client.ifilter_rotating}", color='green', height=1)
+            pdh(msg=f"\tifilter_translating = {_client.ifilter_translating}", color='green', height=1)
         if _verbose:
             _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
-            print(f"request_ifilter()>  answer='{_ans}', error='{_err}'")
+            pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
 
+        # request_ifocus()
+        pdh(msg=f"Executing> request_ifocus()", color='green', height=1)
         _client.request_ifocus()
+        if _client.error == '':
+            pdh(msg=f"\tifocus_a = {_client.ifocus_a}", color='green', height=1)
+            pdh(msg=f"\tifocus_b = {_client.ifocus_b}", color='green', height=1)
+            pdh(msg=f"\tifocus_c = {_client.ifocus_c}", color='green', height=1)
+            pdh(msg=f"\tifocus_mean = {_client.ifocus_mean}", color='green', height=1)
         if _verbose:
             _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
-            print(f"request_ifocus()>   answer='{_ans}', error='{_err}'")
-
-        # dump
-        print(f"{_client.__dump__()}")
+            pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
 
 
         # +
         # command(s)
         # -
-        print(f"command_gfilter_init() {'succeeded' if _client.command_gfilter_init() else 'failed'}")
+        pdh(msg=f"Executing> command_gfilter_init() ...", color='green', height=1)
+        if _client.command_gfilter_init():
+            pdh(msg=f"\tcommand_gfilter_init() succeeded", color='green', height=1)
+        else:
+            pdh(msg=f"\tcommand_gfilter_init() failed", color='red', height=1)
         if _verbose:
             _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
-            print(f"command_gfilter_init() answer='{_ans}', error='{_err}'")
+            pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
 
         _gfilter_name = random.choice(_client.gfilters_names)
-        print(f"command_gfilter_name('{_gfilter_name}') {'succeeded' if _client.command_gfilter_name(gname=_gfilter_name) else 'failed'}")
+        pdh(msg=f"Executing> command_gfilter_name('{_gfilter_name}') ...", color='green', height=1)
+        if _client.command_gfilter_name(gname=_gfilter_name):
+            pdh(msg=f"\tcommand_gfilter_name('{_gfilter_name}') succeeded", color='green', height=1)
+        else:
+            pdh(msg=f"\tcommand_gfilter_name('{_gfilter_name}') failed", color='red', height=1)
         if _verbose:
             _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
-            print(f"command_gfilter_name() answer='{_ans}', error='{_err}'")
+            pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
 
         _gfilter_number = random.choice(_client.gfilters_numbers)
-        print(f"command_gfilter_number({_gfilter_number}) {'succeeded' if _client.command_gfilter_number(gnumber=_gfilter_number) else 'failed'}")
+        pdh(msg=f"Executing> command_gfilter_number({_gfilter_number}) ...", color='green', height=1)
+        if _client.command_gfilter_number(gnumber=_gfilter_number):
+            pdh(msg=f"\tcommand_gfilter_number({_gfilter_number}) succeeded", color='green', height=1)
+        else:
+            pdh(msg=f"\tcommand_gfilter_number({_gfilter_number}) failed", color='red', height=1)
         if _verbose:
             _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
-            print(f"command_gfilter_number() answer='{_ans}', error='{_err}'")
+            pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
 
         # test guider focus
         _gfocus_delta = random.uniform(-100.0, 100.0)
-        print(f"command_gfocus_delta({_gfocus_delta}) {'succeeded' if _client.command_gfocus_delta(gdelta=_gfocus_delta) else 'failed'}")
+        pdh(msg=f"Executing> command_gfocus_delta({_gfocus_delta:.4f}) ...", color='green', height=1)
+        if _client.command_gfocus_delta(gdelta=_gfocus_delta):
+            pdh(msg=f"\tcommand_gfocus_delta({_gfocus_delta:.4f}) succeeded", color='green', height=1)
+        else:
+            pdh(msg=f"\tcommand_gfocus_delta({_gfocus_delta:.4f}) failed", color='red', height=1)
         if _verbose:
             _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
-            print(f"command_gfocus_delta({_gfocus_delta}) answer='{_ans}', error='{_err}'")
+            pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
 
         _gfocus_delta *= -1.0
-        print(f"command_gfocus_delta({_gfocus_delta}) {'succeeded' if _client.command_gfocus_delta(gdelta=_gfocus_delta) else 'failed'}")
+        pdh(msg=f"Executing> command_gfocus_delta({_gfocus_delta:.4f}) ...", color='green', height=1)
+        if _client.command_gfocus_delta(gdelta=_gfocus_delta):
+            pdh(msg=f"\tcommand_gfocus_delta({_gfocus_delta:.4f}) succeeded", color='green', height=1)
+        else:
+            pdh(msg=f"\tcommand_gfocus_delta({_gfocus_delta:.4f}) failed", color='red', height=1)
         if _verbose:
             _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
-            print(f"command_gfocus_delta({_gfocus_delta}) answer='{_ans}', error='{_err}'")
+            pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
 
         # test instrument filter wheel
-        print(f"command_ifilter_init() {'succeeded' if _client.command_ifilter_init() else 'failed'}")
+        pdh(msg=f"Executing> command_ifilter_init() ...", color='green', height=1)
+        if _client.command_ifilter_init():
+            pdh(msg=f"\tcommand_ifilter_init() succeeded", color='green', height=1)
+        else:
+            pdh(msg=f"\tcommand_ifilter_init() failed", color='red', height=1)
         if _verbose:
             _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
-            print(f"command_ifilter_init() answer='{_ans}', error='{_err}'")
+            pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
 
-        # print(f"command_ifilter_init() {'succeeded' if _client.command_ifilter_init() else f'failed, error={_client.error}'}")
-        # print(f"answer='{_client.answer}', error='{_client.error}'")
-        # _ifilter_name = random.choice(_client.ifilters_names)
-        # print(f"command_ifilter_name('{_ifilter}') {'succeeded' if _client.command_ifilter_name(iname=_ifilter) else f'failed, error={_client.error}'}")
-        # print(f"answer='{_client.answer}', error='{_client.error}'")
-        # print(f"command_ifilter_number(4) {'succeeded' if _client.command_ifilter_number(inumber=4) else f'failed, error={_client.error}'}")
-        # print(f"answer='{_client.answer}', error='{_client.error}'")
-        # print(f"command_ifilter_load() {'succeeded' if _client.command_ifilter_load() else f'failed, error={_client.error}'}")
-        # print(f"command_ifilter_unload() {'succeeded' if _client.command_ifilter_unload() else f'failed, error={_client.error}'}")
-        # print(f"answer='{_client.answer}', error='{_client.error}'")
+        _ifilter_name = random.choice(_client.ifilters_names)
+        pdh(msg=f"Executing> command_ifilter_name('{_ifilter_name}') ...", color='green', height=1)
+        if _client.command_ifilter_name(iname=_ifilter_name):
+            pdh(msg=f"\tcommand_ifilter_name('{_ifilter_name}') succeeded", color='green', height=1)
+        else:
+            pdh(msg=f"\tcommand_ifilter_name('{_ifilter_name}') failed", color='red', height=1)
+        if _verbose:
+            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
+            pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
+
+        _ifilter_number = random.choice(_client.ifilters_numbers)
+        pdh(msg=f"Executing> command_ifilter_number({_ifilter_number}) ...", color='green', height=1)
+        if _client.command_ifilter_number(inumber=_ifilter_number):
+            pdh(msg=f"\tcommand_ifilter_number({_ifilter_number}) succeeded", color='green', height=1)
+        else:
+            pdh(msg=f"\tcommand_ifilter_number({_ifilter_number}) failed", color='red', height=1)
+        if _verbose:
+            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
+            pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
+
+        pdh(msg=f"Executing> command_ifilter_load() ...", color='green', height=1)
+        if _client.command_ifilter_load():
+            pdh(msg=f"\tcommand_ifilter_load() succeeded", color='green', height=1)
+        else:
+            pdh(msg=f"\tcommand_ifilter_load() failed", color='red', height=1)
+        if _verbose:
+            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
+            pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
+
+        pdh(msg=f"Executing> command_ifilter_unload() ...", color='green', height=1)
+        if _client.command_ifilter_unload():
+            pdh(msg=f"\tcommand_ifilter_unload() succeeded", color='green', height=1)
+        else:
+            pdh(msg=f"\tcommand_ifilter_unload() failed", color='red', height=1)
+        if _verbose:
+            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
+            pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
+
 
         # print(f"command_ifocus(22.0, 33.0, 44.0) {'succeeded' if _client.command_ifocus(a=22.0, b=33.0, c=44.0) else f'failed, error={_client.error}'}")
         # print(f"command_ifocusall(55.0) {'succeeded' if _client.command_ifocusall(focus=55.0) else f'failed, error={_client.error}'}")
@@ -1017,6 +1178,6 @@ if __name__ == '__main__':
             with open(BOK_NG_HELP, 'r') as _f:
                 print(f"{_f.read()}")
         else:
-            ngclient_test(_host=_args.host, _port=int(_args.port), _timeout=float(_args.timeout), _simulate=bool(_args.simulate), _verbose=bool(_args.verbose))
+            ngclient_check(_host=_args.host, _port=int(_args.port), _timeout=float(_args.timeout), _simulate=bool(_args.simulate), _verbose=bool(_args.verbose))
     except Exception as _:
         print(f"{_}\nUse: {__doc__}")
