@@ -1037,6 +1037,8 @@ def ngclient_check(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeout:
         # +
         # command(s)
         # -
+
+        # command_gfilter_init()
         pdh(msg=f"Executing> command_gfilter_init() ...", color='green', height=1)
         if _client.command_gfilter_init():
             pdh(msg=f"\tcommand_gfilter_init() succeeded", color='green', height=1)
@@ -1046,6 +1048,7 @@ def ngclient_check(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeout:
             _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
             pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
 
+        # command_gfilter_name()
         _gfilter_name = random.choice(_client.gfilters_names)
         pdh(msg=f"Executing> command_gfilter_name('{_gfilter_name}') ...", color='green', height=1)
         if _client.command_gfilter_name(gname=_gfilter_name):
@@ -1056,6 +1059,7 @@ def ngclient_check(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeout:
             _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
             pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
 
+        # command_gfilter_number()
         _gfilter_number = random.choice(_client.gfilters_numbers)
         pdh(msg=f"Executing> command_gfilter_number({_gfilter_number}) ...", color='green', height=1)
         if _client.command_gfilter_number(gnumber=_gfilter_number):
@@ -1066,7 +1070,7 @@ def ngclient_check(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeout:
             _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
             pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
 
-        # test guider focus
+        # command_gfocus_delta()
         _gfocus_delta = random.uniform(-100.0, 100.0)
         pdh(msg=f"Executing> command_gfocus_delta({_gfocus_delta:.4f}) ...", color='green', height=1)
         if _client.command_gfocus_delta(gdelta=_gfocus_delta):
@@ -1087,7 +1091,7 @@ def ngclient_check(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeout:
             _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
             pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
 
-        # test instrument filter wheel
+        # command_ifilter_init()
         pdh(msg=f"Executing> command_ifilter_init() ...", color='green', height=1)
         if _client.command_ifilter_init():
             pdh(msg=f"\tcommand_ifilter_init() succeeded", color='green', height=1)
@@ -1097,6 +1101,7 @@ def ngclient_check(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeout:
             _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
             pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
 
+        # command_ifilter_name()
         _ifilter_name = random.choice(_client.ifilters_names)
         pdh(msg=f"Executing> command_ifilter_name('{_ifilter_name}') ...", color='green', height=1)
         if _client.command_ifilter_name(iname=_ifilter_name):
@@ -1107,6 +1112,7 @@ def ngclient_check(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeout:
             _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
             pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
 
+        # command_ifilter_number()
         _ifilter_number = random.choice(_client.ifilters_numbers)
         pdh(msg=f"Executing> command_ifilter_number({_ifilter_number}) ...", color='green', height=1)
         if _client.command_ifilter_number(inumber=_ifilter_number):
@@ -1117,6 +1123,7 @@ def ngclient_check(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeout:
             _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
             pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
 
+        # command_ifilter_load()
         pdh(msg=f"Executing> command_ifilter_load() ...", color='green', height=1)
         if _client.command_ifilter_load():
             pdh(msg=f"\tcommand_ifilter_load() succeeded", color='green', height=1)
@@ -1126,6 +1133,7 @@ def ngclient_check(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeout:
             _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
             pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
 
+        # command_ifilter_unload()
         pdh(msg=f"Executing> command_ifilter_unload() ...", color='green', height=1)
         if _client.command_ifilter_unload():
             pdh(msg=f"\tcommand_ifilter_unload() succeeded", color='green', height=1)
@@ -1134,7 +1142,6 @@ def ngclient_check(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeout:
         if _verbose:
             _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
             pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
-
 
         # print(f"command_ifocus(22.0, 33.0, 44.0) {'succeeded' if _client.command_ifocus(a=22.0, b=33.0, c=44.0) else f'failed, error={_client.error}'}")
         # print(f"command_ifocusall(55.0) {'succeeded' if _client.command_ifocusall(focus=55.0) else f'failed, error={_client.error}'}")

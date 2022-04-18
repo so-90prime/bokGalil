@@ -1124,6 +1124,37 @@ void replace_word(char *haystack, size_t haystack_len, const char *needle, const
 
 
 /*******************************************************************************
+ * logtime( ... )
+ ******************************************************************************/
+void logtime(const char * format, ...) {
+    
+  /* obtain current time */
+  time_t ctime_s;
+  (void) memset((void *)&ctime_s, '\0', sizeof(ctime_s));
+  if ((ctime_s=time(NULL)) < (time_t)0) { return; }
+
+  /* convert to local time format */
+  char *ctime_p = (char *)NULL;
+  if ((ctime_p=ctime(&ctime_s)) == (char *)NULL) { return; }
+
+  /* create buffer */
+  char buffer[BOK_STR_32];
+  (void) memset((void *)&buffer, '\0', sizeof(buffer));
+  (void) snprintf(buffer, strlen(ctime_p), "%s", ctime_p);
+  chomp(buffer, "\n");
+  chomp(buffer, "\r");
+  (void) printf("%s", buffer);
+
+  /* format */
+  va_list args;
+  va_start(args, format);
+  vprintf(format, args);
+  va_end(args);
+  (void) fflush(stdout);
+}
+
+
+/*******************************************************************************
  * xq( ... )
  ******************************************************************************/
 GReturn xq(char *cmd) {

@@ -13,6 +13,7 @@
 #include <fcntl.h>
 #include <limits.h>
 #include <math.h>
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -770,6 +771,7 @@ void dump_tcp_structure          (tcp_val_t *);
 void dump_udp_structure          (udp_val_t *);
 double get_jd                    (struct tm *);
 void galil_check                 (GReturn, GCon *, bool, bool);
+void logtime                     (const char *, ...);
 void read_filters_from_file      (char *, filter_file_t [], int, int);
 void read_nominal_plane_from_file(char *, float *, float *, float *);
 void save_nominal_plane_to_file  (char *, float, float, float);
