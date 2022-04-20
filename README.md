@@ -8,7 +8,7 @@
 
  - gclib (www.galil.com), specifically: gcapsd_130-1_amd64.deb, gclib_396-1_amd64.deb and gdk_1.0.7.353-1_amd64.deb
 
- - python3 (3.6 or later)
+ - Python3 (3.6 or later)
 
 ## Caveat(s)
 
