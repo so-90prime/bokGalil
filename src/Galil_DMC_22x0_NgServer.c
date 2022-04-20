@@ -158,7 +158,7 @@ void *thread_handler(void *thread_fd) {
               while (--countdown > 0) {
                 /* there is nothing to check on the initialization! */
                 (void) sleep(1);
-                (void) logtime(" server thread is waiting for gfwinit() to finish %d\n", countdown);
+                (void) logtime(" waiting for gfwinit() to finish %d\n", countdown);
               }
             }
             (void) xq_hx();
@@ -166,7 +166,7 @@ void *thread_handler(void *thread_fd) {
               countdown = BOK_NG_GUIDER_FILTER_TIME;
               while (--countdown > 0) {
                 (void) sleep(1);
-                (void) logtime(" server thread is checking gfiltn %d and snum %d\n", (int)round(tcp_shm_ptr->lv.gfiltn), (int)round(tcp_shm_ptr->lv.snum));
+                (void) logtime(" checking gfiltn %d and snum %d\n", (int)round(tcp_shm_ptr->lv.gfiltn), (int)round(tcp_shm_ptr->lv.snum));
                 if ((int)round(tcp_shm_ptr->lv.gfiltn)==1 && (int)round(tcp_shm_ptr->lv.snum)==1) { is_done = true; break; }
                 if ((int)round(tcp_shm_ptr->lv.gfiltn)==2 && (int)round(tcp_shm_ptr->lv.snum)==3) { is_done = true; break; }
                 if ((int)round(tcp_shm_ptr->lv.gfiltn)==3 && (int)round(tcp_shm_ptr->lv.snum)==2) { is_done = true; break; }
@@ -252,7 +252,7 @@ void *thread_handler(void *thread_fd) {
               countdown = BOK_NG_GUIDER_FILTER_TIME;
               while (--countdown > 0) {
                 (void) sleep(1);
-                (void) logtime(" server thread is checking gfiltn %d and snum %d\n", (int)round(tcp_shm_ptr->lv.gfiltn), (int)round(tcp_shm_ptr->lv.snum));
+                (void) logtime(" checking gfiltn %d and snum %d\n", (int)round(tcp_shm_ptr->lv.gfiltn), (int)round(tcp_shm_ptr->lv.snum));
                 if ((int)round(tcp_shm_ptr->lv.gfiltn)==1 && (int)round(tcp_shm_ptr->lv.snum)==1) { is_done = true; break; }
                 if ((int)round(tcp_shm_ptr->lv.gfiltn)==2 && (int)round(tcp_shm_ptr->lv.snum)==3) { is_done = true; break; }
                 if ((int)round(tcp_shm_ptr->lv.gfiltn)==3 && (int)round(tcp_shm_ptr->lv.snum)==2) { is_done = true; break; }
@@ -334,7 +334,7 @@ void *thread_handler(void *thread_fd) {
               countdown = BOK_NG_GUIDER_FILTER_TIME;
               while (--countdown > 0) {
                 (void) sleep(1);
-                (void) logtime(" server thread is checking gfiltn %d and snum %d\n", (int)round(tcp_shm_ptr->lv.gfiltn), (int)round(tcp_shm_ptr->lv.snum));
+                (void) logtime(" checking gfiltn %d and snum %d\n", (int)round(tcp_shm_ptr->lv.gfiltn), (int)round(tcp_shm_ptr->lv.snum));
                 if ((int)round(tcp_shm_ptr->lv.gfiltn)==1 && (int)round(tcp_shm_ptr->lv.snum)==1) { is_done = true; break; }
                 if ((int)round(tcp_shm_ptr->lv.gfiltn)==2 && (int)round(tcp_shm_ptr->lv.snum)==3) { is_done = true; break; }
                 if ((int)round(tcp_shm_ptr->lv.gfiltn)==3 && (int)round(tcp_shm_ptr->lv.snum)==2) { is_done = true; break; }
@@ -411,7 +411,7 @@ void *thread_handler(void *thread_fd) {
               countdown = BOK_NG_GUIDER_FOCUS_TIME;
               while (--countdown > 0) {
                 (void) sleep(1);
-                (void) logtime(" server thread is checking _gfocend %.4f with eaxis_reference_position %.4f\n", _gfocend, (float)udp_shm_ptr->eaxis_reference_position);
+                (void) logtime(" checking _gfocend %.4f with eaxis_reference_position %.4f\n", _gfocend, (float)udp_shm_ptr->eaxis_reference_position);
                 if (abs(_gfocend - (float)udp_shm_ptr->eaxis_reference_position) < 0.1) { is_done = true; break; }
               }
             }
@@ -473,7 +473,7 @@ void *thread_handler(void *thread_fd) {
               while (--countdown > 0) {
                 /* there is nothing to check on the initialization! */
                 (void) sleep(1);
-                (void) logtime(" server thread is waiting for filtldm() to finish %d\n", countdown);
+                (void) logtime(" waiting for filtldm() to finish %d\n", countdown);
               }
             }
             (void) xq_hx();
@@ -482,7 +482,7 @@ void *thread_handler(void *thread_fd) {
               while (--countdown > 0) {
                 /* there is nothing to check on the initialization! */
                 (void) sleep(1);
-                (void) logtime(" server thread is waiting for filtrd() to finish %d\n", countdown);
+                (void) logtime(" waiting for filtrd() to finish %d\n", countdown);
               }
               is_done = true;
             }
@@ -541,7 +541,7 @@ void *thread_handler(void *thread_fd) {
               countdown = BOK_NG_INSTRUMENT_LOAD_TIME;
               while (--countdown > 0) {
                 (void) sleep(1);
-                (void) logtime(" server thread is checking filtisin %d\n", (int)round(tcp_shm_ptr->lv.filtisin));
+                (void) logtime(" checking filtisin %d\n", (int)round(tcp_shm_ptr->lv.filtisin));
                 if (((int)round(tcp_shm_ptr->lv.filtisin)) == 1) { is_done = true; break; }
               }
             }
@@ -626,7 +626,7 @@ void *thread_handler(void *thread_fd) {
               countdown = BOK_NG_INSTRUMENT_FILTER_TIME;
               while (--countdown > 0) {
                 (void) sleep(1);
-                (void) logtime(" server thread is checking reqfilt %d and filtval %d\n", (int)round(tcp_shm_ptr->lv.reqfilt), (int)round(tcp_shm_ptr->lv.filtval));
+                (void) logtime(" checking reqfilt %d and filtval %d\n", (int)round(tcp_shm_ptr->lv.reqfilt), (int)round(tcp_shm_ptr->lv.filtval));
                 if ((int)round(tcp_shm_ptr->lv.reqfilt) == (int)round(tcp_shm_ptr->lv.filtval)) { is_done = true; break; }
               }
             }
@@ -707,7 +707,7 @@ void *thread_handler(void *thread_fd) {
               countdown = BOK_NG_INSTRUMENT_FILTER_TIME;
               while (--countdown > 0) {
                 (void) sleep(1);
-                (void) logtime(" server thread is checking reqfilt %d and filtval %d\n", (int)round(tcp_shm_ptr->lv.reqfilt), (int)round(tcp_shm_ptr->lv.filtval));
+                (void) logtime(" checking reqfilt %d and filtval %d\n", (int)round(tcp_shm_ptr->lv.reqfilt), (int)round(tcp_shm_ptr->lv.filtval));
                 if ((int)round(tcp_shm_ptr->lv.reqfilt) == (int)round(tcp_shm_ptr->lv.filtval)) { is_done = true; break; }
               }
             }
@@ -766,7 +766,7 @@ void *thread_handler(void *thread_fd) {
               countdown = BOK_NG_INSTRUMENT_UNLOAD_TIME;
               while (--countdown > 0) {
                 (void) sleep(1);
-                (void) logtime(" server thread is checking filtisin %d\n", (int)round(tcp_shm_ptr->lv.filtisin));
+                (void) logtime(" checking filtisin %d\n", (int)round(tcp_shm_ptr->lv.filtisin));
                 if (((int)round(tcp_shm_ptr->lv.filtisin)) == 0) { is_done = true; break; }
               }
             }
@@ -784,27 +784,30 @@ void *thread_handler(void *thread_fd) {
         }
 
       /*******************************************************************************
-       * BOK 90PRIME <cmd-id> COMMAND IFOCUS A <float> B <float> C <float>
+       * BOK 90PRIME <cmd-id> COMMAND IFOCUS A <float> B <float> C <float> T <float>
        ******************************************************************************/
       } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
-          (istat=strncasecmp(bok_ng_commands[4], "IFOCUS", strlen("IFOCUS"))==0) &&
-          (istat=strncasecmp(bok_ng_commands[5], "A", strlen("A"))==0) &&
-          (istat=(int)strlen(bok_ng_commands[6])>0) &&
-          (istat=strncasecmp(bok_ng_commands[7], "B", strlen("B"))==0) &&
-          (istat=(int)strlen(bok_ng_commands[8])>0) &&
-          (istat=strncasecmp(bok_ng_commands[9], "C", strlen("C"))==0) &&
-          (istat=(int)strlen(bok_ng_commands[10])>0) ) {
+                 (istat=strncasecmp(bok_ng_commands[4], "IFOCUS", strlen("IFOCUS"))==0) &&
+                 (istat=strncasecmp(bok_ng_commands[5], "A", strlen("A"))==0) &&
+                 (istat=(int)strlen(bok_ng_commands[6])>0) &&
+                 (istat=strncasecmp(bok_ng_commands[7], "B", strlen("B"))==0) &&
+                 (istat=(int)strlen(bok_ng_commands[8])>0) &&
+                 (istat=strncasecmp(bok_ng_commands[9], "C", strlen("C"))==0) &&
+                 (istat=(int)strlen(bok_ng_commands[10])>0) &&
+                 (istat=strncasecmp(bok_ng_commands[11], "T", strlen("T"))==0) &&
+                 (istat=(int)strlen(bok_ng_commands[12])>0) ) {
 
         /* output message */
         decode_float(bok_ng_commands[6], &focus_a);
         decode_float(bok_ng_commands[8], &focus_b);
         decode_float(bok_ng_commands[10], &focus_c);
-        (void) logtime(" setting instrument focus to %.4f %.4f %.4f\n", focus_a, focus_b, focus_c);
+        decode_float(bok_ng_commands[12], &tolerance);
+        (void) logtime(" setting instrument focus to %.4f %.4f %.4f within tolerance %.4f\n", focus_a, focus_b, focus_c, tolerance);
 
         /* in simulation, wait and return success */
         if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
           (void) sleep(BOK_NG_INSTRUMENT_FOCUS_TIME);
-          (void) strcat(outgoing, " OKn");
+          (void) strcat(outgoing, " OK");
 
         /* talk to hardware */
         } else {
@@ -828,26 +831,33 @@ void *thread_handler(void *thread_fd) {
             (void) strcat(outgoing, " ERROR (hardware busy)");
 
           /* check inputs are valid */
-          } else if (focus_a==NAN || focus_b==NAN || focus_c==NAN) {
+          } else if (focus_a==NAN || focus_b==NAN || focus_c==NAN || tolerance==NAN) {
             (void) strcat(outgoing, " ERROR (invalid number)");
 
           /* execute */
           } else {
             (void) xq_hx();
             is_done = false;
-            if ((gstat=xq_focusind(focus_a, focus_b, focus_c)) == G_NO_ERROR) {
+            float value_a = (float)udp_shm_ptr->baxis_analog_in * BOK_LVDT_STEPS;
+            float value_b = (float)udp_shm_ptr->daxis_analog_in * BOK_LVDT_STEPS;
+            float value_c = (float)udp_shm_ptr->faxis_analog_in * BOK_LVDT_STEPS;
+            float delta_a = round((focus_a/1000.0 - value_a) * BOK_LVDT_ATOD);
+            float delta_b = round((focus_b/1000.0 - value_b) * BOK_LVDT_ATOD);
+            float delta_c = round((focus_c/1000.0 - value_c) * BOK_LVDT_ATOD);
+            float tol_a = 0.0;
+            float tol_b = 0.0;
+            float tol_c = 0.0;
+            if ((gstat=xq_focusind(delta_a, delta_b, delta_c)) == G_NO_ERROR) {
               countdown = BOK_NG_INSTRUMENT_FOCUS_TIME;
               while (--countdown > 0) {
                 (void) sleep(1);
-                float vala = (float)udp_shm_ptr->baxis_analog_in * BOK_LVDT_STEPS;
-                float valb = (float)udp_shm_ptr->daxis_analog_in * BOK_LVDT_STEPS;
-                float valc = (float)udp_shm_ptr->faxis_analog_in * BOK_LVDT_STEPS;
-                (void) logtime(" server thread is checking instrument focus a %.4f\n", vala);
-                (void) logtime(" server thread is checking instrument focus b %.4f\n", valb);
-                (void) logtime(" server thread is checking instrument focus c %.4f\n", valc);
-                /* ??? */
-                is_done = true;
-                break;
+                (void) logtime(" checking instrument focus a_position %.4f\n", (float)udp_shm_ptr->a_position);
+                (void) logtime(" checking instrument focus b_position %.4f\n", (float)udp_shm_ptr->b_position);
+                (void) logtime(" checking instrument focus c_position %.4f\n", (float)udp_shm_ptr->c_position);
+                tol_a = abs(round((float)udp_shm_ptr->a_position*1000.0 - focus_a));
+                tol_b = abs(round((float)udp_shm_ptr->b_position*1000.0 - focus_b));
+                tol_c = abs(round((float)udp_shm_ptr->c_position*1000.0 - focus_c));
+                if (tol_a <= tolerance && tol_b <= tolerance and tol_c <= tolerance) { is_done = true; break; }
               }
             }
             if (is_done) {
@@ -866,15 +876,18 @@ void *thread_handler(void *thread_fd) {
         }
 
       /*******************************************************************************
-       * BOK 90PRIME <cmd-id> COMMAND IFOCUSALL <float>
+       * BOK 90PRIME <cmd-id> COMMAND IFOCUSALL <float> T <float>
        ******************************************************************************/
       } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
           (istat=strncasecmp(bok_ng_commands[4], "IFOCUSALL", strlen("IFOCUSALL"))==0) &&
-          (istat=(int)strlen(bok_ng_commands[5])>0) ) {
+          (istat=(int)strlen(bok_ng_commands[5])>0) &&
+          (istat=strncasecmp(bok_ng_commands[6], "T", strlen("T"))==0) &&
+          (istat=(int)strlen(bok_ng_commands[7])>0) ) {
 
         /* output message */
         decode_float(bok_ng_commands[5], &fval);
-        (void) logtime(" setting instrument focusall to %.4f\n", fval);
+        decode_float(bok_ng_commands[7], &tolerance);
+        (void) logtime(" setting instrument focusall to %.4f within tolerance %.4f\n", fval, tolerance);
 
         /* in simulation, wait and return success */
         if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
@@ -910,21 +923,37 @@ void *thread_handler(void *thread_fd) {
           } else {
             (void) xq_hx();
             is_done = false;
-            if ((gstat=xq_focusall(fval)) == G_NO_ERROR) {
+            float value_a = (float)udp_shm_ptr->baxis_analog_in * BOK_LVDT_STEPS;
+            float value_b = (float)udp_shm_ptr->daxis_analog_in * BOK_LVDT_STEPS;
+            float value_c = (float)udp_shm_ptr->faxis_analog_in * BOK_LVDT_STEPS;
+            float delta_a = round((fval/1000.0 - value_a) * BOK_LVDT_ATOD);
+            float delta_b = round((fval/1000.0 - value_b) * BOK_LVDT_ATOD);
+            float delta_c = round((fval/1000.0 - value_c) * BOK_LVDT_ATOD);
+            float tol_a = 0.0;
+            float tol_b = 0.0;
+            float tol_c = 0.0;
+            if ((gstat=xq_focusind(delta_a, delta_b, delta_c)) == G_NO_ERROR) {
               countdown = BOK_NG_INSTRUMENT_FOCUS_TIME;
               while (--countdown > 0) {
                 (void) sleep(1);
-                float vala = (float)udp_shm_ptr->baxis_analog_in * BOK_LVDT_STEPS;
-                float valb = (float)udp_shm_ptr->daxis_analog_in * BOK_LVDT_STEPS;
-                float valc = (float)udp_shm_ptr->faxis_analog_in * BOK_LVDT_STEPS;
-                (void) logtime(" server thread is checking instrument focusall a %.4f\n", vala);
-                (void) logtime(" server thread is checking instrument focusall b %.4f\n", valb);
-                (void) logtime(" server thread is checking instrument focusall c %.4f\n", valc);
-                /* ??? */
-                is_done = true;
-                break;
+                (void) logtime(" checking instrument focus a_position %.4f\n", (float)udp_shm_ptr->a_position);
+                (void) logtime(" checking instrument focus b_position %.4f\n", (float)udp_shm_ptr->b_position);
+                (void) logtime(" checking instrument focus c_position %.4f\n", (float)udp_shm_ptr->c_position);
+                tol_a = abs(round((float)udp_shm_ptr->a_position*1000.0 - focus_a));
+                tol_b = abs(round((float)udp_shm_ptr->b_position*1000.0 - focus_b));
+                tol_c = abs(round((float)udp_shm_ptr->c_position*1000.0 - focus_c));
+                if (tol_a <= tolerance && tol_b <= tolerance and tol_c <= tolerance) { is_done = true; break; }
               }
             }
+            //if ((gstat=xq_focusall(fval)) == G_NO_ERROR) {
+            //  countdown = BOK_NG_INSTRUMENT_FOCUS_TIME;
+            //  while (--countdown > 0) {
+            //    (void) sleep(1);
+            //    /* ??? */
+            //    is_done = true;
+            //    break;
+            //  }
+            //}
             if (is_done) {
               (void) strcat(outgoing, " OK");
             } else {
@@ -1008,9 +1037,9 @@ void *thread_handler(void *thread_fd) {
                 float vala = (float)udp_shm_ptr->baxis_analog_in * BOK_LVDT_STEPS;
                 float valb = (float)udp_shm_ptr->daxis_analog_in * BOK_LVDT_STEPS;
                 float valc = (float)udp_shm_ptr->faxis_analog_in * BOK_LVDT_STEPS;
-                (void) logtime(" server thread is checking instrument focus a %.4f\n", vala);
-                (void) logtime(" server thread is checking instrument focus b %.4f\n", valb);
-                (void) logtime(" server thread is checking instrument focus c %.4f\n", valc);
+                (void) logtime(" checking instrument focus a %.4f\n", vala);
+                (void) logtime(" checking instrument focus b %.4f\n", valb);
+                (void) logtime(" checking instrument focus c %.4f\n", valc);
                 /* ??? */
                 is_done = true;
                 break;
@@ -1087,9 +1116,9 @@ void *thread_handler(void *thread_fd) {
                 float vala = (float)udp_shm_ptr->baxis_analog_in * BOK_LVDT_STEPS;
                 float valb = (float)udp_shm_ptr->daxis_analog_in * BOK_LVDT_STEPS;
                 float valc = (float)udp_shm_ptr->faxis_analog_in * BOK_LVDT_STEPS;
-                (void) logtime(" server thread is checking instrument focus a %.4f\n", vala);
-                (void) logtime(" server thread is checking instrument focus b %.4f\n", valb);
-                (void) logtime(" server thread is checking instrument focus c %.4f\n", valc);
+                (void) logtime(" checking instrument focus a %.4f\n", vala);
+                (void) logtime(" checking instrument focus b %.4f\n", valb);
+                (void) logtime(" checking instrument focus c %.4f\n", valc);
                 /* ??? */
                 is_done = true;
                 break;

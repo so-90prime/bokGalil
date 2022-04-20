@@ -104,7 +104,7 @@ _prc7="indiserver"
 _prc8="/dev/shm/tcp_shm"
 _prc9="/dev/shm/udp_shm"
 _prca="Galil_DMC_22x0_NgServer"
-_prcb="pyindi_bok.py"
+_prcb="bok.py"
 
 _nam0="Galil_DMC_22x0_TCP_Write            "
 _nam1="Galil_DMC_22x0_TCP_Read             "
@@ -117,7 +117,7 @@ _nam7="indiserver                          "
 _nam8="TCP Shared Memory File              "
 _nam9="UDP Shared Memory File              "
 _nama="Galil_DMC_22x0_NgServer             "
-_namb="PyINDI Bok Web-site (pyindi_bok.py) "
+_namb="PyINDI Bok Web-site (bok.py)        "
 
 _pid0=$(ps -ef | grep ${_prc0} | grep -v grep | awk '{print $2}')
 _pid1=$(ps -ef | grep ${_prc1} | grep -v py | grep -v grep | awk '{print $2}')
@@ -254,7 +254,7 @@ case $(echo ${_command}) in
     fi
     if [[ ${web_site} -eq 1 ]]; then
       if [[ ${_service} -eq 1 ]]; then
-        [[ ! -z ${_pidb} ]] && write_ok "${_namb}" "OK (http://10.30.1.2:5905/ninety-prime)" || write_error "${_namb}" "NOT RUNNING"
+        [[ ! -z ${_pidb} ]] && write_ok "${_namb}" "OK (http://10.30.1.2:5905)" || write_error "${_namb}" "NOT RUNNING"
       fi
     fi
     ;;

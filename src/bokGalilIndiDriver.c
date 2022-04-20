@@ -199,7 +199,7 @@ static ITextVectorProperty gfilterTP = {
 /* inner limit is +4158 (stop code 2), outer limit is -5979 (stop code 3) but these limits (-1000,1000) are to
  * stop the user sending too large a value at once */
 static INumber gfocus_distN[] = {
-  {"distgcam", "Delta Focus G", "%5.0f", -1000.0, 1000.0, 1.0, 0.0, 0, 0, 0}
+  {"distgcam", "Delta Focus", "%5.0f", -1000.0, 1000.0, 1.0, 0.0, 0, 0, 0}
 };
 static INumberVectorProperty gfocus_distNP = {
   GALIL_DEVICE, "GFOCUS_DIST", "Guider Focus", GFOCUS_GROUP, IP_RW, 0.0, IPS_IDLE, gfocus_distN, NARRAY(gfocus_distN), "", 0
