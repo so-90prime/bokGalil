@@ -590,15 +590,15 @@ class NgClient(object):
         return self.parse_command_response(_reply)
 
     # +
-    # method: command_ifocusall()
+    # method: command_ifocus_delta()
     # -
-    def command_ifocusall(self, idelta: float = math.nan, t: float = math.nan) -> bool:
-        """ BOK 90PRIME <cmd-id> COMMAND IFOCUSALL <float> T <float> """
+    def command_ifocus_delta(self, idelta: float = math.nan, t: float = math.nan) -> bool:
+        """ BOK 90PRIME <cmd-id> COMMAND IFOCUS DELTA <float> T <float> """
 
         if (math.nan < idelta < -math.nan) or (math.nan < t < -math.nan):
             return False
 
-        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND IFOCUSALL {idelta:.4f} T {t:.4f}")
+        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND IFOCUS DELTA {idelta:.4f} T {t:.4f}")
         return self.parse_command_response(_reply)
 
     # +
@@ -1171,7 +1171,7 @@ def ngclient_check(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeout:
         _ifocus_a = random.uniform(250.0, 350.0)
         _ifocus_b = random.uniform(250.0, 350.0)
         _ifocus_c = random.uniform(250.0, 350.0)
-        _tolerance = random.uniform(10.0, 2.0)
+        _tolerance = random.uniform(10.0, 20.0)
         pdh(msg=f"Executing> command_ifocus({_ifocus_a:.4f}, {_ifocus_b:.4f}, {_ifocus_c:.4f}, {_tolerance:.4f}) ...", color='green', height=1)
         if _client.command_ifocus(a=_ifocus_a, b=_ifocus_b, c=_ifocus_c, t=_tolerance):
             pdh(msg=f"\tcommand_ifocus({_ifocus_a:.4f}, {_ifocus_b:.4f}, {_ifocus_c:.4f}, {_tolerance:.4f}) succeeded", color='green', height=1)
@@ -1181,22 +1181,22 @@ def ngclient_check(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeout:
             _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', '')
             pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
 
-        _idelta = random.uniform(-50.0, 50.0)
-        pdh(msg=f"Executing> command_ifocusall({_idelta:.4f}, {_tolerance:.4f}) ...", color='green', height=1)
-        if _client.command_ifocusall(idelta=_idelta, t=_tolerance):
-            pdh(msg=f"\tcommand_ifocusall({_idelta:.4f}, {_tolerance:.4f}) succeeded", color='green', height=1)
+        _ifocus_delta = random.uniform(-50.0, 50.0)
+        pdh(msg=f"Executing> command_ifocus_delta({_ifocus_delta:.4f}, {_tolerance:.4f}) ...", color='green', height=1)
+        if _client.command_ifocus_delta(idelta=_ifocus_delta, t=_tolerance):
+            pdh(msg=f"\tcommand_ifocus_delta({_ifocus_delta:.4f}, {_tolerance:.4f}) succeeded", color='green', height=1)
         else:
-            pdh(msg=f"\tcommand_ifocusall({_idelta:.4f}, {_tolerance:.4f}) failed", color='red', height=1)
+            pdh(msg=f"\tcommand_ifocus_delta({_ifocus_delta:.4f}, {_tolerance:.4f}) failed", color='red', height=1)
         if _verbose and _client is not None and hasattr(_client, 'answer') and hasattr(_client, 'error'):
             _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', '')
             pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
 
-        _idelta *= -1.0
-        pdh(msg=f"Executing> command_ifocusall({_idelta:.4f}, {_tolerance:.4f}) ...", color='green', height=1)
-        if _client.command_ifocusall(idelta=_idelta, t=_tolerance):
-            pdh(msg=f"\tcommand_ifocusall({_idelta:.4f}, {_tolerance:.4f}) succeeded", color='green', height=1)
+        _ifocus_delta *= -1.0
+        pdh(msg=f"Executing> command_ifocus_delta({_ifocus_delta:.4f}, {_tolerance:.4f}) ...", color='green', height=1)
+        if _client.command_ifocus_delta(idelta=_ifocus_delta, t=_tolerance):
+            pdh(msg=f"\tcommand_ifocus_delta({_ifocus_delta:.4f}, {_tolerance:.4f}) succeeded", color='green', height=1)
         else:
-            pdh(msg=f"\tcommand_ifocusall({_idelta:.4f}, {_tolerance:.4f}) failed", color='red', height=1)
+            pdh(msg=f"\tcommand_ifocus_delta({_ifocus_delta:.4f}, {_tolerance:.4f}) failed", color='red', height=1)
         if _verbose and _client is not None and hasattr(_client, 'answer') and hasattr(_client, 'error'):
             _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', '')
             pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)

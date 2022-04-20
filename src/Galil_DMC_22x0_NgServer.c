@@ -887,14 +887,15 @@ void *thread_handler(void *thread_fd) {
        * BOK 90PRIME <cmd-id> COMMAND IFOCUSALL <float> T <float>
        ******************************************************************************/
       } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
-                 (istat=strncasecmp(bok_ng_commands[4], "IFOCUSALL", strlen("IFOCUSALL"))==0) &&
-                 (istat=(int)strlen(bok_ng_commands[5])>0) &&
-                 (istat=strncasecmp(bok_ng_commands[6], "T", strlen("T"))==0) &&
-                 (istat=(int)strlen(bok_ng_commands[7])>0) ) {
+                 (istat=strncasecmp(bok_ng_commands[4], "IFOCUS", strlen("IFOCUS"))==0) &&
+                 (istat=strncasecmp(bok_ng_commands[5], "DELTA", strlen("DELTA"))==0) &&
+                 (istat=(int)strlen(bok_ng_commands[6])>0) &&
+                 (istat=strncasecmp(bok_ng_commands[7], "T", strlen("T"))==0) &&
+                 (istat=(int)strlen(bok_ng_commands[8])>0) ) {
 
         /* output message */
-        decode_float(bok_ng_commands[5], &fval);
-        decode_float(bok_ng_commands[7], &tolerance);
+        decode_float(bok_ng_commands[6], &fval);
+        decode_float(bok_ng_commands[8], &tolerance);
         (void) logtime(" setting instrument focusall to %.4f within tolerance %.4f\n", fval, tolerance);
 
         /* in simulation, wait and return success */
