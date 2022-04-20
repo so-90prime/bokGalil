@@ -629,6 +629,7 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
   } else if (!strcmp(name, ifocus_lvdtallNP.name)) {
     float distall = round((values[0] / 1000.0) * BOK_LVDT_ATOD);
     IDMessage(GALIL_DEVICE, "lvdt input values all=%.1f", values[0]);
+    IDMessage(GALIL_DEVICE, "lvdt input values distall=%.1f", distall);
 
     /* talk to hardware */
     busy = true;

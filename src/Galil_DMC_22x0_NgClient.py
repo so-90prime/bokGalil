@@ -580,25 +580,25 @@ class NgClient(object):
     # +
     # method: command_ifocus()
     # -
-    def command_ifocus(self, a: float = math.nan, b: float = math.nan, c: float = math.nan) -> bool:
-        """ BOK 90PRIME <cmd-id> COMMAND IFOCUS A <float> B <float> C <float> """
+    def command_ifocus(self, a: float = math.nan, b: float = math.nan, c: float = math.nan, t: float = math.nan) -> bool:
+        """ BOK 90PRIME <cmd-id> COMMAND IFOCUS A <float> B <float> C <float> T <float> """
 
-        if (math.nan < a < -math.nan) or (math.nan < b < -math.nan) or (math.nan < c < -math.nan):
+        if (math.nan < a < -math.nan) or (math.nan < b < -math.nan) or (math.nan < c < -math.nan) or (math.nan < t < -math.nan):
             return False
 
-        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND IFOCUS A {a:.4f} B {b:.4f} C {c:.4f}")
+        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND IFOCUS A {a:.4f} B {b:.4f} C {c:.4f} T {t:.4f}")
         return self.parse_command_response(_reply)
 
     # +
     # method: command_ifocusall()
     # -
-    def command_ifocusall(self, focus: float = math.nan) -> bool:
-        """ BOK 90PRIME <cmd-id> COMMAND IFOCUSALL <float> """
+    def command_ifocusall(self, idelta: float = math.nan, t: float = math.nan) -> bool:
+        """ BOK 90PRIME <cmd-id> COMMAND IFOCUSALL <float> T <float> """
 
-        if math.nan < focus < -math.nan:
+        if (math.nan < idelta < -math.nan) or (math.nan < t < -math.nan):
             return False
 
-        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND IFOCUSALL {focus:.4f}")
+        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND IFOCUSALL {idelta:.4f} T {t:.4f}")
         return self.parse_command_response(_reply)
 
     # +
@@ -619,7 +619,7 @@ class NgClient(object):
     def command_lvdtall(self, lvdt: float = math.nan, t: float = math.nan) -> bool:
         """ BOK 90PRIME <cmd-id> COMMAND LVDTALL <float> T <float> """
 
-        if math.nan < lvdt < -math.nan or math.nan < t < -math.nan:
+        if (math.nan < lvdt < -math.nan) or (math.nan < t < -math.nan):
             return False
 
         _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND LVDTALL {lvdt:.4f} T {t:.4f}")
@@ -688,10 +688,10 @@ class NgClient(object):
         if 'ERROR' in self.__answer:
             self.__error = f"{self.__error}, {self.__answer}"
 
-        # parse answer, eg 'BOK 90PRIME <cmd-id> OK GFILTN=4:red ROTATING=False'
+        # parse answer, eg 'BOK 90PRIME <cmd-id> OK SNUM=4:red ROTATING=False'
         elif 'OK' in self.__answer:
             for _elem in self.__answer.split():
-                if 'GFILTN=' in _elem:
+                if 'SNUM=' in _elem:
                     try:
                         self.__gfilter_name = f"{_elem.split('=')[1].split(':')[1]}"
                         self.__gfilter_number = int(_elem.split('=')[1].split(':')[0])
@@ -886,7 +886,7 @@ class NgClient(object):
         if 'ERROR' in self.__answer:
             self.__error = f"{self.__answer}"
 
-        # parse answer, eg 'BOK 90PRIME <cmd-id> OK A=-0.355 B=1.443 C=0.345'
+        # parse answer, eg 'BOK 90PRIME <cmd-id> OK A=355 B=443 C=345'
         elif 'OK' in self.__answer:
             for _elem in self.__answer.split():
                 if 'A=' in _elem:
@@ -1167,8 +1167,40 @@ def ngclient_check(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeout:
             _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', '')
             pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
 
-        # print(f"command_ifocus(22.0, 33.0, 44.0) {'succeeded' if _client.command_ifocus(a=22.0, b=33.0, c=44.0) else f'failed, error={_client.error}'}")
-        # print(f"command_ifocusall(55.0) {'succeeded' if _client.command_ifocusall(focus=55.0) else f'failed, error={_client.error}'}")
+        # command_ifocus()
+        _ifocus_a = random.uniform(250.0, 350.0)
+        _ifocus_b = random.uniform(250.0, 350.0)
+        _ifocus_c = random.uniform(250.0, 350.0)
+        _tolerance = random.uniform(10.0, 2.0)
+        pdh(msg=f"Executing> command_ifocus({_ifocus_a:.4f}, {_ifocus_b:.4f}, {_ifocus_c:.4f}, {_tolerance:.4f}) ...", color='green', height=1)
+        if _client.command_ifocus(a=_ifocus_a, b=_ifocus_b, c=_ifocus_c, t=_tolerance):
+            pdh(msg=f"\tcommand_ifocus({_ifocus_a:.4f}, {_ifocus_b:.4f}, {_ifocus_c:.4f}, {_tolerance:.4f}) succeeded", color='green', height=1)
+        else:
+            pdh(msg=f"\tcommand_ifocus({_ifocus_a:.4f}, {_ifocus_b:.4f}, {_ifocus_c:.4f}, {_tolerance:.4f}) failed", color='red', height=1)
+        if _verbose and _client is not None and hasattr(_client, 'answer') and hasattr(_client, 'error'):
+            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', '')
+            pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
+
+        _idelta = random.uniform(-50.0, 50.0)
+        pdh(msg=f"Executing> command_ifocusall({_idelta:.4f}, {_tolerance:.4f}) ...", color='green', height=1)
+        if _client.command_ifocusall(idelta=_idelta, t=_tolerance):
+            pdh(msg=f"\tcommand_ifocusall({_idelta:.4f}, {_tolerance:.4f}) succeeded", color='green', height=1)
+        else:
+            pdh(msg=f"\tcommand_ifocusall({_idelta:.4f}, {_tolerance:.4f}) failed", color='red', height=1)
+        if _verbose and _client is not None and hasattr(_client, 'answer') and hasattr(_client, 'error'):
+            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', '')
+            pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
+
+        _idelta *= -1.0
+        pdh(msg=f"Executing> command_ifocusall({_idelta:.4f}, {_tolerance:.4f}) ...", color='green', height=1)
+        if _client.command_ifocusall(idelta=_idelta, t=_tolerance):
+            pdh(msg=f"\tcommand_ifocusall({_idelta:.4f}, {_tolerance:.4f}) succeeded", color='green', height=1)
+        else:
+            pdh(msg=f"\tcommand_ifocusall({_idelta:.4f}, {_tolerance:.4f}) failed", color='red', height=1)
+        if _verbose and _client is not None and hasattr(_client, 'answer') and hasattr(_client, 'error'):
+            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', '')
+            pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
+
         # print(f"command_lvdt(22.0, 33.0, 44.0) {'succeeded' if _client.command_lvdt(a=22.0, b=33.0, c=44.0) else f'failed, error={_client.error}'}")
         # print(f"command_lvdtall(55.0) {'succeeded' if _client.command_lvdtall(lvdt=55.0) else f'failed, error={_client.error}'}")
 

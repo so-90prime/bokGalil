@@ -67,6 +67,7 @@ void *thread_handler(void *thread_fd) {
   char *bok_ng_commands[BOK_NG_BUCKETS];
   filter_file_t bok_ifilters[BOK_IFILTER_SLOTS];
   filter_file_t bok_gfilters[BOK_GFILTER_SLOTS];
+  filter_file_t bok_sfilters[BOK_SFILTER_SLOTS];
 
   int tcp_shm_fd = -1;
   int udp_shm_fd = -1;
@@ -123,8 +124,8 @@ void *thread_handler(void *thread_fd) {
        * BOK 90PRIME <cmd-id> COMMAND GFILTER INIT
        ******************************************************************************/
       } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
-          (istat=strncasecmp(bok_ng_commands[4], "GFILTER", strlen("GFILTER"))==0) &&
-          (istat=strncasecmp(bok_ng_commands[5], "INIT", strlen("INIT"))==0) ) {
+                 (istat=strncasecmp(bok_ng_commands[4], "GFILTER", strlen("GFILTER"))==0) &&
+                 (istat=strncasecmp(bok_ng_commands[5], "INIT", strlen("INIT"))==0) ) {
 
         /* output message */
         (void) logtime(" initializing guider filter wheel\n");
@@ -192,9 +193,9 @@ void *thread_handler(void *thread_fd) {
        * BOK 90PRIME <cmd-id> COMMAND GFILTER NAME <str>
        ******************************************************************************/
       } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
-          (istat=strncasecmp(bok_ng_commands[4], "GFILTER", strlen("GFILTER"))==0) &&
-          (istat=strncasecmp(bok_ng_commands[5], "NAME", strlen("NAME"))==0) &&
-          (istat=(int)strlen(bok_ng_commands[6])>0) ) {
+                 (istat=strncasecmp(bok_ng_commands[4], "GFILTER", strlen("GFILTER"))==0) &&
+                 (istat=strncasecmp(bok_ng_commands[5], "NAME", strlen("NAME"))==0) &&
+                 (istat=(int)strlen(bok_ng_commands[6])>0) ) {
 
         /* convert name to number */
         ival = INT_MAX;
@@ -278,9 +279,9 @@ void *thread_handler(void *thread_fd) {
        * BOK 90PRIME <cmd-id> COMMAND GFILTER NUMBER <int>
        ******************************************************************************/
       } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
-          (istat=strncasecmp(bok_ng_commands[4], "GFILTER", strlen("GFILTER"))==0) &&
-          (istat=strncasecmp(bok_ng_commands[5], "NUMBER", strlen("NUMBER"))==0) &&
-          (istat=(int)strlen(bok_ng_commands[6])>0) ) {
+                 (istat=strncasecmp(bok_ng_commands[4], "GFILTER", strlen("GFILTER"))==0) &&
+                 (istat=strncasecmp(bok_ng_commands[5], "NUMBER", strlen("NUMBER"))==0) &&
+                 (istat=(int)strlen(bok_ng_commands[6])>0) ) {
 
         /* output message */
         decode_integer(bok_ng_commands[6], &ival);
@@ -360,9 +361,9 @@ void *thread_handler(void *thread_fd) {
        * BOK 90PRIME <cmd-id> COMMAND GFOCUS DELTA <float>
        ******************************************************************************/
       } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
-          (istat=strncasecmp(bok_ng_commands[4], "GFOCUS", strlen("GFOCUS"))==0) &&
-          (istat=strncasecmp(bok_ng_commands[5], "DELTA", strlen("DELTA"))==0) &&
-          (istat=(int)strlen(bok_ng_commands[6])>0) ) {
+                 (istat=strncasecmp(bok_ng_commands[4], "GFOCUS", strlen("GFOCUS"))==0) &&
+                 (istat=strncasecmp(bok_ng_commands[5], "DELTA", strlen("DELTA"))==0) &&
+                 (istat=(int)strlen(bok_ng_commands[6])>0) ) {
 
         /* output message */
         decode_float(bok_ng_commands[6], &fval);
@@ -434,8 +435,8 @@ void *thread_handler(void *thread_fd) {
        * BOK 90PRIME <cmd-id> COMMAND IFILTER INIT
        ******************************************************************************/
       } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
-          (istat=strncasecmp(bok_ng_commands[4], "IFILTER", strlen("IFILTER"))==0) &&
-          (istat=strncasecmp(bok_ng_commands[5], "INIT", strlen("INIT"))==0) ) {
+                 (istat=strncasecmp(bok_ng_commands[4], "IFILTER", strlen("IFILTER"))==0) &&
+                 (istat=strncasecmp(bok_ng_commands[5], "INIT", strlen("INIT"))==0) ) {
 
         /* output message */
         (void) logtime(" initializing instrument filter wheel\n");
@@ -503,8 +504,8 @@ void *thread_handler(void *thread_fd) {
        * BOK 90PRIME <cmd-id> COMMAND IFILTER LOAD
        ******************************************************************************/
       } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
-          (istat=strncasecmp(bok_ng_commands[4], "IFILTER", strlen("IFILTER"))==0) &&
-          (istat=strncasecmp(bok_ng_commands[5], "LOAD", strlen("LOAD"))==0) ) {
+                 (istat=strncasecmp(bok_ng_commands[4], "IFILTER", strlen("IFILTER"))==0) &&
+                 (istat=strncasecmp(bok_ng_commands[5], "LOAD", strlen("LOAD"))==0) ) {
 
         /* output message */
         (void) logtime(" loading instrument filter\n");
@@ -562,9 +563,9 @@ void *thread_handler(void *thread_fd) {
        * BOK 90PRIME <cmd-id> COMMAND IFILTER NAME <str>
        ******************************************************************************/
       } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
-          (istat=strncasecmp(bok_ng_commands[4], "IFILTER", strlen("IFILTER"))==0) &&
-          (istat=strncasecmp(bok_ng_commands[5], "NAME", strlen("NAME"))==0) &&
-          (istat=(int)strlen(bok_ng_commands[6])>0) ) {
+                 (istat=strncasecmp(bok_ng_commands[4], "IFILTER", strlen("IFILTER"))==0) &&
+                 (istat=strncasecmp(bok_ng_commands[5], "NAME", strlen("NAME"))==0) &&
+                 (istat=(int)strlen(bok_ng_commands[6])>0) ) {
 
         /* convert name to number */
         ival = INT_MAX;
@@ -647,9 +648,9 @@ void *thread_handler(void *thread_fd) {
        * BOK 90PRIME <cmd-id> COMMAND IFILTER NUMBER <int>
        ******************************************************************************/
       } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
-          (istat=strncasecmp(bok_ng_commands[4], "IFILTER", strlen("IFILTER"))==0) &&
-          (istat=strncasecmp(bok_ng_commands[5], "NUMBER", strlen("NUMBER"))==0) &&
-          (istat=(int)strlen(bok_ng_commands[6])>0) ) {
+                 (istat=strncasecmp(bok_ng_commands[4], "IFILTER", strlen("IFILTER"))==0) &&
+                 (istat=strncasecmp(bok_ng_commands[5], "NUMBER", strlen("NUMBER"))==0) &&
+                 (istat=(int)strlen(bok_ng_commands[6])>0) ) {
 
         /* output message */
         decode_integer(bok_ng_commands[6], &ival);
@@ -728,8 +729,8 @@ void *thread_handler(void *thread_fd) {
        * BOK 90PRIME <cmd-id> COMMAND IFILTER UNLOAD
        ******************************************************************************/
       } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
-          (istat=strncasecmp(bok_ng_commands[4], "IFILTER", strlen("IFILTER"))==0) &&
-          (istat=strncasecmp(bok_ng_commands[5], "UNLOAD", strlen("UNLOAD"))==0) ) {
+                 (istat=strncasecmp(bok_ng_commands[4], "IFILTER", strlen("IFILTER"))==0) &&
+                 (istat=strncasecmp(bok_ng_commands[5], "UNLOAD", strlen("UNLOAD"))==0) ) {
 
         /* output message */
         (void) logtime(" unloading instrument filter\n");
@@ -838,26 +839,34 @@ void *thread_handler(void *thread_fd) {
           } else {
             (void) xq_hx();
             is_done = false;
-            float value_a = (float)udp_shm_ptr->baxis_analog_in * BOK_LVDT_STEPS;
-            float value_b = (float)udp_shm_ptr->daxis_analog_in * BOK_LVDT_STEPS;
-            float value_c = (float)udp_shm_ptr->faxis_analog_in * BOK_LVDT_STEPS;
-            float delta_a = round((focus_a/1000.0 - value_a) * BOK_LVDT_ATOD);
-            float delta_b = round((focus_b/1000.0 - value_b) * BOK_LVDT_ATOD);
-            float delta_c = round((focus_c/1000.0 - value_c) * BOK_LVDT_ATOD);
-            float tol_a = 0.0;
-            float tol_b = 0.0;
-            float tol_c = 0.0;
-            if ((gstat=xq_focusind(delta_a, delta_b, delta_c)) == G_NO_ERROR) {
+            float cur_a = round(((float)udp_shm_ptr->a_position * 1000.0));
+            float cur_b = round(((float)udp_shm_ptr->b_position * 1000.0));
+            float cur_c = round(((float)udp_shm_ptr->c_position * 1000.0));
+            float dista = round((focus_a/1000.0 - cur_a/1000.0) * BOK_LVDT_ATOD);
+            float distb = round((focus_b/1000.0 - cur_b/1000.0) * BOK_LVDT_ATOD);
+            float distc = round((focus_c/1000.0 - cur_c/1000.0) * BOK_LVDT_ATOD);
+            float new_a = focus_a;
+            float new_b = focus_b;
+            float new_c = focus_c;
+            (void) logtime(" instrument focus cur_a %.4f new_a %.4f within tolerance %.4f\n", cur_a, new_a, tolerance);
+            (void) logtime(" instrument focus cur_b %.4f new_b %.4f within tolerance %.4f\n", cur_b, new_b, tolerance);
+            (void) logtime(" instrument focus cur_c %.4f new_c %.4f within tolerance %.4f\n", cur_c, new_c, tolerance);
+            (void) logtime(" instrument focus focus_a %.4f dista %.4f\n", focus_a, dista); 
+            (void) logtime(" instrument focus focus_b %.4f distb %.4f\n", focus_b, distb); 
+            (void) logtime(" instrument focus focus_c %.4f distc %.4f\n", focus_c, distc); 
+            if ((gstat=xq_focusind(dista, distb, distc)) == G_NO_ERROR) {
               countdown = BOK_NG_INSTRUMENT_FOCUS_TIME;
               while (--countdown > 0) {
                 (void) sleep(1);
-                (void) logtime(" checking instrument focus a_position %.4f\n", (float)udp_shm_ptr->a_position);
-                (void) logtime(" checking instrument focus b_position %.4f\n", (float)udp_shm_ptr->b_position);
-                (void) logtime(" checking instrument focus c_position %.4f\n", (float)udp_shm_ptr->c_position);
-                tol_a = abs(round((float)udp_shm_ptr->a_position*1000.0 - focus_a));
-                tol_b = abs(round((float)udp_shm_ptr->b_position*1000.0 - focus_b));
-                tol_c = abs(round((float)udp_shm_ptr->c_position*1000.0 - focus_c));
-                if (tol_a <= tolerance && tol_b <= tolerance and tol_c <= tolerance) { is_done = true; break; }
+                cur_a = round(((float)udp_shm_ptr->a_position * 1000.0));
+                cur_b = round(((float)udp_shm_ptr->b_position * 1000.0));
+                cur_c = round(((float)udp_shm_ptr->c_position * 1000.0));
+                (void) logtime(" instrument focus cur_a %.4f new_a %.4f within tolerance %.4f\n", cur_a, new_a, tolerance);
+                (void) logtime(" instrument focus cur_b %.4f new_b %.4f within tolerance %.4f\n", cur_b, new_b, tolerance);
+                (void) logtime(" instrument focus cur_c %.4f new_c %.4f within tolerance %.4f\n", cur_c, new_c, tolerance);
+                if ( (abs(round(cur_a - new_a)) <= tolerance) &&
+                     (abs(round(cur_b - new_b)) <= tolerance) &&
+                     (abs(round(cur_c - new_c)) <= tolerance) ) { is_done = true; break; }
               }
             }
             if (is_done) {
@@ -865,7 +874,6 @@ void *thread_handler(void *thread_fd) {
             } else {
               (void) strcat(outgoing, " ERROR (timeout or hardware unresponsive)");
             }
-            (void) xq_hx();
           }
 
           /* close memory */
@@ -879,10 +887,10 @@ void *thread_handler(void *thread_fd) {
        * BOK 90PRIME <cmd-id> COMMAND IFOCUSALL <float> T <float>
        ******************************************************************************/
       } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
-          (istat=strncasecmp(bok_ng_commands[4], "IFOCUSALL", strlen("IFOCUSALL"))==0) &&
-          (istat=(int)strlen(bok_ng_commands[5])>0) &&
-          (istat=strncasecmp(bok_ng_commands[6], "T", strlen("T"))==0) &&
-          (istat=(int)strlen(bok_ng_commands[7])>0) ) {
+                 (istat=strncasecmp(bok_ng_commands[4], "IFOCUSALL", strlen("IFOCUSALL"))==0) &&
+                 (istat=(int)strlen(bok_ng_commands[5])>0) &&
+                 (istat=strncasecmp(bok_ng_commands[6], "T", strlen("T"))==0) &&
+                 (istat=(int)strlen(bok_ng_commands[7])>0) ) {
 
         /* output message */
         decode_float(bok_ng_commands[5], &fval);
@@ -916,44 +924,39 @@ void *thread_handler(void *thread_fd) {
             (void) strcat(outgoing, " ERROR (hardware busy)");
 
           /* check inputs are valid */
-          } else if (fval == NAN) {
+          } else if (fval==NAN || tolerance==NAN) {
             (void) strcat(outgoing, " ERROR (invalid number)");
 
           /* execute */
           } else {
             (void) xq_hx();
             is_done = false;
-            float value_a = (float)udp_shm_ptr->baxis_analog_in * BOK_LVDT_STEPS;
-            float value_b = (float)udp_shm_ptr->daxis_analog_in * BOK_LVDT_STEPS;
-            float value_c = (float)udp_shm_ptr->faxis_analog_in * BOK_LVDT_STEPS;
-            float delta_a = round((fval/1000.0 - value_a) * BOK_LVDT_ATOD);
-            float delta_b = round((fval/1000.0 - value_b) * BOK_LVDT_ATOD);
-            float delta_c = round((fval/1000.0 - value_c) * BOK_LVDT_ATOD);
-            float tol_a = 0.0;
-            float tol_b = 0.0;
-            float tol_c = 0.0;
-            if ((gstat=xq_focusind(delta_a, delta_b, delta_c)) == G_NO_ERROR) {
+            float distall = round((fval / 1000.0) * BOK_LVDT_ATOD);
+            float cur_a = round(((float)udp_shm_ptr->a_position * 1000.0));
+            float cur_b = round(((float)udp_shm_ptr->b_position * 1000.0));
+            float cur_c = round(((float)udp_shm_ptr->c_position * 1000.0));
+            float new_a = cur_a + fval;
+            float new_b = cur_b + fval;
+            float new_c = cur_c + fval;
+            (void) logtime(" instrument focus cur_a %.4f new_a %.4f within tolerance %.4f\n", cur_a, new_a, tolerance);
+            (void) logtime(" instrument focus cur_b %.4f new_b %.4f within tolerance %.4f\n", cur_b, new_b, tolerance);
+            (void) logtime(" instrument focus cur_c %.4f new_c %.4f within tolerance %.4f\n", cur_c, new_c, tolerance);
+            (void) logtime(" instrument focus delta %.4f distall %.4f\n", fval, distall); 
+            if ((gstat=xq_focusind(distall, distall, distall)) == G_NO_ERROR) {
               countdown = BOK_NG_INSTRUMENT_FOCUS_TIME;
               while (--countdown > 0) {
                 (void) sleep(1);
-                (void) logtime(" checking instrument focus a_position %.4f\n", (float)udp_shm_ptr->a_position);
-                (void) logtime(" checking instrument focus b_position %.4f\n", (float)udp_shm_ptr->b_position);
-                (void) logtime(" checking instrument focus c_position %.4f\n", (float)udp_shm_ptr->c_position);
-                tol_a = abs(round((float)udp_shm_ptr->a_position*1000.0 - focus_a));
-                tol_b = abs(round((float)udp_shm_ptr->b_position*1000.0 - focus_b));
-                tol_c = abs(round((float)udp_shm_ptr->c_position*1000.0 - focus_c));
-                if (tol_a <= tolerance && tol_b <= tolerance and tol_c <= tolerance) { is_done = true; break; }
+                cur_a = round(((float)udp_shm_ptr->a_position * 1000.0));
+                cur_b = round(((float)udp_shm_ptr->b_position * 1000.0));
+                cur_c = round(((float)udp_shm_ptr->c_position * 1000.0));
+                (void) logtime(" instrument focus cur_a %.4f new_a %.4f within tolerance %.4f\n", cur_a, new_a, tolerance);
+                (void) logtime(" instrument focus cur_b %.4f new_b %.4f within tolerance %.4f\n", cur_b, new_b, tolerance);
+                (void) logtime(" instrument focus cur_c %.4f new_c %.4f within tolerance %.4f\n", cur_c, new_c, tolerance);
+                if ( (abs(round(cur_a - new_a)) <= tolerance) &&
+                     (abs(round(cur_b - new_b)) <= tolerance) &&
+                     (abs(round(cur_c - new_c)) <= tolerance) ) { is_done = true; break; }
               }
             }
-            //if ((gstat=xq_focusall(fval)) == G_NO_ERROR) {
-            //  countdown = BOK_NG_INSTRUMENT_FOCUS_TIME;
-            //  while (--countdown > 0) {
-            //    (void) sleep(1);
-            //    /* ??? */
-            //    is_done = true;
-            //    break;
-            //  }
-            //}
             if (is_done) {
               (void) strcat(outgoing, " OK");
             } else {
@@ -973,15 +976,15 @@ void *thread_handler(void *thread_fd) {
        * BOK 90PRIME <cmd-id> COMMAND LVDT A <float> B <float> C <float>
        ******************************************************************************/
       } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
-          (istat=strncasecmp(bok_ng_commands[4], "LVDT", strlen("LVDT"))==0) &&
-          (istat=strncasecmp(bok_ng_commands[5], "A", strlen("A"))==0) &&
-          (istat=(int)strlen(bok_ng_commands[6])>0) &&
-          (istat=strncasecmp(bok_ng_commands[7], "B", strlen("B"))==0) &&
-          (istat=(int)strlen(bok_ng_commands[8])>0) &&
-          (istat=strncasecmp(bok_ng_commands[9], "C", strlen("C"))==0) &&
-          (istat=(int)strlen(bok_ng_commands[10])>0) &&
-          (istat=strncasecmp(bok_ng_commands[11], "T", strlen("T"))==0) &&
-          (istat=(int)strlen(bok_ng_commands[12])>0) ) {
+                 (istat=strncasecmp(bok_ng_commands[4], "LVDT", strlen("LVDT"))==0) &&
+                 (istat=strncasecmp(bok_ng_commands[5], "A", strlen("A"))==0) &&
+                 (istat=(int)strlen(bok_ng_commands[6])>0) &&
+                 (istat=strncasecmp(bok_ng_commands[7], "B", strlen("B"))==0) &&
+                 (istat=(int)strlen(bok_ng_commands[8])>0) &&
+                 (istat=strncasecmp(bok_ng_commands[9], "C", strlen("C"))==0) &&
+                 (istat=(int)strlen(bok_ng_commands[10])>0) &&
+                 (istat=strncasecmp(bok_ng_commands[11], "T", strlen("T"))==0) &&
+                 (istat=(int)strlen(bok_ng_commands[12])>0) ) {
 
         /* output message */
         decode_float(bok_ng_commands[6], &lvdt_a);
@@ -1064,10 +1067,10 @@ void *thread_handler(void *thread_fd) {
        * BOK 90PRIME <cmd-id> COMMAND LVDTALL <float> T <float>
        ******************************************************************************/
       } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
-          (istat=strncasecmp(bok_ng_commands[4], "LVDTALL", strlen("LVDTALL"))==0) &&
-          (istat=(int)strlen(bok_ng_commands[5])>0) &&
-          (istat=strncasecmp(bok_ng_commands[6], "T", strlen("T"))==0) &&
-          (istat=(int)strlen(bok_ng_commands[7])>0) ) {
+                 (istat=strncasecmp(bok_ng_commands[4], "LVDTALL", strlen("LVDTALL"))==0) &&
+                 (istat=(int)strlen(bok_ng_commands[5])>0) &&
+                 (istat=strncasecmp(bok_ng_commands[6], "T", strlen("T"))==0) &&
+                 (istat=(int)strlen(bok_ng_commands[7])>0) ) {
 
         /* output message */
         decode_float(bok_ng_commands[5], &fval);
@@ -1201,7 +1204,7 @@ void *thread_handler(void *thread_fd) {
        * BOK 90PRIME <cmd-id> REQUEST GFILTER
        ******************************************************************************/
       } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_REQUEST, strlen(BOK_NG_REQUEST))==0) &&
-          (istat=strncasecmp(bok_ng_commands[4], "GFILTER", strlen("GFILTER"))==0) ) {
+                 (istat=strncasecmp(bok_ng_commands[4], "GFILTER", strlen("GFILTER"))==0) ) {
 
         /* read memory */
         tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
@@ -1221,19 +1224,20 @@ void *thread_handler(void *thread_fd) {
           /* read filter(s) file */
           (void) memset(buffer, '\0', sizeof(buffer));
           if ((p=getenv("BOK_GALIL_DOCS")) == (char *)NULL) {
-            (void) sprintf(buffer, "%s", BOK_GFILTER_FILE);
+            (void) sprintf(buffer, "%s", BOK_SFILTER_FILE);
           } else {
-            (void) sprintf(buffer, "%s/%s", p, BOK_GFILTER_FILE);
+            (void) sprintf(buffer, "%s/%s", p, BOK_SFILTER_FILE);
           }
-          for (int i=0; i<BOK_GFILTER_SLOTS; i++) {(void) memset((void *)&bok_gfilters[i], 0, sizeof(filter_file_t));}
-          read_filters_from_file(buffer, (filter_file_t *)bok_gfilters, BOK_GFILTER_SLOTS, BOK_GFILTER_COLUMNS);
+          for (int i=0; i<BOK_SFILTER_SLOTS; i++) {(void) memset((void *)&bok_sfilters[i], 0, sizeof(filter_file_t));}
+          read_filters_from_file(buffer, (filter_file_t *)bok_sfilters, BOK_SFILTER_SLOTS, BOK_SFILTER_COLUMNS);
 
           /* report filters */
           (void) memset(buffer, '\0', sizeof(buffer));
-          istat = (int)round(tcp_shm_ptr->lv.gfiltn);
-          (void) sprintf(buffer, " OK GFILTN=%d:%s ROTATING=%s",
-            istat, bok_gfilters[istat].name,
+          istat = (int)round(tcp_shm_ptr->lv.snum);
+          (void) sprintf(buffer, " OK SNUM=%d:%s ROTATING=%s",
+            istat, bok_sfilters[istat].name,
             ((int)round(udp_shm_ptr->haxis_moving)==1 ? "True" : "False"));
+          (void) strcat(outgoing, buffer);
         }
  
        /* close memory */
@@ -1271,7 +1275,7 @@ void *thread_handler(void *thread_fd) {
        * BOK 90PRIME <cmd-id> REQUEST IFILTERS
        ******************************************************************************/
       } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_REQUEST, strlen(BOK_NG_REQUEST))==0) &&
-          (istat=strncasecmp(bok_ng_commands[4], "IFILTERS", strlen("IFILTERS"))==0) ) {
+                 (istat=strncasecmp(bok_ng_commands[4], "IFILTERS", strlen("IFILTERS"))==0) ) {
 
         /* read memory */
         tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
@@ -1310,7 +1314,7 @@ void *thread_handler(void *thread_fd) {
        * BOK 90PRIME <cmd-id> REQUEST IFILTER
        ******************************************************************************/
       } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_REQUEST, strlen(BOK_NG_REQUEST))==0) &&
-          (istat=strncasecmp(bok_ng_commands[4], "IFILTER", strlen("IFILTER"))==0) ) {
+                 (istat=strncasecmp(bok_ng_commands[4], "IFILTER", strlen("IFILTER"))==0) ) {
 
         /* read memory */
         tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
@@ -1372,10 +1376,11 @@ void *thread_handler(void *thread_fd) {
           /* report ifocus(s) */
           (void) memset(buffer, '\0', sizeof(buffer));
           (void) sprintf(buffer, " OK A=%.4f B=%.4f C=%.4f MEAN=%.4f",
-            (float)udp_shm_ptr->baxis_analog_in*BOK_LVDT_STEPS, (float)udp_shm_ptr->daxis_analog_in*BOK_LVDT_STEPS,
-            (float)udp_shm_ptr->faxis_analog_in*BOK_LVDT_STEPS,
-            ((float)udp_shm_ptr->baxis_analog_in*BOK_LVDT_STEPS + (float)udp_shm_ptr->daxis_analog_in*BOK_LVDT_STEPS +
-            (float)udp_shm_ptr->faxis_analog_in*BOK_LVDT_STEPS)/3.0);
+            (float)udp_shm_ptr->a_position*1000.0,
+            (float)udp_shm_ptr->b_position*1000.0,
+            (float)udp_shm_ptr->c_position*1000.0,
+            ((float)udp_shm_ptr->a_position*1000.0 + (float)udp_shm_ptr->b_position*1000.0 +
+             (float)udp_shm_ptr->c_position*1000.0)/3.0);
           (void) strcat(outgoing, buffer);
         }
 
