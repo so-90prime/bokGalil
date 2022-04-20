@@ -4,9 +4,11 @@
 
  - Ubuntu 16.04.7 LTS (or later)
 
- - Indi code (www.indilib.org)
+ - INDI code (www.indilib.org)
 
  - gclib (www.galil.com), specifically: gcapsd_130-1_amd64.deb, gclib_396-1_amd64.deb and gdk_1.0.7.353-1_amd64.deb
+
+ - python3 (3.6 or later)
 
 ## Caveat(s)
 
