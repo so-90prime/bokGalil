@@ -6,10 +6,7 @@
 
  - Indi code (www.indilib.org)
 
- - gclib (www.galil.com), specifically:
-  -- gcapsd_130-1_amd64.deb
-  -- gclib_396-1_amd64.deb
-  -- gdk_1.0.7.353-1_amd64.deb
+ - gclib (www.galil.com), specifically: gcapsd_130-1_amd64.deb, gclib_396-1_amd64.deb and gdk_1.0.7.353-1_amd64.deb
 
 ## Caveat(s)
 
