@@ -1678,7 +1678,7 @@ static void execute_timer(void *p) {
   IUResetSwitch(&gfilter_changeSP);
   (void) memset((void *)&gfilter_names, 0, sizeof(gfilter_names));
   _gfiltn = (int)round(tcp_val.lv.gfiltn);
-  IDMessage(GALIL_DEVICE, "TCP shared memory, _gfiltn=%d", _gfiltn);
+  /* IDMessage(GALIL_DEVICE, "TCP shared memory, _gfiltn=%d", _gfiltn); */
   (void) sprintf(gfilter_names.filter_1, "%s", bok_gfilters[1].name);
   (void) sprintf(gfilter_names.filter_2, "%s", bok_gfilters[2].name);
   (void) sprintf(gfilter_names.filter_3, "%s", bok_gfilters[3].name);
@@ -1695,7 +1695,7 @@ static void execute_timer(void *p) {
   IUResetSwitch(&ifilter_changeSP);
   (void) memset((void *)&ifilter_names, 0, sizeof(ifilter_names));
   _ifiltn = (int)round(tcp_val.lv.filtval);
-  IDMessage(GALIL_DEVICE, "TCP shared memory, _ifiltn=%d", _ifiltn);
+  /* IDMessage(GALIL_DEVICE, "TCP shared memory, _ifiltn=%d", _ifiltn); */
   if (_ifiltn == (int)round(tcp_val.filtvals[0])) {
     (void) sprintf(ifilter_names.filter_1, "%s", bok_ifilters[(int)round(tcp_val.filtvals[0])].name);
     ifilter_changeS[0].s = ISS_ON;
