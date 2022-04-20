@@ -1645,7 +1645,7 @@ static void execute_timer(void *p) {
   /* read TCP shared memory */
   if ((_tfd=shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666))>=0 &&
       (_tp=(tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, _tfd, 0))!=(tcp_val_p)NULL) {
-    IDMessage(GALIL_DEVICE, "Reading TCP shared memory");
+    /* IDMessage(GALIL_DEVICE, "Reading TCP shared memory"); */
     (void) memset((void *)&tcp_val, 0, TCP_VAL_SIZE);
     (void) memmove((void *)&tcp_val, _tp, TCP_VAL_SIZE);
     /* (void) dump_tcp_structure(&tcp_val); */
@@ -1653,7 +1653,7 @@ static void execute_timer(void *p) {
     (void) close(_tfd);
     _tp = (tcp_val_p)NULL;
     _tfd = -1;
-    IDMessage(GALIL_DEVICE, "Read TCP shared memory OK");
+    /* IDMessage(GALIL_DEVICE, "Read TCP shared memory OK"); */
   } else {
     IDMessage(GALIL_DEVICE, "<ERROR> failed to call TCP shared memory");
   }
@@ -1661,7 +1661,7 @@ static void execute_timer(void *p) {
   /* read UDP shared memory */
   if ((_ufd=shm_open(BOK_SHM_UDP_NAME, O_RDONLY, 0666)) &&
        (_up=(udp_val_p)mmap(0, UDP_VAL_SIZE, PROT_READ, MAP_SHARED, _ufd, 0))!=(udp_val_p)NULL) {
-    IDMessage(GALIL_DEVICE, "Reading UDP shared memory");
+    /* IDMessage(GALIL_DEVICE, "Reading UDP shared memory"); */
     (void) memset((void *)&udp_val, 0, UDP_VAL_SIZE);
     (void) memmove((void *)&udp_val, _up, UDP_VAL_SIZE);
     /* (void) dump_udp_structure(&udp_val); */
@@ -1669,7 +1669,7 @@ static void execute_timer(void *p) {
     (void) close(_ufd);
     _up = (udp_val_p)NULL;
     _ufd = -1;
-    IDMessage(GALIL_DEVICE, "Read UDP shared memory OK");
+    /* IDMessage(GALIL_DEVICE, "Read UDP shared memory OK"); */
   } else {
     IDMessage(GALIL_DEVICE, "<ERROR> failed to call UDP shared memory");
   }

@@ -29,12 +29,12 @@
 /*******************************************************************************
  * times for action(s)
  ******************************************************************************/
-#define BOK_NG_GUIDER_FILTER_TIME      45
+#define BOK_NG_GUIDER_FILTER_TIME      60
 #define BOK_NG_GUIDER_FOCUS_TIME       30
-#define BOK_NG_GUIDER_INIT_TIME        15
-#define BOK_NG_INSTRUMENT_FILTER_TIME  45
+#define BOK_NG_GUIDER_INIT_TIME        30
+#define BOK_NG_INSTRUMENT_FILTER_TIME  60
 #define BOK_NG_INSTRUMENT_FOCUS_TIME   30
-#define BOK_NG_INSTRUMENT_INIT_TIME    15
+#define BOK_NG_INSTRUMENT_INIT_TIME    30
 #define BOK_NG_INSTRUMENT_LOAD_TIME    10
 #define BOK_NG_INSTRUMENT_UNLOAD_TIME  10
 
@@ -113,7 +113,8 @@ void *thread_handler(void *thread_fd) {
        * BOK 90PRIME <cmd-id> COMMAND EXIT
        ******************************************************************************/
       if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
-                 (istat=strncasecmp(bok_ng_commands[4], "EXIT", strlen("EXIT"))==0) ) {
+          (istat=strncasecmp(bok_ng_commands[4], "EXIT", strlen("EXIT"))==0) ) {
+        (void) xq_hx();
         (void) strcat(outgoing, " OK");
 
       /*******************************************************************************
@@ -157,7 +158,20 @@ void *thread_handler(void *thread_fd) {
                 (void) sleep(1);
                 (void) logtime(" server thread is waiting for gfwinit() to finish %d\n", countdown);
               }
-              is_done = true;
+            }
+            (void) xq_hx();
+            if ((gstat=xq_gfiltn(1.0))==G_NO_ERROR && (gstat=xq_gfwmov())==G_NO_ERROR) {
+              countdown = BOK_NG_GUIDER_FILTER_TIME;
+              while (--countdown > 0) {
+                (void) sleep(1);
+                (void) logtime(" server thread is checking gfiltn %d and snum %d\n", (int)round(tcp_shm_ptr->lv.gfiltn), (int)round(tcp_shm_ptr->lv.snum));
+                if ((int)round(tcp_shm_ptr->lv.gfiltn)==1 && (int)round(tcp_shm_ptr->lv.snum)==1) { is_done = true; break; }
+                if ((int)round(tcp_shm_ptr->lv.gfiltn)==2 && (int)round(tcp_shm_ptr->lv.snum)==3) { is_done = true; break; }
+                if ((int)round(tcp_shm_ptr->lv.gfiltn)==3 && (int)round(tcp_shm_ptr->lv.snum)==2) { is_done = true; break; }
+                if ((int)round(tcp_shm_ptr->lv.gfiltn)==4 && (int)round(tcp_shm_ptr->lv.snum)==6) { is_done = true; break; }
+                if ((int)round(tcp_shm_ptr->lv.gfiltn)==5 && (int)round(tcp_shm_ptr->lv.snum)==4) { is_done = true; break; }
+                if ((int)round(tcp_shm_ptr->lv.gfiltn)==6 && (int)round(tcp_shm_ptr->lv.snum)==5) { is_done = true; break; }
+              }
             }
             if (is_done) {
               (void) strcat(outgoing, " OK");
@@ -349,7 +363,7 @@ void *thread_handler(void *thread_fd) {
           (istat=(int)strlen(bok_ng_commands[6])>0) ) {
 
         /* output message */
-        decode_float(bok_ng_commands[5], &fval);
+        decode_float(bok_ng_commands[6], &fval);
         (void) logtime(" moving guider focus by %.4f\n", fval);
 
         /* in simulation, wait and return success */
@@ -450,8 +464,9 @@ void *thread_handler(void *thread_fd) {
 
           /* execute */
           } else {
+            (void) xq_hx();
             is_done = false;
-            if ((gstat=xq_hx())==G_NO_ERROR && (gstat=xq_filtldm())==G_NO_ERROR) {
+            if ((gstat=xq_filtldm()) == G_NO_ERROR) {
               countdown = BOK_NG_INSTRUMENT_INIT_TIME;
               while (--countdown > 0) {
                 /* there is nothing to check on the initialization! */
@@ -459,7 +474,8 @@ void *thread_handler(void *thread_fd) {
                 (void) logtime(" server thread is waiting for filtldm() to finish %d\n", countdown);
               }
             }
-            if ((gstat=xq_hx())==G_NO_ERROR && (gstat=xq_filtrd())==G_NO_ERROR) {
+            (void) xq_hx();
+            if ((gstat=xq_filtrd()) == G_NO_ERROR) {
               countdown = BOK_NG_INSTRUMENT_FILTER_TIME;
               while (--countdown > 0) {
                 /* there is nothing to check on the initialization! */
@@ -467,19 +483,13 @@ void *thread_handler(void *thread_fd) {
                 (void) logtime(" server thread is waiting for filtrd() to finish %d\n", countdown);
               }
               is_done = true;
-              //countdown = BOK_NG_INSTRUMENT_INIT_TIME;
-              //while (--countdown > 0) {
-              //  (void) sleep(1);
-              //  (void) fprintf(stdout, "Server thread is checking initfilt %d\n", (int)round(tcp_shm_ptr->lv.initfilt));
-              //  (void) fflush(stdout);
-              //  if (((int)round(tcp_shm_ptr->lv.initfilt)) == 1) { is_done = true; break; }
-              //}
             }
             if (is_done) {
               (void) strcat(outgoing, " OK");
             } else {
               (void) strcat(outgoing, " ERROR (timeout or hardware unresponsive)");
             }
+            (void) xq_hx();
           }
 
           /* close memory */
@@ -523,8 +533,9 @@ void *thread_handler(void *thread_fd) {
 
           /* talk to hardware */
           } else {
+            (void) xq_hx();
             is_done = false;
-            if ((gstat=xq_hx())==G_NO_ERROR && (gstat=xq_filtin())==G_NO_ERROR) {
+            if ((gstat=xq_filtin()) == G_NO_ERROR) {
               countdown = BOK_NG_INSTRUMENT_LOAD_TIME;
               while (--countdown > 0) {
                 (void) sleep(1);
@@ -537,6 +548,7 @@ void *thread_handler(void *thread_fd) {
             } else {
               (void) strcat(outgoing, " ERROR (timeout or hardware unresponsive)");
             }
+            (void) xq_hx();
           }
 
           /* close memory */
@@ -606,6 +618,7 @@ void *thread_handler(void *thread_fd) {
 
           /* execute */
           } else {
+            (void) xq_hx();
             is_done = false;
             if ((gstat=xq_reqfilt((float)ival))==G_NO_ERROR && (gstat=xq_filtmov())==G_NO_ERROR) {
               countdown = BOK_NG_INSTRUMENT_FILTER_TIME;
@@ -620,6 +633,7 @@ void *thread_handler(void *thread_fd) {
             } else {
               (void) strcat(outgoing, " ERROR (timeout or hardware unresponsive)");
             }
+            (void) xq_hx();
           }
 
           /* close memory */
@@ -685,6 +699,7 @@ void *thread_handler(void *thread_fd) {
 
           /* execute */
           } else {
+            (void) xq_hx();
             is_done = false;
             if ((gstat=xq_reqfilt((float)ival))==G_NO_ERROR && (gstat=xq_filtmov())==G_NO_ERROR) {
               countdown = BOK_NG_INSTRUMENT_FILTER_TIME;
@@ -699,6 +714,7 @@ void *thread_handler(void *thread_fd) {
             } else {
               (void) strcat(outgoing, " ERROR (timeout or hardware unresponsive)");
             }
+            (void) xq_hx();
           }
 
           /* close memory */
@@ -742,8 +758,9 @@ void *thread_handler(void *thread_fd) {
 
           /* talk to hardware */
           } else {
+            (void) xq_hx();
             is_done = false;
-            if ((gstat=xq_hx())==G_NO_ERROR && (gstat=xq_filtout())==G_NO_ERROR) {
+            if ((gstat=xq_filtout()) == G_NO_ERROR) {
               countdown = BOK_NG_INSTRUMENT_UNLOAD_TIME;
               while (--countdown > 0) {
                 (void) sleep(1);
@@ -756,6 +773,7 @@ void *thread_handler(void *thread_fd) {
             } else {
               (void) strcat(outgoing, " ERROR (timeout or hardware unresponsive)");
             }
+            (void) xq_hx();
           }
 
           /* close memory */
@@ -813,6 +831,7 @@ void *thread_handler(void *thread_fd) {
 
           /* execute */
           } else {
+            (void) xq_hx();
             is_done = false;
             if ((gstat=xq_focusind(focus_a, focus_b, focus_c)) == G_NO_ERROR) {
               countdown = BOK_NG_INSTRUMENT_FOCUS_TIME;
@@ -834,6 +853,7 @@ void *thread_handler(void *thread_fd) {
             } else {
               (void) strcat(outgoing, " ERROR (timeout or hardware unresponsive)");
             }
+            (void) xq_hx();
           }
 
           /* close memory */
@@ -886,6 +906,7 @@ void *thread_handler(void *thread_fd) {
 
           /* execute */
           } else {
+            (void) xq_hx();
             is_done = false;
             if ((gstat=xq_focusall(fval)) == G_NO_ERROR) {
               countdown = BOK_NG_INSTRUMENT_FOCUS_TIME;
@@ -907,6 +928,7 @@ void *thread_handler(void *thread_fd) {
             } else {
               (void) strcat(outgoing, " ERROR (timeout or hardware unresponsive)");
             }
+            (void) xq_hx();
           }
 
           /* close memory */
@@ -966,6 +988,7 @@ void *thread_handler(void *thread_fd) {
 
           /* execute */
           } else {
+            (void) xq_hx();
             is_done = false;
             float vala = (float)udp_shm_ptr->baxis_analog_in * BOK_LVDT_STEPS;
             float valb = (float)udp_shm_ptr->daxis_analog_in * BOK_LVDT_STEPS;
@@ -993,6 +1016,7 @@ void *thread_handler(void *thread_fd) {
             } else {
               (void) strcat(outgoing, " ERROR (timeout or hardware unresponsive)");
             }
+            (void) xq_hx();
           }
 
           /* close memory */
@@ -1045,6 +1069,7 @@ void *thread_handler(void *thread_fd) {
 
           /* execute */
           } else {
+            (void) xq_hx();
             is_done = false;
             float distall = round((fval / 1000.0) * BOK_LVDT_ATOD);
             if ((gstat=xq_focusind(distall, distall, distall)) == G_NO_ERROR) {
@@ -1067,6 +1092,7 @@ void *thread_handler(void *thread_fd) {
             } else {
               (void) strcat(outgoing, " ERROR (timeout or hardware unresponsive)");
             }
+            (void) xq_hx();
           }
 
           /* close memory */
@@ -1081,7 +1107,8 @@ void *thread_handler(void *thread_fd) {
        ******************************************************************************/
       } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
                  (istat=strncasecmp(bok_ng_commands[4], "TEST", strlen("TEST"))==0) ) {
-        (void) strcat(outgoing, " TEST OK");
+        (void) xq_hx();
+        (void) strcat(outgoing, " OK");
 
       /*******************************************************************************
        * BOK 90PRIME <cmd-id> REQUEST ENCODERS

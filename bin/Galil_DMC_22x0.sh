@@ -126,7 +126,7 @@ _pid3=$(ps -ef | grep ${_prc3} | grep -v grep | awk '{print $2}')
 _pid4=$(ps -ef | grep ${_prc4} | grep -v py | grep -v grep | awk '{print $2}')
 _pid5=$(ps -ef | grep ${_prc5} | grep -v grep | awk '{print $2}')
 _pid6=$(ps -ef | grep ${_prc6} | grep -v ${_prc7} | grep -v grep | awk '{print $2}')
-_pid7=$(ps -ef | grep ${_prc7} | grep -v grep | awk '{print $2}')
+_pid7=$(ps -ef | grep ${_prc7} | grep ${_prc6} | grep -v grep | awk '{print $2}')
 _pid8=''
 _pid9=''
 _pida=$(ps -ef | grep ${_prca} | grep -v grep | awk '{print $2}')
@@ -163,7 +163,7 @@ case $(echo ${_command}) in
       [[ -z ${_pid0} ]] && write_green "Starting ${_nam0}" && (nohup ${BOK_GALIL_BIN}/${_prc0} >> ${BOK_GALIL_LOG}/${_prc0}.log 2>&1 &) && write_ok "${_nam0}" "STARTED OK" && sleep 1 || write_error "${_nam0}" "ALREADY RUNNING"
       [[ -z ${_pid3} ]] && write_green "Starting ${_nam3}" && (nohup ${BOK_GALIL_BIN}/${_prc3} >> ${BOK_GALIL_LOG}/${_prc3}.log 2>&1 &) && write_ok "${_nam3}" "STARTED OK" && sleep 1 || write_error "${_nam3}" "ALREADY RUNNING"
       if [[ ${_indiserver} -eq 1 ]]; then
-        [[ -z ${_pid6} ]] && [[ -z ${_pid7} ]] && write_green "Starting ${_nam7}" && (nohup ${_prc7} -vv ${BOK_GALIL_BIN}/${_prc6} >> ${BOK_GALIL_LOG}/${_prc6}.log 2>&1 &) && write_ok "${_nam6}" "STARTED OK" && sleep 1 || write_error "${_nam6}" "ALREADY RUNNING"
+        [[ -z ${_pid6} ]] && [[ -z ${_pid7} ]] && write_green "Starting ${_nam6}" && (nohup ${_prc7} -vv ${BOK_GALIL_BIN}/${_prc6} >> ${BOK_GALIL_LOG}/${_prc6}.log 2>&1 &) && write_ok "${_nam6}" "STARTED OK" && sleep 1 || write_error "${_nam6}" "ALREADY RUNNING"
       fi
       # optional
       if [[ ${c_read} -eq 1 ]]; then
@@ -192,7 +192,7 @@ case $(echo ${_command}) in
       write_magenta "Dry-Run> kill -SIGINT pidof(${_prc0})"
       write_magenta "Dry-Run> kill -SIGINT pidof(${_prc3})"
       write_magenta "Dry-Run> kill -9 pidof(${_prc6})"
-      write_magenta "Dry-Run> kill -9 pidof(${_prc7})"
+      # write_magenta "Dry-Run> kill -9 pidof(${_prc7})"
       write_magenta "Dry-Run> rm -f ${_prc8}"
       write_magenta "Dry-Run> rm -f ${_prc9}"
       # optional
@@ -207,7 +207,7 @@ case $(echo ${_command}) in
       [[ ! -z ${_pid0} ]] && echo "kill -SIGINT ${_pid0}" && kill -SIGINT ${_pid0} && write_ok "${_nam0}" "KILLED OK" || write_error "${_nam0}" "NOT RUNNING"
       [[ ! -z ${_pid3} ]] && echo "kill -SIGINT ${_pid3}" && kill -SIGINT ${_pid3} && write_ok "${_nam3}" "KILLED OK" || write_error "${_nam3}" "NOT RUNNING"
       [[ ! -z ${_pid6} ]] && echo "kill -9 ${_pid6}" && kill -9 ${_pid6} &&  write_ok "${_nam6}" "KILLED OK" || write_error "${_nam6}" "NOT RUNNING"
-      [[ ! -z ${_pid7} ]] && echo "kill -9 ${_pid7}" && kill -9 ${_pid7} && write_ok "${_nam7}" "KILLED OK" || write_error "${_nam7}" "NOT RUNNING"
+      # [[ ! -z ${_pid7} ]] && echo "kill -9 ${_pid7}" && kill -9 ${_pid7} && write_ok "${_nam7}" "KILLED OK" || write_error "${_nam7}" "NOT RUNNING"
       [[ -f ${_prc8} ]] && echo "rm -rf ${_prc8}" && rm -f ${_prc8} || write_error "${_nam8}" "NOT FOUND"
       [[ -f ${_prc9} ]] && echo "rm -rf ${_prc9}" && rm -f ${_prc9} || write_error "${_nam9}" "NOT FOUND"
       # optional

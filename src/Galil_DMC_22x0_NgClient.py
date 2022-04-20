@@ -496,9 +496,6 @@ class NgClient(object):
     def command_gfilter_number(self, gnumber: int = -1) -> bool:
         """ BOK 90PRIME <cmd-id> COMMAND GFILTER NUMBER <int> """
 
-        if gnumber not in BOK_NG_GFILTER_SLOTS:
-            return False
-
         if not self.__gfilters:
             self.request_gfilters()
 
@@ -562,13 +559,10 @@ class NgClient(object):
     def command_ifilter_number(self, inumber: int = -1) -> bool:
         """ BOK 90PRIME <cmd-id> COMMAND IFILTER NUMBER <int> """
 
-        if inumber not in BOK_NG_IFILTER_SLOTS:
-            return False
-
         if not self.__ifilters:
             self.request_ifilters()
 
-        if inumber not in self.__gfilters_numbers:
+        if inumber not in self.__ifilters_numbers:
             return False
 
         _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND IFILTER NUMBER {inumber}")
@@ -960,8 +954,8 @@ def ngclient_check(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeout:
             pdh(msg=f"\tencoder_a = {_client.encoder_a}", color='green', height=1)
             pdh(msg=f"\tencoder_b = {_client.encoder_b}", color='green', height=1)
             pdh(msg=f"\tencoder_c = {_client.encoder_c}", color='green', height=1)
-        if _verbose:
-            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
+        if _verbose and _client is not None and hasattr(_client, 'answer') and hasattr(_client, 'error'):
+            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', '')
             pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
 
         # request_gfilters()
@@ -972,8 +966,8 @@ def ngclient_check(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeout:
             pdh(msg=f"\tgfilters_names = {_client.gfilters_names}", color='green', height=1)
             pdh(msg=f"\tgfilters_numbers = {_client.gfilters_numbers}", color='green', height=1)
             pdh(msg=f"\tgfilters_slots = {_client.gfilters_slots}", color='green', height=1)
-        if _verbose:
-            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
+        if _verbose and _client is not None and hasattr(_client, 'answer') and hasattr(_client, 'error'):
+            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', '')
             pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
 
         # request_gfilter()
@@ -983,8 +977,8 @@ def ngclient_check(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeout:
             pdh(msg=f"\tgfilter_name = '{_client.gfilter_name}'", color='green', height=1)
             pdh(msg=f"\tgfilter_number = {_client.gfilter_number}", color='green', height=1)
             pdh(msg=f"\tgfilter_rotating = {_client.gfilter_rotating}", color='green', height=1)
-        if _verbose:
-            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
+        if _verbose and _client is not None and hasattr(_client, 'answer') and hasattr(_client, 'error'):
+            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', '')
             pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
 
         # request_gfocus()
@@ -992,8 +986,8 @@ def ngclient_check(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeout:
         _client.request_gfocus()
         if _client.error == '':
             pdh(msg=f"\tgfocus = {_client.gfocus}", color='green', height=1)
-        if _verbose:
-            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
+        if _verbose and _client is not None and hasattr(_client, 'answer') and hasattr(_client, 'error'):
+            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', '')
             pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
 
         # request_ifilters()
@@ -1004,8 +998,8 @@ def ngclient_check(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeout:
             pdh(msg=f"\tifilters_names = {_client.ifilters_names}", color='green', height=1)
             pdh(msg=f"\tifilters_numbers = {_client.ifilters_numbers}", color='green', height=1)
             pdh(msg=f"\tifilters_slots = {_client.ifilters_slots}", color='green', height=1)
-        if _verbose:
-            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
+        if _verbose and _client is not None and hasattr(_client, 'answer') and hasattr(_client, 'error'):
+            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', '')
             pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
 
         # request_ifilter()
@@ -1017,8 +1011,8 @@ def ngclient_check(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeout:
             pdh(msg=f"\tifilter_number = {_client.ifilter_number}", color='green', height=1)
             pdh(msg=f"\tifilter_rotating = {_client.ifilter_rotating}", color='green', height=1)
             pdh(msg=f"\tifilter_translating = {_client.ifilter_translating}", color='green', height=1)
-        if _verbose:
-            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
+        if _verbose and _client is not None and hasattr(_client, 'answer') and hasattr(_client, 'error'):
+            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', '')
             pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
 
         # request_ifocus()
@@ -1029,8 +1023,8 @@ def ngclient_check(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeout:
             pdh(msg=f"\tifocus_b = {_client.ifocus_b}", color='green', height=1)
             pdh(msg=f"\tifocus_c = {_client.ifocus_c}", color='green', height=1)
             pdh(msg=f"\tifocus_mean = {_client.ifocus_mean}", color='green', height=1)
-        if _verbose:
-            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
+        if _verbose and _client is not None and hasattr(_client, 'answer') and hasattr(_client, 'error'):
+            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', '')
             pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
 
 
@@ -1044,8 +1038,8 @@ def ngclient_check(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeout:
             pdh(msg=f"\tcommand_gfilter_init() succeeded", color='green', height=1)
         else:
             pdh(msg=f"\tcommand_gfilter_init() failed", color='red', height=1)
-        if _verbose:
-            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
+        if _verbose and _client is not None and hasattr(_client, 'answer') and hasattr(_client, 'error'):
+            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', '')
             pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
 
         # command_gfilter_name()
@@ -1055,8 +1049,8 @@ def ngclient_check(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeout:
             pdh(msg=f"\tcommand_gfilter_name('{_gfilter_name}') succeeded", color='green', height=1)
         else:
             pdh(msg=f"\tcommand_gfilter_name('{_gfilter_name}') failed", color='red', height=1)
-        if _verbose:
-            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
+        if _verbose and _client is not None and hasattr(_client, 'answer') and hasattr(_client, 'error'):
+            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', '')
             pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
 
         # command_gfilter_number()
@@ -1066,8 +1060,18 @@ def ngclient_check(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeout:
             pdh(msg=f"\tcommand_gfilter_number({_gfilter_number}) succeeded", color='green', height=1)
         else:
             pdh(msg=f"\tcommand_gfilter_number({_gfilter_number}) failed", color='red', height=1)
-        if _verbose:
-            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
+        if _verbose and _client is not None and hasattr(_client, 'answer') and hasattr(_client, 'error'):
+            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', '')
+            pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
+
+        # command_gfilter_name('open')
+        pdh(msg=f"Executing> command_gfilter_name('open') ...", color='green', height=1)
+        if _client.command_gfilter_name(gname='open'):
+            pdh(msg=f"\tcommand_gfilter_name('open') succeeded", color='green', height=1)
+        else:
+            pdh(msg=f"\tcommand_gfilter_name('open') failed", color='red', height=1)
+        if _verbose and _client is not None and hasattr(_client, 'answer') and hasattr(_client, 'error'):
+            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', '')
             pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
 
         # command_gfocus_delta()
@@ -1077,8 +1081,8 @@ def ngclient_check(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeout:
             pdh(msg=f"\tcommand_gfocus_delta({_gfocus_delta:.4f}) succeeded", color='green', height=1)
         else:
             pdh(msg=f"\tcommand_gfocus_delta({_gfocus_delta:.4f}) failed", color='red', height=1)
-        if _verbose:
-            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
+        if _verbose and _client is not None and hasattr(_client, 'answer') and hasattr(_client, 'error'):
+            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', '')
             pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
 
         _gfocus_delta *= -1.0
@@ -1087,72 +1091,109 @@ def ngclient_check(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeout:
             pdh(msg=f"\tcommand_gfocus_delta({_gfocus_delta:.4f}) succeeded", color='green', height=1)
         else:
             pdh(msg=f"\tcommand_gfocus_delta({_gfocus_delta:.4f}) failed", color='red', height=1)
-        if _verbose:
-            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
+        if _verbose and _client is not None and hasattr(_client, 'answer') and hasattr(_client, 'error'):
+            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', '')
             pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
 
         # command_ifilter_init()
-        pdh(msg=f"Executing> command_ifilter_init() ...", color='green', height=1)
-        if _client.command_ifilter_init():
-            pdh(msg=f"\tcommand_ifilter_init() succeeded", color='green', height=1)
+        #pdh(msg=f"Executing> command_ifilter_init() ...", color='green', height=1)
+        #if _client.command_ifilter_init():
+        #    pdh(msg=f"\tcommand_ifilter_init() succeeded", color='green', height=1)
+        #else:
+        #    pdh(msg=f"\tcommand_ifilter_init() failed", color='red', height=1)
+        #if _verbose and _client is not None and hasattr(_client, 'answer') and hasattr(_client, 'error'):
+        #    _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', '')
+        #    pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
+
+        # command_ifilter_unload()
+        # command_ifilter_name()
+        # command_ifilter_load()
+        pdh(msg=f"Executing> command_ifilter_unload() ...", color='green', height=1)
+        if _client.command_ifilter_unload():
+            pdh(msg=f"\tcommand_ifilter_unload() succeeded", color='green', height=1)
         else:
-            pdh(msg=f"\tcommand_ifilter_init() failed", color='red', height=1)
-        if _verbose:
-            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
+            pdh(msg=f"\tcommand_ifilter_unload() failed", color='red', height=1)
+        if _verbose and _client is not None and hasattr(_client, 'answer') and hasattr(_client, 'error'):
+            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', '')
             pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
 
-        # command_ifilter_name()
         _ifilter_name = random.choice(_client.ifilters_names)
         pdh(msg=f"Executing> command_ifilter_name('{_ifilter_name}') ...", color='green', height=1)
         if _client.command_ifilter_name(iname=_ifilter_name):
             pdh(msg=f"\tcommand_ifilter_name('{_ifilter_name}') succeeded", color='green', height=1)
         else:
             pdh(msg=f"\tcommand_ifilter_name('{_ifilter_name}') failed", color='red', height=1)
-        if _verbose:
-            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
+        if _verbose and _client is not None and hasattr(_client, 'answer') and hasattr(_client, 'error'):
+            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', '')
             pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
 
+        pdh(msg=f"Executing> command_ifilter_load() ...", color='green', height=1)
+        if _client.command_ifilter_load():
+            pdh(msg=f"\tcommand_ifilter_load() succeeded", color='green', height=1)
+        else:
+            pdh(msg=f"\tcommand_ifilter_load() failed", color='red', height=1)
+        if _verbose and _client is not None and hasattr(_client, 'answer') and hasattr(_client, 'error'):
+            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', '')
+            pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
+
+        # command_ifilter_unload()
         # command_ifilter_number()
+        # command_ifilter_load()
+        pdh(msg=f"Executing> command_ifilter_unload() ...", color='green', height=1)
+        if _client.command_ifilter_unload():
+            pdh(msg=f"\tcommand_ifilter_unload() succeeded", color='green', height=1)
+        else:
+            pdh(msg=f"\tcommand_ifilter_unload() failed", color='red', height=1)
+        if _verbose and _client is not None and hasattr(_client, 'answer') and hasattr(_client, 'error'):
+            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', '')
+            pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
+
         _ifilter_number = random.choice(_client.ifilters_numbers)
         pdh(msg=f"Executing> command_ifilter_number({_ifilter_number}) ...", color='green', height=1)
         if _client.command_ifilter_number(inumber=_ifilter_number):
             pdh(msg=f"\tcommand_ifilter_number({_ifilter_number}) succeeded", color='green', height=1)
         else:
             pdh(msg=f"\tcommand_ifilter_number({_ifilter_number}) failed", color='red', height=1)
-        if _verbose:
-            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
+        if _verbose and _client is not None and hasattr(_client, 'answer') and hasattr(_client, 'error'):
+            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', '')
             pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
 
-        # command_ifilter_load()
         pdh(msg=f"Executing> command_ifilter_load() ...", color='green', height=1)
         if _client.command_ifilter_load():
             pdh(msg=f"\tcommand_ifilter_load() succeeded", color='green', height=1)
         else:
             pdh(msg=f"\tcommand_ifilter_load() failed", color='red', height=1)
-        if _verbose:
-            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
-            pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
-
-        # command_ifilter_unload()
-        pdh(msg=f"Executing> command_ifilter_unload() ...", color='green', height=1)
-        if _client.command_ifilter_unload():
-            pdh(msg=f"\tcommand_ifilter_unload() succeeded", color='green', height=1)
-        else:
-            pdh(msg=f"\tcommand_ifilter_unload() failed", color='red', height=1)
-        if _verbose:
-            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', ''),
+        if _verbose and _client is not None and hasattr(_client, 'answer') and hasattr(_client, 'error'):
+            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', '')
             pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
 
         # print(f"command_ifocus(22.0, 33.0, 44.0) {'succeeded' if _client.command_ifocus(a=22.0, b=33.0, c=44.0) else f'failed, error={_client.error}'}")
         # print(f"command_ifocusall(55.0) {'succeeded' if _client.command_ifocusall(focus=55.0) else f'failed, error={_client.error}'}")
         # print(f"command_lvdt(22.0, 33.0, 44.0) {'succeeded' if _client.command_lvdt(a=22.0, b=33.0, c=44.0) else f'failed, error={_client.error}'}")
         # print(f"command_lvdtall(55.0) {'succeeded' if _client.command_lvdtall(lvdt=55.0) else f'failed, error={_client.error}'}")
-        # print(f"command_test() {'succeeded' if _client.command_test() else f'failed, error={_client.error}'}")
-        # print(f"command_exit() {'succeeded' if _client.command_exit() else f'failed, error={_client.error}'}")
+
+        # command_test()
+        pdh(msg=f"Executing> command_test() ...", color='green', height=1)
+        if _client.command_test():
+            pdh(msg=f"\tcommand_test() succeeded", color='green', height=1)
+        else:
+            pdh(msg=f"\tcommand_test() failed", color='red', height=1)
+        if _verbose and _client is not None and hasattr(_client, 'answer') and hasattr(_client, 'error'):
+            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', '')
+            pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
+
+        # command_exit()
+        pdh(msg=f"Executing> command_exit() ...", color='green', height=1)
         if _client.command_exit():
+            pdh(msg=f"\tcommand_exit() succeeded", color='green', height=1)
             if _client is not None and hasattr(_client, 'disconnect'):
                 _client.disconnect()
             _client = None
+        else:
+            pdh(msg=f"\tcommand_exit() failed", color='red', height=1)
+        if _verbose and _client is not None and hasattr(_client, 'answer') and hasattr(_client, 'error'):
+            _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', '')
+            pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
 
     except Exception as _x:
         print(f"{_x}")
