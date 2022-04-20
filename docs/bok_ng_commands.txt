@@ -63,13 +63,13 @@ BOK 90PRIME NG COMMAND / REQUEST SET
       On success: BOK 90PRIME <cmd-id> OK
       On failure: BOK 90PRIME <cmd-id> ERROR (reason)
 
-    BOK 90PRIME <cmd-id> COMMAND LVDT A <float> B <float> C <float>
-      Explanation: client commands server to change instrument LVDTs in all 3 axes by separate amounts
+    BOK 90PRIME <cmd-id> COMMAND LVDT A <float> B <float> C <float> T <float>
+      Explanation: client commands server to change instrument LVDTs in all 3 axes by separate amounts within tolerance
       On success: BOK 90PRIME <cmd-id> OK
       On failure: BOK 90PRIME <cmd-id> ERROR (reason)
 
-    BOK 90PRIME <cmd-id> COMMAND LVDTALL <float>
-      Explanation: client commands server to change instrument LVDTs in all 3 axes by the same amount
+    BOK 90PRIME <cmd-id> COMMAND LVDTALL <float> T <float>
+      Explanation: client commands server to change instrument LVDTs in all 3 axes by the same amount within tolerance
       On success: BOK 90PRIME <cmd-id> OK
       On failure: BOK 90PRIME <cmd-id> ERROR (reason)
  

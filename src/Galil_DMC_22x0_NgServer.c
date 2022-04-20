@@ -36,6 +36,7 @@
 #define BOK_NG_INSTRUMENT_FOCUS_TIME   30
 #define BOK_NG_INSTRUMENT_INIT_TIME    30
 #define BOK_NG_INSTRUMENT_LOAD_TIME    10
+#define BOK_NG_INSTRUMENT_LVDT_TIME    30
 #define BOK_NG_INSTRUMENT_UNLOAD_TIME  10
 
 
@@ -53,6 +54,7 @@ void *thread_handler(void *thread_fd) {
   float lvdt_a = 0.0;
   float lvdt_b = 0.0;
   float lvdt_c = 0.0;
+  float tolerance = 0.0;
   GReturn gstat = (GReturn)0;
   int handler_fd = *(int *)thread_fd;
   int istat = 0;
@@ -948,17 +950,20 @@ void *thread_handler(void *thread_fd) {
           (istat=strncasecmp(bok_ng_commands[7], "B", strlen("B"))==0) &&
           (istat=(int)strlen(bok_ng_commands[8])>0) &&
           (istat=strncasecmp(bok_ng_commands[9], "C", strlen("C"))==0) &&
-          (istat=(int)strlen(bok_ng_commands[10])>0) ) {
+          (istat=(int)strlen(bok_ng_commands[10])>0) &&
+          (istat=strncasecmp(bok_ng_commands[11], "T", strlen("T"))==0) &&
+          (istat=(int)strlen(bok_ng_commands[12])>0) ) {
 
         /* output message */
         decode_float(bok_ng_commands[6], &lvdt_a);
         decode_float(bok_ng_commands[8], &lvdt_b);
         decode_float(bok_ng_commands[10], &lvdt_c);
-        (void) logtime(" setting instrument lvdt to %.4f %.4f %.4f\n", lvdt_a, lvdt_b, lvdt_c);
+        decode_float(bok_ng_commands[12], &tolerance);
+        (void) logtime(" setting instrument lvdt to %.4f %.4f %.4f within tolerance %.4f\n", lvdt_a, lvdt_b, lvdt_c, tolerance);
 
         /* in simulation, wait and return success */
         if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
-          (void) sleep(BOK_NG_INSTRUMENT_FOCUS_TIME);
+          (void) sleep(BOK_NG_INSTRUMENT_LVDT_TIME);
           (void) strcat(outgoing, " OK");
 
         /* talk to hardware */
@@ -983,7 +988,7 @@ void *thread_handler(void *thread_fd) {
             (void) strcat(outgoing, " ERROR (hardware busy)");
 
           /* check inputs are valid */
-          } else if (lvdt_a==NAN || lvdt_b==NAN || lvdt_c==NAN) {
+          } else if (lvdt_a==NAN || lvdt_b==NAN || lvdt_c==NAN || tolerance==NAN) {
             (void) strcat(outgoing, " ERROR (invalid number)");
 
           /* execute */
@@ -997,7 +1002,7 @@ void *thread_handler(void *thread_fd) {
             float distb = round((lvdt_b / 1000.0 - valb) * BOK_LVDT_ATOD);
             float distc = round((lvdt_c / 1000.0 - valc) * BOK_LVDT_ATOD);
             if ((gstat=xq_focusind(dista, distb, distc)) == G_NO_ERROR) {
-              countdown = BOK_NG_INSTRUMENT_FOCUS_TIME;
+              countdown = BOK_NG_INSTRUMENT_LVDT_TIME;
               while (--countdown > 0) {
                 (void) sleep(1);
                 float vala = (float)udp_shm_ptr->baxis_analog_in * BOK_LVDT_STEPS;
@@ -1027,19 +1032,22 @@ void *thread_handler(void *thread_fd) {
         }
 
       /*******************************************************************************
-       * BOK 90PRIME <cmd-id> COMMAND LVDTALL <float>
+       * BOK 90PRIME <cmd-id> COMMAND LVDTALL <float> T <float>
        ******************************************************************************/
       } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
           (istat=strncasecmp(bok_ng_commands[4], "LVDTALL", strlen("LVDTALL"))==0) &&
-          (istat=(int)strlen(bok_ng_commands[5])>0) ) {
+          (istat=(int)strlen(bok_ng_commands[5])>0) &&
+          (istat=strncasecmp(bok_ng_commands[6], "T", strlen("T"))==0) &&
+          (istat=(int)strlen(bok_ng_commands[7])>0) ) {
 
         /* output message */
         decode_float(bok_ng_commands[5], &fval);
-        (void) logtime(" setting instrument lvdtall to %.4f\n", fval);
+        decode_float(bok_ng_commands[7], &tolerance);
+        (void) logtime(" setting instrument lvdtall to %.4f within tolerance %.4f\n", fval, tolerance);
 
         /* in simulation, wait and return success */
         if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
-          (void) sleep(BOK_NG_INSTRUMENT_FOCUS_TIME);
+          (void) sleep(BOK_NG_INSTRUMENT_LVDT_TIME);
           (void) strcat(outgoing, " OK");
 
         /* talk to hardware */
@@ -1064,7 +1072,7 @@ void *thread_handler(void *thread_fd) {
             (void) strcat(outgoing, " ERROR (hardware busy)");
 
           /* check inputs are valid */
-          } else if (fval == NAN) {
+          } else if (fval==NAN || tolerance==NAN) {
             (void) strcat(outgoing, " ERROR (invalid number)");
 
           /* execute */
@@ -1073,7 +1081,7 @@ void *thread_handler(void *thread_fd) {
             is_done = false;
             float distall = round((fval / 1000.0) * BOK_LVDT_ATOD);
             if ((gstat=xq_focusind(distall, distall, distall)) == G_NO_ERROR) {
-              countdown = BOK_NG_INSTRUMENT_FOCUS_TIME;
+              countdown = BOK_NG_INSTRUMENT_LVDT_TIME;
               while (--countdown > 0) {
                 (void) sleep(1);
                 float vala = (float)udp_shm_ptr->baxis_analog_in * BOK_LVDT_STEPS;

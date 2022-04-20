@@ -1,0 +1,8 @@
+#This file contains the master look-up table for the 90prime guider filter wheel SNUM.
+#Filter\tCode\tName
+1	green	green
+2	neutral	neutral
+3	open	open
+4	clear	clear
+5	blue	blue
+6	red	red

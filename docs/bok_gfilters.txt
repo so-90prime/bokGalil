@@ -5,5 +5,5 @@
 2	open	open
 3	neutral	neutral
 4	red	red
-5	open2	open2
+5	clear	clear
 6	blue	blue

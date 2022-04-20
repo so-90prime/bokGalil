@@ -48,6 +48,10 @@
 #define BOK_GFILTER_FILE     "bok_gfilters.txt"
 #define BOK_GFILTER_COLUMNS  3
 #define BOK_GFILTER_SLOTS    7
+#define BOK_SFILTERS         6
+#define BOK_SFILTER_FILE     "bok_sfilters.txt"
+#define BOK_SFILTER_COLUMNS  3
+#define BOK_SFILTER_SLOTS    7
 #define BOK_IAXIS_INPUTS     10
 #define BOK_NG_HOST          "10.30.1.2"
 #define BOK_NG_PORT          5750

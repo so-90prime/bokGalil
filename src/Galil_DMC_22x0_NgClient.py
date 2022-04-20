@@ -604,25 +604,25 @@ class NgClient(object):
     # +
     # method: command_lvdt()
     # -
-    def command_lvdt(self, a: float = math.nan, b: float = math.nan, c: float = math.nan) -> bool:
-        """ BOK 90PRIME <cmd-id> COMMAND LVDT A <float> B <float> C <float> """
+    def command_lvdt(self, a: float = math.nan, b: float = math.nan, c: float = math.nan, t: float = math.nan) -> bool:
+        """ BOK 90PRIME <cmd-id> COMMAND LVDT A <float> B <float> C <float> T <float> """
 
-        if (math.nan < a < -math.nan) or (math.nan < b < -math.nan) or (math.nan < c < -math.nan):
+        if (math.nan < a < -math.nan) or (math.nan < b < -math.nan) or (math.nan < c < -math.nan) or (math.nan < t < -math.nan):
             return False
 
-        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND LVDT A {a:.4f} B {b:.4f} C {c:.4f}")
+        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND LVDT A {a:.4f} B {b:.4f} C {c:.4f} T {t:.4f}")
         return self.parse_command_response(_reply)
 
     # +
     # method: command_lvdtall()
     # -
-    def command_lvdtall(self, lvdt: float = math.nan) -> bool:
-        """ BOK 90PRIME <cmd-id> COMMAND LVDTALL <float> """
+    def command_lvdtall(self, lvdt: float = math.nan, t: float = math.nan) -> bool:
+        """ BOK 90PRIME <cmd-id> COMMAND LVDTALL <float> T <float> """
 
-        if math.nan < lvdt < -math.nan:
+        if math.nan < lvdt < -math.nan or math.nan < t < -math.nan:
             return False
 
-        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND LVDTALL {lvdt:.4f}")
+        _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND LVDTALL {lvdt:.4f} T {t:.4f}")
         return self.parse_command_response(_reply)
 
     # +

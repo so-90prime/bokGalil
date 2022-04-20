@@ -143,6 +143,7 @@ static void zero_telemetry(void);
 static bool busy = false;
 static filter_file_t bok_ifilters[BOK_IFILTER_SLOTS];
 static filter_file_t bok_gfilters[BOK_GFILTER_SLOTS];
+static filter_file_t bok_sfilters[BOK_SFILTER_SLOTS];
 static bool initialized = false;
 static int timer_id = -1;
 static tcp_val_t tcp_val;
@@ -744,8 +745,10 @@ static void driver_init(void) {
   /* declare some variables and initialize them */
   char *gpath = (char *)NULL;
   char *ipath = (char *)NULL;
+  char *spath = (char *)NULL;
   char gname[BOK_STR_1024] = {'\0'};
   char iname[BOK_STR_1024] = {'\0'};
+  char sname[BOK_STR_1024] = {'\0'};
 
   /* check status */
   if (initialized == true) { return; }
@@ -766,10 +769,19 @@ static void driver_init(void) {
     (void) sprintf(iname, "%s/%s", ipath, BOK_IFILTER_FILE);
   }
 
+  /* get sensor filters file */
+  (void) memset((void *)&sname, '\0', sizeof(sname));
+  if ((spath=getenv("BOK_GALIL_DOCS")) == (char *)NULL) {
+    (void) sprintf(sname, "%s", BOK_SFILTER_FILE);
+  } else {
+    (void) sprintf(sname, "%s/%s", spath, BOK_SFILTER_FILE);
+  }
+
   /* output some message(s) */
   IDMessage(GALIL_DEVICE, "Initializing driver v%s, %s (%s), %s", _VERSION_, _AUTHOR_, _EMAIL_, _DATE_);
   IDMessage(GALIL_DEVICE, "Guider filter file %s", gname);
   IDMessage(GALIL_DEVICE, "Instrument filter file %s", iname);
+  IDMessage(GALIL_DEVICE, "Sensor filter file %s", sname);
 
   /* read guider filter list from file */
   for (int j=0; j<BOK_GFILTER_SLOTS; j++) { (void) memset((void *)&bok_gfilters[j], 0, sizeof(filter_file_t)); }
@@ -787,6 +799,16 @@ static void driver_init(void) {
   for (int j=0; j<BOK_IFILTER_SLOTS; j++) {
     if (strlen(bok_ifilters[j].code)>0 && strlen(bok_ifilters[j].name)>0) {
       (void) fprintf(stderr, "instrument filters> index=%d, code='%s', name='%s'\n", j, bok_ifilters[j].code, bok_ifilters[j].name);
+      (void) fflush(stderr);
+    }
+  }
+
+  /* read sensor filter list from file */
+  for (int k=0; k<BOK_SFILTER_SLOTS; k++) { (void) memset((void *)&bok_sfilters[k], 0, sizeof(filter_file_t)); }
+  read_filters_from_file(sname, (filter_file_t *)bok_sfilters, BOK_SFILTER_SLOTS, BOK_SFILTER_COLUMNS);
+  for (int k=0; k<BOK_SFILTER_SLOTS; k++) {
+    if (strlen(bok_sfilters[k].code)>0 && strlen(bok_sfilters[k].name)>0) {
+      (void) fprintf(stderr, "sensor filters> index=%d, code='%s', name='%s'\n", k, bok_sfilters[k].code, bok_sfilters[k].name);
       (void) fflush(stderr);
     }
   }
@@ -1753,6 +1775,10 @@ static void execute_timer(void *p) {
     if (tcp_val.lv.gfiltn == (float)k) { (void) sprintf(telemetrys.gfiltn, "%s (%d)", bok_gfilters[k].name, k); }
     if (tcp_val.lv.fnum_in == (float)k) { (void) sprintf(telemetrys.fnum_in, "%s (%d)", bok_gfilters[k].name, k); }
   }
+  for (int l=1; l<BOK_SFILTER_SLOTS; l++) {
+    if (tcp_val.lv.snum == (float)l) { (void) sprintf(telemetrys.snum, "%s (%d)", bok_sfilters[l].name, l); }
+    if (tcp_val.lv.snum_in == (float)l) { (void) sprintf(telemetrys.snum_in, "%s (%d)", bok_sfilters[l].name, l); }
+  }
   (void) sprintf(telemetrys.hardware,     "%s",             tcp_val.hardware);
   (void) sprintf(telemetrys.software,     "%s",             tcp_val.software);
   (void) sprintf(telemetrys.timestamp,    "%s",             tcp_val.timestamp);
@@ -1784,8 +1810,8 @@ static void execute_timer(void *p) {
   (void) sprintf(telemetrys.ifilter_4,    "%s (%d)",        ifilter_names.filter_4, (int)round(tcp_val.filtvals[3]));
   (void) sprintf(telemetrys.ifilter_5,    "%s (%d)",        ifilter_names.filter_5, (int)round(tcp_val.filtvals[4]));
   (void) sprintf(telemetrys.ifilter_6,    "%s (%d)",        ifilter_names.filter_6, (int)round(tcp_val.filtvals[5]));
-  (void) sprintf(telemetrys.snum,         "%08.1f",         tcp_val.lv.snum);
-  (void) sprintf(telemetrys.snum_in,      "%08.1f",         tcp_val.lv.snum_in);
+  //(void) sprintf(telemetrys.snum,         "%s (%d)",        tcp_val.lv.snum);
+  //(void) sprintf(telemetrys.snum_in,      "%s (%d)",        tcp_val.lv.snum_in);
   (void) sprintf(telemetrys.gfilter_1,    "%s (1)",         gfilter_names.filter_1);
   (void) sprintf(telemetrys.gfilter_2,    "%s (2)",         gfilter_names.filter_2);
   (void) sprintf(telemetrys.gfilter_3,    "%s (3)",         gfilter_names.filter_3);
