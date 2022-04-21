@@ -32,7 +32,7 @@
 #define BOK_NG_GUIDER_FILTER_TIME      60
 #define BOK_NG_GUIDER_FOCUS_TIME       30
 #define BOK_NG_GUIDER_INIT_TIME        30
-#define BOK_NG_INSTRUMENT_FILTER_TIME  60
+#define BOK_NG_INSTRUMENT_FILTER_TIME  75
 #define BOK_NG_INSTRUMENT_FOCUS_TIME   30
 #define BOK_NG_INSTRUMENT_INIT_TIME    30
 #define BOK_NG_INSTRUMENT_LOAD_TIME    10
@@ -152,8 +152,8 @@ void *thread_handler(void *thread_fd) {
 
           /* execute */
           } else {
-            (void) xq_hx();
             is_done = false;
+            (void) xq_hx();
             if ((gstat=xq_gfwinit())==G_NO_ERROR) {
               countdown = BOK_NG_GUIDER_INIT_TIME;
               while (--countdown > 0) {
@@ -247,8 +247,8 @@ void *thread_handler(void *thread_fd) {
 
           /* execute */
           } else {
-            (void) xq_hx();
             is_done = false;
+            (void) xq_hx();
             if ((gstat=xq_gfiltn((float)ival))==G_NO_ERROR && (gstat=xq_gfwmov())==G_NO_ERROR) {
               countdown = BOK_NG_GUIDER_FILTER_TIME;
               while (--countdown > 0) {
@@ -329,8 +329,8 @@ void *thread_handler(void *thread_fd) {
 
           /* execute */
           } else {
-            (void) xq_hx();
             is_done = false;
+            (void) xq_hx();
             if ((gstat=xq_gfiltn((float)ival))==G_NO_ERROR && (gstat=xq_gfwmov())==G_NO_ERROR) {
               countdown = BOK_NG_GUIDER_FILTER_TIME;
               while (--countdown > 0) {
@@ -405,15 +405,15 @@ void *thread_handler(void *thread_fd) {
 
           /* execute */
           } else {
-            (void) xq_hx;
             is_done = false;
-            float _gfocend = (float)udp_shm_ptr->eaxis_reference_position + fval;
+            float gfocend = (float)udp_shm_ptr->eaxis_reference_position + fval;
+            (void) xq_hx;
             if ((gstat=xq_gfocus(fval)) == G_NO_ERROR) {
               countdown = BOK_NG_GUIDER_FOCUS_TIME;
               while (--countdown > 0) {
                 (void) sleep(1);
-                (void) logtime(" checking _gfocend %.4f with eaxis_reference_position %.4f\n", _gfocend, (float)udp_shm_ptr->eaxis_reference_position);
-                if (abs(_gfocend - (float)udp_shm_ptr->eaxis_reference_position) < 0.1) { is_done = true; break; }
+                (void) logtime(" checking gfocend %.4f with eaxis_reference_position %.4f\n", gfocend, (float)udp_shm_ptr->eaxis_reference_position);
+                if (abs(gfocend - (float)udp_shm_ptr->eaxis_reference_position) < 0.1) { is_done = true; break; }
               }
             }
             if (is_done) {
@@ -467,8 +467,8 @@ void *thread_handler(void *thread_fd) {
 
           /* execute */
           } else {
-            (void) xq_hx();
             is_done = false;
+            (void) xq_hx();
             if ((gstat=xq_filtldm()) == G_NO_ERROR) {
               countdown = BOK_NG_INSTRUMENT_INIT_TIME;
               while (--countdown > 0) {
@@ -536,8 +536,8 @@ void *thread_handler(void *thread_fd) {
 
           /* talk to hardware */
           } else {
-            (void) xq_hx();
             is_done = false;
+            (void) xq_hx();
             if ((gstat=xq_filtin()) == G_NO_ERROR) {
               countdown = BOK_NG_INSTRUMENT_LOAD_TIME;
               while (--countdown > 0) {
@@ -621,8 +621,8 @@ void *thread_handler(void *thread_fd) {
 
           /* execute */
           } else {
-            (void) xq_hx();
             is_done = false;
+            (void) xq_hx();
             if ((gstat=xq_reqfilt((float)ival))==G_NO_ERROR && (gstat=xq_filtmov())==G_NO_ERROR) {
               countdown = BOK_NG_INSTRUMENT_FILTER_TIME;
               while (--countdown > 0) {
@@ -702,8 +702,8 @@ void *thread_handler(void *thread_fd) {
 
           /* execute */
           } else {
-            (void) xq_hx();
             is_done = false;
+            (void) xq_hx();
             if ((gstat=xq_reqfilt((float)ival))==G_NO_ERROR && (gstat=xq_filtmov())==G_NO_ERROR) {
               countdown = BOK_NG_INSTRUMENT_FILTER_TIME;
               while (--countdown > 0) {
@@ -761,8 +761,8 @@ void *thread_handler(void *thread_fd) {
 
           /* talk to hardware */
           } else {
-            (void) xq_hx();
             is_done = false;
+            (void) xq_hx();
             if ((gstat=xq_filtout()) == G_NO_ERROR) {
               countdown = BOK_NG_INSTRUMENT_UNLOAD_TIME;
               while (--countdown > 0) {
@@ -837,7 +837,6 @@ void *thread_handler(void *thread_fd) {
 
           /* execute */
           } else {
-            (void) xq_hx();
             is_done = false;
             float cur_a = round(((float)udp_shm_ptr->a_position * 1000.0));
             float cur_b = round(((float)udp_shm_ptr->b_position * 1000.0));
@@ -854,6 +853,7 @@ void *thread_handler(void *thread_fd) {
             (void) logtime(" instrument focus focus_a %.4f dista %.4f\n", focus_a, dista); 
             (void) logtime(" instrument focus focus_b %.4f distb %.4f\n", focus_b, distb); 
             (void) logtime(" instrument focus focus_c %.4f distc %.4f\n", focus_c, distc); 
+            (void) xq_hx();
             if ((gstat=xq_focusind(dista, distb, distc)) == G_NO_ERROR) {
               countdown = BOK_NG_INSTRUMENT_FOCUS_TIME;
               while (--countdown > 0) {
@@ -874,6 +874,7 @@ void *thread_handler(void *thread_fd) {
             } else {
               (void) strcat(outgoing, " ERROR (timeout or hardware unresponsive)");
             }
+            (void) xq_hx();
           }
 
           /* close memory */
@@ -930,7 +931,6 @@ void *thread_handler(void *thread_fd) {
 
           /* execute */
           } else {
-            (void) xq_hx();
             is_done = false;
             float distall = round((fval / 1000.0) * BOK_LVDT_ATOD);
             float cur_a = round(((float)udp_shm_ptr->a_position * 1000.0));
@@ -943,6 +943,7 @@ void *thread_handler(void *thread_fd) {
             (void) logtime(" instrument focus cur_b %.4f new_b %.4f within tolerance %.4f\n", cur_b, new_b, tolerance);
             (void) logtime(" instrument focus cur_c %.4f new_c %.4f within tolerance %.4f\n", cur_c, new_c, tolerance);
             (void) logtime(" instrument focus delta %.4f distall %.4f\n", fval, distall); 
+            (void) xq_hx();
             if ((gstat=xq_focusind(distall, distall, distall)) == G_NO_ERROR) {
               countdown = BOK_NG_INSTRUMENT_FOCUS_TIME;
               while (--countdown > 0) {
@@ -1026,7 +1027,6 @@ void *thread_handler(void *thread_fd) {
 
           /* execute */
           } else {
-            (void) xq_hx();
             is_done = false;
             float vala = (float)udp_shm_ptr->baxis_analog_in * BOK_LVDT_STEPS;
             float valb = (float)udp_shm_ptr->daxis_analog_in * BOK_LVDT_STEPS;
@@ -1034,6 +1034,7 @@ void *thread_handler(void *thread_fd) {
             float dista = round((lvdt_a / 1000.0 - vala) * BOK_LVDT_ATOD);
             float distb = round((lvdt_b / 1000.0 - valb) * BOK_LVDT_ATOD);
             float distc = round((lvdt_c / 1000.0 - valc) * BOK_LVDT_ATOD);
+            (void) xq_hx();
             if ((gstat=xq_focusind(dista, distb, distc)) == G_NO_ERROR) {
               countdown = BOK_NG_INSTRUMENT_LVDT_TIME;
               while (--countdown > 0) {
@@ -1110,9 +1111,9 @@ void *thread_handler(void *thread_fd) {
 
           /* execute */
           } else {
-            (void) xq_hx();
             is_done = false;
             float distall = round((fval / 1000.0) * BOK_LVDT_ATOD);
+            (void) xq_hx();
             if ((gstat=xq_focusind(distall, distall, distall)) == G_NO_ERROR) {
               countdown = BOK_NG_INSTRUMENT_LVDT_TIME;
               while (--countdown > 0) {
@@ -1345,11 +1346,12 @@ void *thread_handler(void *thread_fd) {
           /* report filters */
           (void) memset(buffer, '\0', sizeof(buffer));
           istat = (int)round(tcp_shm_ptr->lv.filtval);
-          (void) sprintf(buffer, " OK FILTVAL=%d:%s INBEAM=%s ROTATING=%s TRANSLATING=%s",
+          (void) sprintf(buffer, " OK FILTVAL=%d:%s INBEAM=%s ROTATING=%s TRANSLATING=%s ERRFILT=%d FILTTSC=%d",
             istat, bok_ifilters[istat].name,
             ((int)round(tcp_shm_ptr->lv.filtisin)==1 ? "True" : "False"),
             ((int)round(udp_shm_ptr->faxis_moving)==1 ? "True" : "False"),
-            ((int)round(udp_shm_ptr->gaxis_moving)==1 ? "True" : "False"));
+            ((int)round(udp_shm_ptr->gaxis_moving)==1 ? "True" : "False"),
+            (int)round(tcp_shm_ptr->lv.errfilt), (int)round(tcp_shm_ptr->lv.filttsc));
           (void) strcat(outgoing, buffer);
         }
 

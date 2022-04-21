@@ -98,6 +98,7 @@ typedef struct telemetrydata {
   char distc[BOK_STR_32];
   char distgcam[BOK_STR_32];
   char errfilt[BOK_STR_32];
+  char filttsc[BOK_STR_32];
   char filtisin[BOK_STR_32];
   char filtval[BOK_STR_32];
   char ifilter_1[BOK_STR_64];
@@ -365,6 +366,7 @@ static IText telemetryT[] = {
   {"distc",           "distc                           ", telemetrys.distc,           0, 0, 0},
   {"distgcam",        "distgcam (gfocus)               ", telemetrys.distgcam,        0, 0, 0},
   {"errfilt",         "errfilt (1.0=Error, 0.0=OK)     ", telemetrys.errfilt,         0, 0, 0},
+  {"filttsc",         "filttsc (2.0=f/w, 3.0=b/w)      ", telemetrys.filttsc,         0, 0, 0},
   {"filtisin",        "filtisin  (1.0=True, 0.0=False) ", telemetrys.filtisin,        0, 0, 0},
   {"ifilter_1",       "iFilter 1 (filtvals[0])         ", telemetrys.ifilter_1,       0, 0, 0},
   {"ifilter_2",       "iFilter 2 (filtvals[1])         ", telemetrys.ifilter_2,       0, 0, 0},
@@ -1804,6 +1806,7 @@ static void execute_timer(void *p) {
   (void) sprintf(telemetrys.distc,        "%08.1f",         tcp_val.lv.distc);
   (void) sprintf(telemetrys.distgcam,     "%.0f",           tcp_val.lv.distgcam);
   (void) sprintf(telemetrys.errfilt,      "%08.1f",         tcp_val.lv.errfilt);
+  (void) sprintf(telemetrys.filttsc,      "%08.1f",         tcp_val.lv.filttsc);
   (void) sprintf(telemetrys.filtisin,     "%08.1f",         tcp_val.lv.filtisin);
   (void) sprintf(telemetrys.ifilter_1,    "%s (%d)",        ifilter_names.filter_1, (int)round(tcp_val.filtvals[0]));
   (void) sprintf(telemetrys.ifilter_2,    "%s (%d)",        ifilter_names.filter_2, (int)round(tcp_val.filtvals[1]));

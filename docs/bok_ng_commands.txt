@@ -53,13 +53,13 @@ BOK 90PRIME NG COMMAND / REQUEST SET
       On success: BOK 90PRIME <cmd-id> OK
       On failure: BOK 90PRIME <cmd-id> ERROR (reason)
 
-    BOK 90PRIME <cmd-id> COMMAND IFOCUS A <float> B <float> C <float>
-      Explanation: client commands server to change instrument focus in all 3 axes by separate amounts
+    BOK 90PRIME <cmd-id> COMMAND IFOCUS A <float> B <float> C <float> T <float>
+      Explanation: client commands server to change instrument focus in all 3 axes by separate amounts within tolerance
       On success: BOK 90PRIME <cmd-id> OK
       On failure: BOK 90PRIME <cmd-id> ERROR (reason)
 
-    BOK 90PRIME <cmd-id> COMMAND IFOCUSALL <float>
-      Explanation: client commands server to change instrument focus in all 3 axes by the same amount
+    BOK 90PRIME <cmd-id> COMMAND IFOCUS DELTA <float> T <float>
+      Explanation: client commands server to change instrument focus in all 3 axes by the same amount within tolerance
       On success: BOK 90PRIME <cmd-id> OK
       On failure: BOK 90PRIME <cmd-id> ERROR (reason)
 
@@ -102,7 +102,7 @@ BOK 90PRIME NG COMMAND / REQUEST SET
 
     BOK 90PRIME <cmd-id> REQUEST IFILTER
       Explanation: client requests server to report current instrument filter
-      On success: BOK 90PRIME <cmd-id> OK FILTVAL=18:Bob INBEAM=True ROTATING=False TRANSLATING=False
+      On success: BOK 90PRIME <cmd-id> OK FILTVAL=18:Bob INBEAM=True ROTATING=False TRANSLATING=False ERRFILT=<int> FILTTSC=<int>
       On failure: BOK 90PRIME <cmd-id> ERROR (reason)
 
     BOK 90PRIME <cmd-id> REQUEST IFILTERS
