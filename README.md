@@ -33,6 +33,13 @@ This software only supports /dev/shm shared memory under Unix.
  % make everything
 ```
 
+## Quick Test
+
+```bash
+ % make -f test_galil.make
+ % ./test_galil
+```
+
 ## Start, Stop, Status
 
 NB: At the Bok telescope, this code is run under either the *mtnops* or *primefocus* account after a `conda activate` !
@@ -87,6 +94,6 @@ Log files are written to $BOK_GALIL_LOG.
 
 --------------------------------------
 
-Last Modified: 20220120
+Last Modified: 20220527
 
 Last Author: Phil Daly (pndaly@arizona.edu)

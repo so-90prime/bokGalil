@@ -44,6 +44,7 @@ log/
 # +
 # build(s)
 # -
+test_galil
 bin/bokGalilIndiDriver
 bin/bok_read_filters
 bin/bok_read_guider_filters
