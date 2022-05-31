@@ -40,6 +40,7 @@ int main( int argc, char *argv[] ) {
   char buffer[BOK_STR_2048] = {'\0'};
   GCon gfd = G_NO_ERROR;
   GReturn gstat = G_NO_ERROR;
+  int bok = 1;
   int counter = -1;
   int delay = BOK_UDP_DELAY_MS;
   int istat = 0;
@@ -65,6 +66,7 @@ int main( int argc, char *argv[] ) {
   /* get command line parameter(s) */
   while ( argc>1L && argv[1][0]=='-' ) {
     switch (argv[1][1]) {
+      case 'b': case 'B': bok = atoi(&argv[1][2]); break;
       case 's': case 'S':
         if (isalpha((char)argv[1][2])) {
           simulate = (argv[1][2]=='t' || argv[1][2]=='T') ? true: false;
@@ -75,7 +77,8 @@ int main( int argc, char *argv[] ) {
       default:
         (void) fprintf(stdout, "%s: v%s %s %s\n", _NAME_, _VERSION_, _AUTHOR_, _DATE_);
         (void) fprintf(stdout, "%s\n", _HELP_);
-        (void) fprintf(stdout, "\nUse: %s [-s<bool> -h]\n", _NAME_);
+        (void) fprintf(stdout, "\nUse: %s [-b<int> -s<bool> -h]\n", _NAME_);
+        (void) fprintf(stdout, "\t-b<int>  : 1=bok, 0=lab [default=%d]\n", bok);
         (void) fprintf(stdout, "\t-s<bool> : set simulate (t||f) [default=%s]\n", "false");
         (void) fflush(stdout);
         exit (0);
@@ -110,12 +113,31 @@ int main( int argc, char *argv[] ) {
     exit(-1);
   }
 
-  /* turn on the UDP faucet */
+  /* open the ip_addr */
   if (gfd) { (void) GClose(gfd); }
-  if (!simulate) {
-    if ((gstat=GOpen(BOK_GALIL_TCP_CMD, &gfd)) != G_NO_ERROR) { simulate = true; }
+  gstat = G_NO_ERROR;
+  if ( ! simulate ) {
+    if (bok > 0) {
+      (void) fprintf(stdout, "%s <%s> executing '%s', gstat=%d, gfd=%p\n", _NAME_, (simulate == true ? "SIM" : "OK"), BOK_GALIL_CMD_BOK, gstat, gfd);
+      (void) fflush(stdout);
+      if ((gstat=GOpen(BOK_GALIL_CMD_BOK, &gfd)) != G_NO_ERROR) { simulate = true; }
+      (void) printf("GOpen('%s') called, gstat=%d, gfd=%ld\n", BOK_GALIL_CMD_BOK, (int)gstat, (long)gfd);
+      (void) fprintf(stdout, "%s <%s> executed '%s', gstat=%d, gfd=%p\n", _NAME_, (simulate == true ? "SIM" : "OK"), BOK_GALIL_CMD_BOK, gstat, gfd);
+      (void) fflush(stdout);
+    } else {
+      (void) fprintf(stdout, "%s <%s> executing '%s', gstat=%d, gfd=%p\n", _NAME_, (simulate == true ? "SIM" : "OK"), BOK_GALIL_CMD_LAB, gstat, gfd);
+      (void) fflush(stdout);
+      if ((gstat=GOpen(BOK_GALIL_CMD_LAB, &gfd)) != G_NO_ERROR) { simulate = true; }
+      (void) printf("GOpen('%s') called, gstat=%d, gfd=%ld\n", BOK_GALIL_CMD_LAB, (int)gstat, (long)gfd);
+      (void) fprintf(stdout, "%s <%s> executed '%s', gstat=%d, gfd=%p\n", _NAME_, (simulate == true ? "SIM" : "OK"), BOK_GALIL_CMD_LAB, gstat, gfd);
+      (void) fflush(stdout);
+    }
+  }
+
+  /* turn on the UDP faucet */
+  if ( ! simulate) {
     (void) memset((void *)buffer, 0, sizeof(buffer));
-    if (!simulate && (gstat=GCommand(gfd, BOK_UDP_FAUCET_ON, buffer, sizeof(buffer), 0)) != G_NO_ERROR) {
+    if ((gstat=GCommand(gfd, BOK_UDP_FAUCET_ON, buffer, sizeof(buffer), 0)) != G_NO_ERROR) {
       (void) fprintf(stderr, "%s <ERROR> failed to execute '%s', simulating, gstat=%d\n", _NAME_, BOK_UDP_FAUCET_ON, (int)gstat);
       (void) fflush(stderr);
       simulate = true;
@@ -784,13 +806,34 @@ int main( int argc, char *argv[] ) {
   /* close device */
   if (sfd) { (void) close(sfd); }
 
+  /* open the ip_addr */
+  if (gfd) { (void) GClose(gfd); }
+  gstat = G_NO_ERROR;
+  if ( ! simulate ) {
+    if (bok > 0) {
+      (void) fprintf(stdout, "%s <%s> executing '%s', gstat=%d, gfd=%p\n", _NAME_, (simulate == true ? "SIM" : "OK"), BOK_GALIL_CMD_BOK, gstat, gfd);
+      (void) fflush(stdout);
+      if ((gstat=GOpen(BOK_GALIL_CMD_BOK, &gfd)) != G_NO_ERROR) { simulate = true; }
+      (void) printf("GOpen('%s') called, gstat=%d, gfd=%ld\n", BOK_GALIL_CMD_BOK, (int)gstat, (long)gfd);
+      (void) fprintf(stdout, "%s <%s> executed '%s', gstat=%d, gfd=%p\n", _NAME_, (simulate == true ? "SIM" : "OK"), BOK_GALIL_CMD_BOK, gstat, gfd);
+      (void) fflush(stdout);
+    } else {
+      (void) fprintf(stdout, "%s <%s> executing '%s', gstat=%d, gfd=%p\n", _NAME_, (simulate == true ? "SIM" : "OK"), BOK_GALIL_CMD_LAB, gstat, gfd);
+      (void) fflush(stdout);
+      if ((gstat=GOpen(BOK_GALIL_CMD_LAB, &gfd)) != G_NO_ERROR) { simulate = true; }
+      (void) printf("GOpen('%s') called, gstat=%d, gfd=%ld\n", BOK_GALIL_CMD_LAB, (int)gstat, (long)gfd);
+      (void) fprintf(stdout, "%s <%s> executed '%s', gstat=%d, gfd=%p\n", _NAME_, (simulate == true ? "SIM" : "OK"), BOK_GALIL_CMD_LAB, gstat, gfd);
+      (void) fflush(stdout);
+    }
+  }
+
   /* turn off the UDP faucet */
-  if (!simulate) {
-    if ((gstat=GOpen(BOK_GALIL_TCP_CMD, &gfd)) != G_NO_ERROR) { simulate = true; }
+  if ( ! simulate) {
     (void) memset((void *)buffer, 0, sizeof(buffer));
-    if (!simulate && (gstat=GCommand(gfd, BOK_UDP_FAUCET_OFF, buffer, sizeof(buffer), 0)) != G_NO_ERROR) {
-      (void) fprintf(stderr, "%s <ERROR> failed to execute '%s' exiting, gstat=%d\n", _NAME_, BOK_UDP_FAUCET_OFF, (int)gstat);
+    if ((gstat=GCommand(gfd, BOK_UDP_FAUCET_OFF, buffer, sizeof(buffer), 0)) != G_NO_ERROR) {
+      (void) fprintf(stderr, "%s <ERROR> failed to execute '%s', simulating, gstat=%d\n", _NAME_, BOK_UDP_FAUCET_ON, (int)gstat);
       (void) fflush(stderr);
+      simulate = true;
     }
   }
   if (gfd) { (void) GClose(gfd); }

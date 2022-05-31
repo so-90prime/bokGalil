@@ -43,7 +43,8 @@
 #define BOK_IFILTER_FILE     "bok_ifilters.txt"
 #define BOK_IFILTER_COLUMNS  3
 #define BOK_IFILTER_SLOTS    256
-#define BOK_GALIL_TCP_CMD    "10.30.3.31 --command TCP"
+#define BOK_GALIL_CMD_BOK    "10.30.3.31 --command TCP"
+#define BOK_GALIL_CMD_LAB    "192.168.0.100 --command TCP"
 #define BOK_GFILTERS         6
 #define BOK_GFILTER_FILE     "bok_gfilters.txt"
 #define BOK_GFILTER_COLUMNS  3

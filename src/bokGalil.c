@@ -1167,7 +1167,7 @@ GReturn xq(char *cmd) {
   (void) memset((void *)resp, 0, sizeof(resp));
 
   /* execute command */
-  if ((gstat=GOpen(BOK_GALIL_TCP_CMD, &gfd)) == G_NO_ERROR) {
+  if ((gstat=GOpen(BOK_GALIL_CMD_BOK, &gfd)) == G_NO_ERROR) {
     if ((gstat=GCommand(gfd, cmd, resp, sizeof(resp), 0)) == G_NO_ERROR) {
       (void) fprintf(stdout, "Executed '%s' OK, gstat=%d, response='%s'\n", cmd, gstat, resp); (void) fflush(stdout);
     } else {

@@ -40,11 +40,13 @@ log/
 .Spotlight-V100
 .Trashes
 *.db
+*.out
 
 # +
 # build(s)
 # -
 test_galil
+docker/*
 bin/bokGalilIndiDriver
 bin/bok_read_filters
 bin/bok_read_guider_filters

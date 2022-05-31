@@ -140,13 +140,15 @@ void email(void) {
 void help(void) {
   (void) fprintf(stdout, "%s: v%s %s %s\n", _NAME_, _VERSION_, _AUTHOR_, _DATE_);
   (void) fprintf(stdout, "%s\n", _HELP_);
-  (void) fprintf(stdout, "\nUse: %s [-a -c -d -e -h -i<addr> -o -v]\n", _NAME_);
+  // (void) fprintf(stdout, "\nUse: %s [-a -c -d -e -h -i<addr> -o -v]\n", _NAME_);
+  (void) fprintf(stdout, "\nUse: %s [-a -b<int> -c -d -e -h -o -v]\n", _NAME_);
   (void) fprintf(stdout, "\t-a       : show author\n");
+  (void) fprintf(stdout, "\t-b<int>  : 1=bok, 0=lab [default=1]\n");
   (void) fprintf(stdout, "\t-c       : show (supported) commands\n");
   (void) fprintf(stdout, "\t-d       : show date\n");
   (void) fprintf(stdout, "\t-e       : show email\n");
   (void) fprintf(stdout, "\t-o       : override unsupported command(s)\n");
-  (void) fprintf(stdout, "\t-i<addr> : set ip address\n");
+  // (void) fprintf(stdout, "\t-i<addr> : set ip address\n");
   (void) fprintf(stdout, "\t-v       : show version\n");
   (void) fflush(stdout);
 }

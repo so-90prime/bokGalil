@@ -35,6 +35,7 @@ int main( int argc, char *argv[] ) {
   char *pr = command;
   GCon gfd = G_NO_ERROR;
   GReturn gstat = G_NO_ERROR;
+  int bok = 1;
   int cmd_index = G_GCLIB_ERROR;
   int rb = G_NO_ERROR;
   int wb = G_NO_ERROR;
@@ -47,16 +48,18 @@ int main( int argc, char *argv[] ) {
   /* get command line parameter(s) */
   while ( argc>1L && argv[1][0]=='-' ) {
     switch (argv[1][1]) {
-      case 'a': case 'A': author();   exit(0); break;
-      case 'c': case 'C': commands(); exit(0); break;
-      case 'd': case 'D': date();     exit(0); break;
-      case 'e': case 'E': email();    exit(0); break;
+      case 'b': case 'B': bok = atoi(&argv[1][2]); break;
       case 'o': case 'O': cmd_override = true; break;
+      case 'a': case 'A': author();    exit(0); break;
+      case 'c': case 'C': commands();  exit(0); break;
+      case 'd': case 'D': date();      exit(0); break;
+      case 'e': case 'E': email();     exit(0); break;
       case 'v': case 'V': version();   exit(0); break;
       default:            help();      exit(0); break;
     }
     argc--; argv++;
   }
+
 
   /* print library version */
   gstat = G_NO_ERROR;
@@ -78,11 +81,21 @@ int main( int argc, char *argv[] ) {
 
   /* open the ip_addr */
   gstat = G_NO_ERROR;
-  (void) fprintf(stdout, "%s <%s> executing '%s', gstat=%d, gfd=%p\n", _NAME_, (simulate == true ? "SIM" : "OK"), BOK_GALIL_TCP_CMD, gstat, gfd);
-  (void) fflush(stdout);
-  if ((gstat=GOpen(BOK_GALIL_TCP_CMD, &gfd)) != G_NO_ERROR) { simulate = true; }
-  (void) fprintf(stdout, "%s <%s> executed '%s', gstat=%d, gfd=%p\n", _NAME_, (simulate == true ? "SIM" : "OK"), BOK_GALIL_TCP_CMD, gstat, gfd);
-  (void) fflush(stdout);
+  if (bok > 0) {
+    (void) fprintf(stdout, "%s <%s> executing '%s', gstat=%d, gfd=%p\n", _NAME_, (simulate == true ? "SIM" : "OK"), BOK_GALIL_CMD_BOK, gstat, gfd);
+    (void) fflush(stdout);
+    if ((gstat=GOpen(BOK_GALIL_CMD_BOK, &gfd)) != G_NO_ERROR) { simulate = true; }
+    (void) printf("GOpen('%s') called, gstat=%d, gfd=%ld\n", BOK_GALIL_CMD_BOK, (int)gstat, (long)gfd);
+    (void) fprintf(stdout, "%s <%s> executed '%s', gstat=%d, gfd=%p\n", _NAME_, (simulate == true ? "SIM" : "OK"), BOK_GALIL_CMD_BOK, gstat, gfd);
+    (void) fflush(stdout);
+  } else {
+    (void) fprintf(stdout, "%s <%s> executing '%s', gstat=%d, gfd=%p\n", _NAME_, (simulate == true ? "SIM" : "OK"), BOK_GALIL_CMD_LAB, gstat, gfd);
+    (void) fflush(stdout);
+    if ((gstat=GOpen(BOK_GALIL_CMD_LAB, &gfd)) != G_NO_ERROR) { simulate = true; }
+    (void) printf("GOpen('%s') called, gstat=%d, gfd=%ld\n", BOK_GALIL_CMD_LAB, (int)gstat, (long)gfd);
+    (void) fprintf(stdout, "%s <%s> executed '%s', gstat=%d, gfd=%p\n", _NAME_, (simulate == true ? "SIM" : "OK"), BOK_GALIL_CMD_LAB, gstat, gfd);
+    (void) fflush(stdout);
+  }
 
   /* get some info */
   (void) memset(buffer, '\0', sizeof(buffer));
