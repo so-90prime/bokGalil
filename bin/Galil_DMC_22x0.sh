@@ -17,11 +17,15 @@
 # -
 def_command="status"
 
+_home=$(env | grep '^HOME' | cut -d'=' -f2)
+bok_90prime_gui="${_home}/PycharmProjects/bok_90prime_gui"
+
 c_read=0
 dry_run=0
 ng_server=0
 py_read=0
 web_site=0
+
 [[ -z $(command -v indiserver) ]] && _indiserver=0 || _indiserver=1
 
 
@@ -152,8 +156,8 @@ case $(echo ${_command}) in
       [[ ${ng_server} -eq 1 ]] && write_magenta "Dry-Run> nohup ${BOK_GALIL_BIN}/${_prca} >> ${BOK_GALIL_LOG}/${_prca}.log 2>&1 &"
       if [[ ${web_site} -eq 1 ]]; then
         write_magenta "Dry-Run> conda activate pyindi"
-        write_magenta "Dry-Run> cd ~/PycharmProjects/bok-90prime-gui/src"
-        write_magenta "Dry-Run> python3 bok.py"
+        write_magenta "Dry-Run> cd ${bok_90prime_gui}/src"
+        write_magenta "Dry-Run> python3 ${bok_90prime_gui}/src/bok.py"
       fi
     else
       # standard
@@ -175,7 +179,7 @@ case $(echo ${_command}) in
         [[ -z ${_pida} ]] && write_green "Starting ${_nama}" && (nohup ${BOK_GALIL_BIN}/${_prca} >> ${BOK_GALIL_LOG}/${_prca}.log 2>&1 &) && write_ok "${_nama}" "STARTED OK" && sleep 1 || write_error "${_nama}" "ALREADY RUNNING"
       fi
       if [[ ${web_site} -eq 1 ]]; then
-        [[ -z ${_pidb} ]] && write_green "Starting ${_namb}" && service mtnops.pyindi start && write_ok "${_namb}" "STARTED OK" && sleep 1 || write_error "${_namb}" "ALREADY RUNNING"
+        [[ -z ${_pidb} ]] && write_green "Starting ${_namb}" && conda activate pyindi && cd ${bok_90prime_gui}/src && python3 ${bok_90prime_gui}/src/bok.py && write_ok "${_namb}" "STARTED OK" && sleep 1 || write_error "${_namb}" "ALREADY RUNNING"
       fi
     fi
     ;;
