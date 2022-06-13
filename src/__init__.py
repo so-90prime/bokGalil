@@ -65,7 +65,7 @@ class Logger(object):
     # +
     # method: __init__
     # -
-    def __init__(self, name: str, level: str):
+    def __init__(self, name: str = f"{os.getenv('USER', 'None')}", level: str = LOG_LEVELS[0]):
 
         # get arguments(s)
         self.name = name
@@ -235,7 +235,7 @@ def bok_print(msg: str = '', color: str = 'black', height: int = 1) -> None:
 # +
 # function: clear_bitn()
 # -
-def clear_bitn(data: int, bit: int) -> int:
+def clear_bitn(data: int = 0 , bit: int = 0) -> int:
     """ returns data with bit n cleared """
     return data & ~(1 << bit)
 
@@ -243,7 +243,7 @@ def clear_bitn(data: int, bit: int) -> int:
 # +
 # function: get_hash()
 # -
-def get_hash(seed: str) -> str:
+def get_hash(seed: str = '0xface') -> str:
     """ return unique 64-character string """
     _seed = seed.strip() if (isinstance(seed, str) and seed.strip() != '') else datetime.now().isoformat()
     return hashlib.sha256(_seed.encode('utf-8')).hexdigest()
@@ -292,7 +292,7 @@ def get_iers() -> None:
 # function: get_isot()
 # -
 # noinspection PyBroadException
-def get_isot(day_offset: int, utc: bool) -> str:
+def get_isot(day_offset: int = 0, utc: bool = False) -> str:
     """ return date in isot format for any day_offset or '' """
     if not isinstance(day_offset, int) or not isinstance(utc, bool):
         return ''
@@ -307,7 +307,7 @@ def get_isot(day_offset: int, utc: bool) -> str:
 # function: get_jd()
 # -
 # noinspection PyBroadException
-def get_jd(day_offset: int, utc: bool) -> float:
+def get_jd(day_offset: int = 0, utc: bool = False) -> float:
     """ return date in jd format for any day_offset offset or math.nan """
     if not isinstance(day_offset, int) or not isinstance(utc, bool):
         return math.nan
@@ -321,7 +321,7 @@ def get_jd(day_offset: int, utc: bool) -> float:
 # +
 # function: is_bitn_set()
 # -
-def is_bitn_set(data: int, bit: int) -> bool:
+def is_bitn_set(data: int = 0, bit: int = 0) -> bool:
     """ returns True if bit n is set """
     return True if (data & (1 << bit)) else False
 
@@ -330,7 +330,7 @@ def is_bitn_set(data: int, bit: int) -> bool:
 # function: isot_to_jd()
 # -
 # noinspection PyBroadException
-def isot_to_jd(isot: str) -> float:
+def isot_to_jd(isot: str = '') -> float:
     """ returns jd from isot date string or math.nan """
     try:
         return Time(isot).jd if (re.match(ISO_PATTERN_C, isot) is not None) else math.nan
@@ -342,7 +342,7 @@ def isot_to_jd(isot: str) -> float:
 # function: jd_to_isot()
 # -
 # noinspection PyBroadException
-def jd_to_isot(jd: float) -> str:
+def jd_to_isot(jd: float = math.nan) -> str:
     """ return isot from jd or '' """
     if not isinstance(jd, float) or abs(jd) is math.nan:
         return ''
@@ -363,7 +363,7 @@ def msleep(_seconds: int = 1):
 # +
 # function: set_bitn()
 # -
-def set_bitn(data: int, bit: int) -> int:
+def set_bitn(data: int = 0, bit: int = 0) -> int:
     """ returns data with bit n set """
     return data | (1 << bit)
 
@@ -394,7 +394,7 @@ def usleep(_seconds: int = 1):
 # +
 # function: verify_dict()
 # -
-def verify_dict(_dict: dict, _types: tuple) -> bool:
+def verify_dict(_dict: dict = None, _types: tuple = None) -> bool:
     """ verify dictionary contains data types in tuple """
     return all(isinstance(_v, _types) for _k, _v in _dict.items())
 
@@ -403,7 +403,7 @@ def verify_dict(_dict: dict, _types: tuple) -> bool:
 # function: verify_template()
 # -
 # noinspection PyTypeHints
-def verify_template(_dict: dict, _temp: dict) -> bool:
+def verify_template(_dict: dict = None, _temp: dict = None) -> bool:
     """ verify dictionary contains data types in template """
     return all(isinstance(_dict[_key], _temp[_key]) for _key in _dict)
 
@@ -411,6 +411,6 @@ def verify_template(_dict: dict, _temp: dict) -> bool:
 # +
 # function: verify_keys()
 # -
-def verify_keys(_dict: dict, _keys: list) -> bool:
+def verify_keys(_dict: dict = None, _keys: list = None) -> bool:
     """ verify dictionary contains all key(s) specified """
-    return all(_k in _keys for _k in _dict if _dict is not {})
+    return all(_k in _dict for _k in _keys if _dict is not {})
