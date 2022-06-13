@@ -243,7 +243,7 @@ def clear_bitn(data: int = 0 , bit: int = 0) -> int:
 # +
 # function: get_hash()
 # -
-def get_hash(seed: str = f'{random.random()}') -> str:
+def get_hash(seed: str = '') -> str:
     """ return unique 64-character string """
     _seed = seed.strip() if (isinstance(seed, str) and seed.strip() != '') else datetime.now().isoformat()
     return hashlib.sha256(_seed.encode('utf-8')).hexdigest()
