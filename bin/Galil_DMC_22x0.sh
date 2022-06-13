@@ -6,7 +6,7 @@
 # Name:        Galil_DMC_22x0.sh
 # Description: Galil_DMC_22x0 control
 # Author:      Phil Daly (pndaly@arizona.edu)
-# Date:        20220411
+# Date:        20220613
 # Execute:     % bash Galil_DMC_22x0.sh --help
 #
 # -
@@ -22,7 +22,6 @@ dry_run=0
 ng_server=0
 py_read=0
 web_site=0
-[[ -z $(command -v service) ]] && _service=0 || _service=1
 [[ -z $(command -v indiserver) ]] && _indiserver=0 || _indiserver=1
 
 
@@ -132,8 +131,6 @@ _pid9=''
 _pida=$(ps -ef | grep ${_prca} | grep -v grep | awk '{print $2}')
 _pidb=$(ps -ef | grep ${_prcb} | grep -v grep | awk '{print $2}')
 
-# [[ ${_service} -eq 1 ]] && _pyindi_bok=$(service mtnops.pyindi status | grep 'Active:' | cut -d':' -f2 | cut -d'(' -f2 | cut -d')' -f1) || _pyindi_bok='NO SERVICE'
-
 
 # +
 # execute
@@ -154,9 +151,9 @@ case $(echo ${_command}) in
       [[ ${py_read} -eq 1 ]] && write_magenta "Dry-Run> nohup python3 ${BOK_GALIL_BIN}/${_prc5} --loop >> ${BOK_GALIL_LOG}/${_prc5}.log 2>&1 &"
       [[ ${ng_server} -eq 1 ]] && write_magenta "Dry-Run> nohup ${BOK_GALIL_BIN}/${_prca} >> ${BOK_GALIL_LOG}/${_prca}.log 2>&1 &"
       if [[ ${web_site} -eq 1 ]]; then
-        if [[ ${_service} -eq 1 ]]; then
-          write_magenta "Dry-Run> service mtnops.pyindi start"
-       fi
+        write_magenta "Dry-Run> conda activate pyindi"
+        write_magenta "Dry-Run> cd ~/PycharmProjects/bok-90prime-gui/src"
+        write_magenta "Dry-Run> python3 bok.py"
       fi
     else
       # standard
@@ -178,9 +175,7 @@ case $(echo ${_command}) in
         [[ -z ${_pida} ]] && write_green "Starting ${_nama}" && (nohup ${BOK_GALIL_BIN}/${_prca} >> ${BOK_GALIL_LOG}/${_prca}.log 2>&1 &) && write_ok "${_nama}" "STARTED OK" && sleep 1 || write_error "${_nama}" "ALREADY RUNNING"
       fi
       if [[ ${web_site} -eq 1 ]]; then
-        if [[ ${_service} -eq 1 ]]; then
-          [[ -z ${_pidb} ]] && write_green "Starting ${_namb}" && service mtnops.pyindi start && write_ok "${_namb}" "STARTED OK" && sleep 1 || write_error "${_namb}" "ALREADY RUNNING"
-        fi
+        [[ -z ${_pidb} ]] && write_green "Starting ${_namb}" && service mtnops.pyindi start && write_ok "${_namb}" "STARTED OK" && sleep 1 || write_error "${_namb}" "ALREADY RUNNING"
       fi
     fi
     ;;
@@ -201,7 +196,7 @@ case $(echo ${_command}) in
       [[ ${py_read} -eq 1 ]] && write_magenta "Dry-Run> kill -SIGINT pidof(${_prc2})"
       [[ ${py_read} -eq 1 ]] && write_magenta "Dry-Run> kill -SIGINT pidof(${_prc5})"
       [[ ${ng_server} -eq 1 ]] && write_magenta "Dry-Run> kill -9 pidof(${_prca})"
-      [[ ${web_site} -eq 1 ]] && [[ ${_service} -eq 1 ]] && write_magenta "Dry-Run> service mtnops.pyindi stop"
+      [[ ${web_site} -eq 1 ]] && write_magenta "Dry-Run> kill -9 pidof(${_prcb})"
     else
       # standard
       [[ ! -z ${_pid0} ]] && echo "kill -SIGINT ${_pid0}" && kill -SIGINT ${_pid0} && write_ok "${_nam0}" "KILLED OK" || write_error "${_nam0}" "NOT RUNNING"
@@ -223,9 +218,7 @@ case $(echo ${_command}) in
         [[ ! -z ${_pida} ]] && echo "kill -9 ${_pida}" && kill -9 ${_pida} && write_ok "${_nama}" "KILLED OK" || write_error "${_nama}" "NOT RUNNING"
       fi
       if [[ ${web_site} -eq 1 ]]; then
-        if [[ ${_service} -eq 1 ]]; then
-          service mtnops.pyindi stop
-        fi
+        [[ ! -z ${_pidb} ]] && echo "kill -9 ${_pidb}" && kill -9 ${_pidb} && write_ok "${_nama}" "KILLED OK" || write_error "${_namb}" "NOT RUNNING"
       fi
     fi
    ;;
@@ -253,9 +246,7 @@ case $(echo ${_command}) in
       [[ ! -z ${_pida} ]] && write_ok "${_nama}" "OK (${_pida})" || write_error "${_nama}" "NOT RUNNING"
     fi
     if [[ ${web_site} -eq 1 ]]; then
-      if [[ ${_service} -eq 1 ]]; then
-        [[ ! -z ${_pidb} ]] && write_ok "${_namb}" "OK (http://10.30.1.2:5905)" || write_error "${_namb}" "NOT RUNNING"
-      fi
+      [[ ! -z ${_pidb} ]] && write_ok "${_namb}" "OK (http://10.30.1.2:5905)" || write_error "${_namb}" "NOT RUNNING"
     fi
     ;;
 esac
