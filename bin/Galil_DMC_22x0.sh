@@ -18,7 +18,7 @@
 def_command="status"
 
 _home=$(env | grep '^HOME' | cut -d'=' -f2)
-bok_90prime_gui="${_home}/PycharmProjects/bok_90prime_gui"
+bok_90prime_gui="${_home}/PycharmProjects/bok-90prime-gui"
 
 c_read=0
 dry_run=0
