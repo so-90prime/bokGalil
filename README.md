@@ -95,6 +95,6 @@ Log files are written to $BOK_GALIL_LOG.
 
 --------------------------------------
 
-Last Modified: 20220527
+Last Modified: 20220829
 
 Last Author: Phil Daly (pndaly@arizona.edu)
