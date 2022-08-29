@@ -16,16 +16,18 @@
 # set defaults: edit as you see fit
 # -
 def_command="status"
-_home=$(env | grep '^HOME' | cut -d'=' -f2)
-bok_90prime_gui="${_home}/PycharmProjects/bok-90prime-gui"
 dry_run=0
 [[ -z $(command -v indiserver) ]] && _indiserver=0 || _indiserver=1
+
+
+source ${BOK_GALIL_BIN}/functions.sh
+bok_90prime_gui="${HOME}/bok-90prime-gui"
+[[ -f "${bok_90prime_gui}/.env" ]] && source ${bok_90prime_gui}/.env || write_red "<ERROR> No web environment found!"
 
 
 # +
 # utility functions
 # -
-source ${BOK_GALIL_BIN}/functions.sh
 usage () {
   write_blue   ""                                                                                  2>&1
   write_blue   "Galil_DMC_22x0 Control"                                                            2>&1
@@ -92,7 +94,7 @@ _nam5="Galil_DMC_22x0_NgServer             "
 _pid5=$(ps -ef | grep ${_prc5} | grep -v grep | awk '{print $2}')
 
 _prc6="bok.py"
-_nam6="PyINDI Bok Web-site (bok.py)        "
+_nam6="PyINDI http://${WEBHOST}:${WEBPORT}/      "
 _pid6=$(ps -ef | grep ${_prc6} | grep -v grep | awk '{print $2}')
 
 
@@ -108,7 +110,7 @@ case $(echo ${_command}) in
       write_magenta "Dry-Run> nohup ${BOK_GALIL_BIN}/${_prc1} >> ${BOK_GALIL_LOG}/${_prc1}.log 2>&1 &"
       write_magenta "Dry-Run> nohup indiserver -vv ${BOK_GALIL_BIN}/${_prc4} >> ${BOK_GALIL_LOG}/${_prc4}.log 2>&1 &"
       write_magenta "Dry-Run> nohup ${BOK_GALIL_BIN}/${_prc5} >> ${BOK_GALIL_LOG}/${_prc5}.log 2>&1 &"
-      write_magenta "Dry-Run> conda activate pyindi; cd ${bok_90prime_gui}/src; python3 ${bok_90prime_gui}/src/bok.py"
+      write_magenta "Dry-Run> nohup python3 ${bok_90prime_gui}/src/${_prc6} >> ${BOK_GALIL_LOG}/${_prc6}.log 2>&1 &"
     else
       [[ -z ${_pid0} ]] && write_green "Starting ${_nam0}" && (nohup ${BOK_GALIL_BIN}/${_prc0} >> ${BOK_GALIL_LOG}/${_prc0}.log 2>&1 &) && write_ok "${_nam0}" "STARTED OK" && sleep 1 || write_error "${_nam0}" "ALREADY RUNNING"
       [[ -z ${_pid1} ]] && write_green "Starting ${_nam1}" && (nohup ${BOK_GALIL_BIN}/${_prc1} >> ${BOK_GALIL_LOG}/${_prc1}.log 2>&1 &) && write_ok "${_nam1}" "STARTED OK" && sleep 1 || write_error "${_nam1}" "ALREADY RUNNING"
@@ -116,7 +118,7 @@ case $(echo ${_command}) in
         [[ -z ${_pid4} ]] && write_green "Starting ${_nam4}" && (nohup indiserver -vv ${BOK_GALIL_BIN}/${_prc4} >> ${BOK_GALIL_LOG}/${_prc4}.log 2>&1 &) && write_ok "${_nam4}" "STARTED OK" && sleep 1 || write_error "${_nam4}" "ALREADY RUNNING"
       fi
       [[ -z ${_pid5} ]] && write_green "Starting ${_nam5}" && (nohup ${BOK_GALIL_BIN}/${_prc5} >> ${BOK_GALIL_LOG}/${_prc5}.log 2>&1 &) && write_ok "${_nam5}" "STARTED OK" && sleep 1 || write_error "${_nam5}" "ALREADY RUNNING"
-      [[ -z ${_pid6} ]] && write_green "Starting ${_nam6}" && conda activate pyindi && cd ${bok_90prime_gui}/src && python3 ${bok_90prime_gui}/src/bok.py && write_ok "${_nam6}" "STARTED OK" && sleep 1 || write_error "${_nam6}" "ALREADY RUNNING"
+      [[ -z ${_pid6} ]] && write_green "Starting ${_nam6}" && (nohup python3 ${bok_90prime_gui}/src/${_prc6} >> ${BOK_GALIL_LOG}/${_prc6}.log 2>&1 &) && write_ok "${_nam6}" "STARTED OK" && sleep 1 || write_error "${_nam6}" "ALREADY RUNNING"
     fi
     ;;
 
@@ -149,7 +151,7 @@ case $(echo ${_command}) in
     [[ ! -z ${_pid1} ]] && write_ok "${_nam1}" "OK (${_pid1})" || write_error "${_nam1}" "NOT RUNNING"
     [[ ! -z ${_pid4} ]] && write_ok "${_nam4}" "OK (${_pid4})" || write_error "${_nam4}" "NOT RUNNING"
     [[ ! -z ${_pid5} ]] && write_ok "${_nam5}" "OK (${_pid5})" || write_error "${_nam5}" "NOT RUNNING"
-    [[ ! -z ${_pid6} ]] && write_ok "${_nam6}" "OK (http://10.30.1.2:5905)" || write_error "${_nam6}" "NOT RUNNING"
+    [[ ! -z ${_pid6} ]] && write_ok "${_nam6}" "OK (http://{WEBHOST}:{WEBPORT})" || write_error "${_nam6}" "NOT RUNNING"
     ;;
 esac
 
