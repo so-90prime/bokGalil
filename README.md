@@ -17,7 +17,8 @@ This software only supports /dev/shm shared memory under Unix.
 ## Pre-Requisite(s)
 
 ```bash
- % apt -y install libxml2-util
+ % apt -y install python3-pip
+ % apt -y install libxml2-utils
 ```
 
 ## Set Up
