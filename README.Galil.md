@@ -2,11 +2,29 @@
 
 ## Installation of Galil Software
 
-  - Add key from http://www.galil.com/sw/pub/all/crypto/GALIL-GPG-KEY-E29D0E4B.asc
+  - Ubuntu 20.04 *only*
+
+  - Add key from https://www.galil.com/sw/pub/all/crypto/GALIL-GPG-KEY-E29D0E4B.asc
+
+  ```bash
+    % curl -O https://www.galil.com/sw/pub/all/crypto/GALIL-GPG-KEY-E29D0E4B.asc
+    % sudo apt-key add GALIL-GPG-KEY-E29D0E4B.asc
+  ```
 
   - Add repository from http://www.galil.com/sw/pub/ubuntu/20.04/galil.list
 
-  - sudo apt update && sudo apt install gclib && sudo apt install gcapsd
+  ```bash
+    % curl -O https://www.galil.com/sw/pub/ubuntu/20.04/galil.list
+    % sudo mv galil.list /etc/apt/sources.list.d/
+  ```
+
+  - Update repositories and install
+
+  ```bash
+    % sudo apt update
+    % sudo apt install gclib
+    % sudo apt install gcapsd
+  ```
 
 ## Caveat(s)
 
@@ -150,6 +168,6 @@ Now, to change the instrument focus, we use the algorithm:
 
 --------------------------------------
 
-Last Modified: 20220201
+Last Modified: 20220829
 
 Last Author: Phil Daly (pndaly@arizona.edu)
