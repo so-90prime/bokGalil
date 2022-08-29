@@ -1,5 +1,13 @@
 # Galil DMC 22x0 Information
 
+## Installation of Galil Software
+
+  - Add key from http://www.galil.com/sw/pub/all/crypto/GALIL-GPG-KEY-E29D0E4B.asc
+
+  - Add repository from http://www.galil.com/sw/pub/ubuntu/20.04/galil.list
+
+  - sudo apt update && sudo apt install gclib && sudo apt install gcapsd
+
 ## Caveat(s)
 
 Information presented here was derived from perusing galil_90prime.dmc and various schematics
