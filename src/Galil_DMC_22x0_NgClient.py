@@ -1303,7 +1303,7 @@ def ngclient_check(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeout:
 if __name__ == '__main__':
 
     # get command line argument(s)
-    _p = argparse.ArgumentParser(description='Galil_DMC_22x0_TCP_Read', formatter_class=argparse.RawTextHelpFormatter)
+    _p = argparse.ArgumentParser(description='Galil_DMC_22x0_NgClient', formatter_class=argparse.RawTextHelpFormatter)
     _p.add_argument('--commands', default=False, action='store_true', help='Show supported commands')
     _p.add_argument('--host', default=f"{BOK_NG_HOST}", help="""Host [%(default)s]""")
     _p.add_argument('--port', default=BOK_NG_PORT, help="""Port [%(default)s]""")

@@ -41,6 +41,15 @@ This software only supports /dev/shm shared memory under Unix.
  % ./test_galil
 ```
 
+## Quick Test (at Bok)
+
+```bash
+ % telnet 10.30.3.31
+```
+
+then execute the `LV;` command. Data should appear. Use `ctrl-]` to escape to the telnet prompt and enter `quit`.
+
+
 ## Start, Stop, Status
 
 NB: At the Bok telescope, this code is run under either the *mtnops* or *primefocus* account after a `conda activate` !
