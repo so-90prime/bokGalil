@@ -34,14 +34,12 @@ This software only supports /dev/shm shared memory under Unix.
  % make everything
 ```
 
-## Quick Test
+## Quick Test(s) (At Bok)
 
 ```bash
  % make -f test_galil.make
- % ./test_galil
+ % ./test_galil -s0
 ```
-
-## Quick Test (at Bok)
 
 ```bash
  % telnet 10.30.3.31
