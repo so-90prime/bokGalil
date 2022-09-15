@@ -12,7 +12,7 @@ ATARGETS  = bok_read_filters bok_read_guider_filters bok_read_instrument_filters
 DTARGETS  = bokGalilIndiDriver
 STARGETS  = Galil_DMC_22x0_NgClient Galil_DMC_22x0_NgServer
 TTARGETS  = Galil_DMC_22x0_TCP_Write Galil_DMC_22x0_TCP_Read
-UTARGETS  = Galil_DMC_22x0_UDP_Write Galil_DMC_22x0_UDP_Read
+UTARGETS  = Galil_DMC_22x0_UDP_Write Galil_DMC_22x0_UDP_Read Galil_DMC_22x0_Write_Memory
 LIBRARIES = libbokGalil.so libbokGalil.a
 
 HERE     := $(shell pwd)

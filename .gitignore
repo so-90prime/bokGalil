@@ -63,6 +63,7 @@ bin/Galil_DMC_22x0_TCP_Write
 bin/Galil_DMC_22x0_UDP_Read
 bin/Galil_DMC_22x0_UDP_Read.py
 bin/Galil_DMC_22x0_UDP_Write
+bin/Galil_DMC_22x0_Write_Memory
 src/bokGalilIndiDriver
 src/bok_read_filters
 src/bok_read_guider_filters
