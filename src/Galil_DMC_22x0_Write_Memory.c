@@ -18,6 +18,7 @@
 #define _HELP_ "Command(s) for the Galil_DMC_22x0 via gclib"
 #define _NAME_ "Galil_DMC_22x0_Write_Memory"
 
+
 /*******************************************************************************
  * signal(s)
  ******************************************************************************/
@@ -48,9 +49,14 @@ int msleep(long msec) {
 
 
 /*******************************************************************************
- * tcp command(s)
+ * mem command(s)
  ******************************************************************************/
-const tcp_cmd_t MemCmnds[] = {
+typedef struct mem_command_type {
+  char name[BOK_STR_64];
+  char help[BOK_STR_128];
+} mem_cmd_t, *mem_cmd_p, **mem_cmd_s;
+
+const mem_cmd_t MemCmnds[] = {
   {"FILTVALS[0]=?;",     "filter number in slot 0",            },
   {"FILTVALS[1]=?;",     "filter number in slot 1",            },
   {"FILTVALS[2]=?;",     "filter number in slot 2",            },
@@ -62,7 +68,7 @@ const tcp_cmd_t MemCmnds[] = {
   {"TP;",                "tell (motor) position",              },
   {"QR;",                "tell (data) record",                 }
 };
-#define MEM_CMD_NELMS (sizeof(MemCmnds)/sizeof(tcp_cmd_t))
+#define MEM_CMD_NELMS (sizeof(MemCmnds)/sizeof(mem_cmd_t))
 
 
 /*******************************************************************************
@@ -72,7 +78,7 @@ int main( int argc, char *argv[] ) {
 
   /* declare some variables and initialize them */
   bool simulate = false;
-  char buffer[BOK_STR_1024] = {'\0'};
+  char buffer[BOK_STR_2048] = {'\0'};
   char command[BOK_STR_64] = {'\0'};
   char lv_name[BOK_STR_64] = {'\0'};
   char *ep = (char *)NULL;
@@ -233,6 +239,12 @@ int main( int argc, char *argv[] ) {
         if ((gstat=GCommand(gfd, pr, buffer, sizeof(buffer), 0)) != G_NO_ERROR) {
 
           /* report error */
+          replace_word(buffer, sizeof(buffer), "\n", " ");
+          replace_word(buffer, sizeof(buffer), "\r", " ");
+          replace_word(buffer, sizeof(buffer), ":", "");
+          (void) fprintf(stderr, "%s <ERROR> failed executing '%s', gstat=%d\n", _NAME_, pr, gstat);
+          (void) fflush(stderr);
+
           tcp_val.gstatus += gstat;
           (void) memset(buffer, '\0', sizeof(buffer));
           if ((gstat=GCommand(gfd, "TC 1;", buffer, sizeof(buffer), 0)) == G_NO_ERROR) {
@@ -242,53 +254,86 @@ int main( int argc, char *argv[] ) {
             (void) fflush(stderr);
           } else {
             tcp_val.gstatus += gstat;
-            (void) fprintf(stderr, "%s <ERROR> failed executing 'TC 1;', estring='', gstat=%d\n", _NAME_, gstat);
+            (void) fprintf(stderr, "%s <ERROR> failed executing 'TC 1;', gstat=%d\n", _NAME_, gstat);
             (void) fflush(stderr);
           }
 
         /* command executed ok */
         } else {
 
-          /* clean up the response */
-          tcp_val.gstatus += gstat;
-          chomp(buffer, "\n");
-          chomp(buffer, "\n");
-          // replace_word(buffer, sizeof(buffer), "\n", " ");
-          // replace_word(buffer, sizeof(buffer), "\r", " ");
-          // replace_word(buffer, sizeof(buffer), ":", "");
-
           /* check status */
           if (strncasecmp(buffer, "?", 1)==0 || strlen(buffer)<=1) {
             (void) fprintf(stderr, "%s <INFO> command '%s' rejected, gstat=%d\n", _NAME_, pr, gstat);
             (void) fflush(stderr);
+
           } else {
 
             /* {"FILTVALS[0]=?;",     "filter number in slot 0",            }, */
             if (strncasecmp(pr, "FILTVALS[0]=?;", strlen("FILTVALS[0]=?;")) == 0) {
+	      tcp_val.gstatus += gstat;
+              replace_word(buffer, sizeof(buffer), "\n", " ");
+              replace_word(buffer, sizeof(buffer), "\r", " ");
+              replace_word(buffer, sizeof(buffer), ":", "");
               decode_float(buffer, &tcp_val.filtvals[0]);
+              (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, buffer, tcp_val.filtvals[0], gstat);
+              (void) fflush(stdout);
 
             /* {"FILTVALS[1]=?;",     "filter number in slot 1",            }, */
             } else if (strncasecmp(pr, "FILTVALS[1]=?;", strlen("FILTVALS[1]=?;")) == 0) {
+	      tcp_val.gstatus += gstat;
+              replace_word(buffer, sizeof(buffer), "\n", " ");
+              replace_word(buffer, sizeof(buffer), "\r", " ");
+              replace_word(buffer, sizeof(buffer), ":", "");
               decode_float(buffer, &tcp_val.filtvals[1]);
+              (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, buffer, tcp_val.filtvals[1], gstat);
+              (void) fflush(stdout);
 
             /* {"FILTVALS[2]=?;",     "filter number in slot 2",            }, */
             } else if (strncasecmp(pr, "FILTVALS[2]=?;", strlen("FILTVALS[2]=?;")) == 0) {
+	      tcp_val.gstatus += gstat;
+              replace_word(buffer, sizeof(buffer), "\n", " ");
+              replace_word(buffer, sizeof(buffer), "\r", " ");
+              replace_word(buffer, sizeof(buffer), ":", "");
               decode_float(buffer, &tcp_val.filtvals[2]);
+              (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, buffer, tcp_val.filtvals[2], gstat);
+              (void) fflush(stdout);
 
             /* {"FILTVALS[3]=?;",     "filter number in slot 3",            }, */
             } else if (strncasecmp(pr, "FILTVALS[3]=?;", strlen("FILTVALS[3]=?;")) == 0) {
+	      tcp_val.gstatus += gstat;
+              replace_word(buffer, sizeof(buffer), "\n", " ");
+              replace_word(buffer, sizeof(buffer), "\r", " ");
+              replace_word(buffer, sizeof(buffer), ":", "");
               decode_float(buffer, &tcp_val.filtvals[3]);
+              (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, buffer, tcp_val.filtvals[3], gstat);
+              (void) fflush(stdout);
 
             /* {"FILTVALS[4]=?;",     "filter number in slot 4",            }, */
             } else if (strncasecmp(pr, "FILTVALS[4]=?;", strlen("FILTVALS[4]=?;")) == 0) {
+	      tcp_val.gstatus += gstat;
+              replace_word(buffer, sizeof(buffer), "\n", " ");
+              replace_word(buffer, sizeof(buffer), "\r", " ");
+              replace_word(buffer, sizeof(buffer), ":", "");
               decode_float(buffer, &tcp_val.filtvals[4]);
+              (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, buffer, tcp_val.filtvals[4], gstat);
+              (void) fflush(stdout);
 
             /* {"FILTVALS[5]=?;",     "filter number in slot 5",            }, */
             } else if (strncasecmp(pr, "FILTVALS[5]=?;", strlen("FILTVALS[5]=?;")) == 0) {
+	      tcp_val.gstatus += gstat;
+              replace_word(buffer, sizeof(buffer), "\n", " ");
+              replace_word(buffer, sizeof(buffer), "\r", " ");
+              replace_word(buffer, sizeof(buffer), ":", "");
               decode_float(buffer, &tcp_val.filtvals[5]);
+              (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, buffer, tcp_val.filtvals[5], gstat);
+              (void) fflush(stdout);
 
             /* {"LV;",                "list variable",                      }, */
             } else if (strncasecmp(pr, "LV;", strlen("LV;")) == 0) {
+	      tcp_val.gstatus += gstat;
+              replace_word(buffer, sizeof(buffer), "\n", " ");
+              replace_word(buffer, sizeof(buffer), "\r", " ");
+              replace_word(buffer, sizeof(buffer), ":", "");
               replace_word(buffer, sizeof(buffer), "  ", "\\");
               tok = strtok(buffer, "\\");
               while (tok != (char *)NULL) {
@@ -301,132 +346,261 @@ int main( int argc, char *argv[] ) {
                   (void) memmove(lv_name, tok, strlen(tok));
                   if (strncasecmp(lv_name, "DISTA=", strlen("DISTA=")) == 0) {
                     tcp_val.lv.dista = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.dista, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "DISTALL=", strlen("DISTALL=")) == 0) {
                     tcp_val.lv.distall = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.distall, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "DISTB=", strlen("DISTB=")) == 0) {
                     tcp_val.lv.distb = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.distb, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "DISTC=", strlen("DISTC=")) == 0) {
                     tcp_val.lv.distc = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.distc, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "DISTGCAM=", strlen("DISTGCAM=")) == 0) {
                     tcp_val.lv.distgcam = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.distgcam, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "ERRFILT=", strlen("ERRFILT=")) == 0) {
                     tcp_val.lv.errfilt = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.errfilt, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "FILTBIT1=", strlen("FILTBIT1=")) == 0) {
                     tcp_val.lv.filtbit1 = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.filtbit1, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "FILTBIT2=", strlen("FILTBIT2=")) == 0) {
                     tcp_val.lv.filtbit2 = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.filtbit2, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "FILTBIT3=", strlen("FILTBIT3=")) == 0) {
                     tcp_val.lv.filtbit3 = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.filtbit3, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "FILTBIT4=", strlen("FILTBIT4=")) == 0) {
                     tcp_val.lv.filtbit4 = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.filtbit4, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "FILTBIT5=", strlen("FILTBIT5=")) == 0) {
                     tcp_val.lv.filtbit5 = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.filtbit5, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "FILTBIT6=", strlen("FILTBIT6=")) == 0) {
                     tcp_val.lv.filtbit6 = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.filtbit6, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "FILTBIT7=", strlen("FILTBIT7=")) == 0) {
                     tcp_val.lv.filtbit7 = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.filtbit7, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "FILTBIT8=", strlen("FILTBIT8=")) == 0) {
                     tcp_val.lv.filtbit8 = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.filtbit8, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "FILTHIGH=", strlen("FILTHIGH=")) == 0) {
                     tcp_val.lv.filthigh = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.filthigh, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "FILTISIN=", strlen("FILTISIN=")) == 0) {
                     tcp_val.lv.filtisin = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.filtisin, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "FILTLOW=", strlen("FILTLOW=")) == 0) {
                     tcp_val.lv.filtlow = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.filtlow, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "FILTNUM=", strlen("FILTNUM=")) == 0) {
                     tcp_val.lv.filtnum = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.filtnum, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "FILTRAC=", strlen("FILTRAC=")) == 0) {
                     tcp_val.lv.filtrac = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.filtrac, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "FILTRBL=", strlen("FILTRBL=")) == 0) {
                     tcp_val.lv.filtrbl = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.filtrbl, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "FILTRDC=", strlen("FILTRDC=")) == 0) {
                     tcp_val.lv.filtrdc = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.filtrdc, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "FILTRFL=", strlen("FILTRFL=")) == 0) {
                     tcp_val.lv.filtrfl = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.filtrfl, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "FILTRSP=", strlen("FILTRSP=")) == 0) {
                     tcp_val.lv.filtrsp = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.filtrsp, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "FILTTAC=", strlen("FILTTAC=")) == 0) {
                     tcp_val.lv.filttac = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.filttac, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "FILTTDC=", strlen("FILTTDC=")) == 0) {
                     tcp_val.lv.filttdc = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.filttdc, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "FILTTDIS=", strlen("FILTTDIS=")) == 0) {
                     tcp_val.lv.filttdis = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.filttdis, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "FILTTNUD=", strlen("FILTTNUD=")) == 0) {
                     tcp_val.lv.filttnud = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.filttnud, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "FILTTSC=", strlen("FILTTSC=")) == 0) {
                     tcp_val.lv.filttsc = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.filttsc, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "FILTTSP=", strlen("FILTTSP=")) == 0) {
                     tcp_val.lv.filttsp = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.filttsp, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "FILTVAL=", strlen("FILTVAL=")) == 0) {
                     tcp_val.lv.filtval = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.filtval, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "FNUM=", strlen("FNUM=")) == 0) {
                     tcp_val.lv.fnum = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.fnum, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "FNUM_IN=", strlen("FNUM_IN=")) == 0) {
                     tcp_val.lv.fnum_in = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.fnum_in, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "FOCAC=", strlen("FOCAC=")) == 0) {
                     tcp_val.lv.focac = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.focac, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "FOCBL=", strlen("FOCBL=")) == 0) {
                     tcp_val.lv.focbl = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.focbl, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "FOCDC=", strlen("FOCDC=")) == 0) {
                     tcp_val.lv.focdc = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.focdc, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "FOCFL=", strlen("FOCFL=")) == 0) {
                     tcp_val.lv.focfl = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.focfl, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "FOCREFA=", strlen("FOCREFA=")) == 0) {
                     tcp_val.lv.focrefa = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.focrefa, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "FOCREFB=", strlen("FOCREFB=")) == 0) {
                     tcp_val.lv.focrefb = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.focrefb, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "FOCREFC=", strlen("FOCREFC=")) == 0) {
                     tcp_val.lv.focrefc = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.focrefc, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "FOCRFSET=", strlen("FOCRFSET=")) == 0) {
                     tcp_val.lv.focrfset = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.focrfset, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "FOCSP=", strlen("FOCSP=")) == 0) {
                     tcp_val.lv.focsp = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.focsp, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "GFAC=", strlen("GFAC=")) == 0) {
                     tcp_val.lv.gfac = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.gfac, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "GFCENT=", strlen("GFCENT=")) == 0) {
                     tcp_val.lv.gfcent = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.gfcent, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "GFDC=", strlen("GFDC=")) == 0) {
                     tcp_val.lv.gfdc = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.gfdc, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "GFILTAC=", strlen("GFILTAC=")) == 0) {
                     tcp_val.lv.gfiltac = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.gfiltac, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "GFILTDC=", strlen("GFILTDC=")) == 0) {
                     tcp_val.lv.gfiltdc = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.gfiltdc, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "GFILTN=", strlen("GFILTN=")) == 0) {
                     tcp_val.lv.gfiltn = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.gfiltn, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "GFILTQ=", strlen("GFILTQ=")) == 0) {
                     tcp_val.lv.gfiltq = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.gfiltq, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "GFILTREQ=", strlen("GFILTREQ=")) == 0) {
                     tcp_val.lv.gfiltreq = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.gfiltreq, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "GFILTSP=", strlen("GFILTSP=")) == 0) {
                     tcp_val.lv.gfiltsp = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.gfiltsp, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "GFSP=", strlen("GFSP=")) == 0) {
                     tcp_val.lv.gfsp = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.gfsp, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "GIFLTN=", strlen("GIFLTN=")) == 0) {
                     tcp_val.lv.gifltn = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.gfiltn, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "INITFILT=", strlen("INITFILT=")) == 0) {
                     tcp_val.lv.initfilt = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.initfilt, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "NMOVES=", strlen("NMOVES=")) == 0) {
                     tcp_val.lv.nmoves = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.nmoves, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "NROT=", strlen("NROT=")) == 0) {
                     tcp_val.lv.nrot = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.nrot, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "REQFILT=", strlen("REQFILT=")) == 0) {
                     tcp_val.lv.reqfilt = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.reqfilt, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "SNUM=", strlen("SNUM=")) == 0) {
                     tcp_val.lv.snum = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.snum
+				    , gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "SNUM_IN=", strlen("SNUM_IN=")) == 0) {
                     tcp_val.lv.snum_in = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.snum_in, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "TOTFOCA=", strlen("TOTFOCA=")) == 0) {
                     tcp_val.lv.totfoca = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.totfoca, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "TOTFOCB=", strlen("TOTFOCB=")) == 0) {
                     tcp_val.lv.totfocb = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.totfocb, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "TOTFOCC=", strlen("TOTFOCC=")) == 0) {
                     tcp_val.lv.totfocc = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.totfocc, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "VECAC=", strlen("VECAC=")) == 0) {
                     tcp_val.lv.vecac = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.vecac, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "VECDC=", strlen("VECDC=")) == 0) {
                     tcp_val.lv.vecdc = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.vecdc, gstat);
+                    (void) fflush(stdout);
                   } else if (strncasecmp(lv_name, "VECSP=", strlen("VECSP=")) == 0) {
                     tcp_val.lv.vecsp = fval;
+                    (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%.2f, gstat=%d\n", _NAME_, pr, lv_name, tcp_val.lv.vecsp, gstat);
+                    (void) fflush(stdout);
                   }
                 }
                 tok = strtok(NULL, "\\");
@@ -434,14 +608,29 @@ int main( int argc, char *argv[] ) {
 
             /*   {"TB;",                "tell status byte",                   }, */
             } else if (strncasecmp(pr, "TB;", strlen("TB;")) == 0) {
+	      tcp_val.gstatus += gstat;
+              replace_word(buffer, sizeof(buffer), "\n", " ");
+              replace_word(buffer, sizeof(buffer), "\r", " ");
+              replace_word(buffer, sizeof(buffer), ":", "");
               decode_integer(buffer, &tcp_val.status);
+              (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', value=%d, gstat=%d\n", _NAME_, pr, buffer, tcp_val.status, gstat);
+              (void) fflush(stdout);
 
             /*   {"TP;",                "tell (motor) position",              }, */
             } else if (strncasecmp(pr, "TP;", strlen("TP;")) == 0) {
+	      tcp_val.gstatus += gstat;
+              replace_word(buffer, sizeof(buffer), "\n", " ");
+              replace_word(buffer, sizeof(buffer), "\r", " ");
+              replace_word(buffer, sizeof(buffer), ":", "");
               decode_fvals(buffer, tcp_val.position, BOK_AXES, ',');
+              (void) fprintf(stdout, "%s <INFO> executed '%s', buffer='%s', gstat=%d\n", _NAME_, pr, buffer, gstat);
+              (void) fflush(stdout);
 
             /* {"QR;",                "tell data record",                   } */
             } else if (strncasecmp(pr, "QR;", strlen("QR;")) == 0) {
+              tcp_val.gstatus += gstat;
+              chomp(buffer, "\n");
+              chomp(buffer, "\n");
               (void) memmove((void *)&qr, buffer, sizeof(qr));
               /* header */
               udp_val.aaxis_enabled = (IS_BIT_SET(qr.header.header.uc[0], 0) ? 1 : 0);
@@ -738,28 +927,23 @@ int main( int argc, char *argv[] ) {
               udp_val.c_position = (float)qr.faxis.analog.s * BOK_LVDT_STEPS;
             } else {
               (void) fprintf(stdout, "%s '%s' returns '%s'\n", _NAME_, pr, buffer);
+              (void) fflush(stdout);
             }
-            (void) fflush(stdout);
           }
         }
       }
     }
 
-    /* move record to UDP shared memory */
+    /* move record to UDP shared memory and dump */
     (void) memmove(udp_shm_p, &udp_val, UDP_VAL_SIZE);
-
-    /* dump shared memory */
     dump_udp_structure(udp_shm_p);
 
-    /* move record to TCP shared memory */
+    /* move record to TCP shared memory and dump */
     (void) memmove(tcp_shm_p, &tcp_val, TCP_VAL_SIZE);
-
-    /* dump shared memory */
     dump_tcp_structure(tcp_shm_p);
 
     /* delay */
     (void) msleep(delay);
-
   }
 
   /* close device */
