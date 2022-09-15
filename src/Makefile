@@ -92,6 +92,8 @@ clean:
 	rm -f $(BOK_BIN)/Galil_DMC_22x0_TCP_Read.py >> /dev/null 2>&1
 	rm -f $(BOK_BIN)/Galil_DMC_22x0_UDP_Read.py >> /dev/null 2>&1
 	rm -rf /dev/shm/tcp_shm /dev/shm/udp_shm >> /dev/null 2>&1
+	rm -f $(HERE)/__hosts__.py >> /dev/null 2>&1
+	sed 's?\#define ??g' __hosts__.h | awk '{gsub(/[ ]+/," = ")}1' >> __hosts__.py
 
 everything:
 	make clean

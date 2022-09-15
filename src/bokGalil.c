@@ -8,6 +8,7 @@
 /*******************************************************************************
  * include(s)
  ******************************************************************************/
+#include "__hosts__.h"
 #include "bokGalil.h"
 
 
@@ -1163,11 +1164,14 @@ GReturn xq(char *cmd) {
   GCon gfd = (GCon)0;
   GReturn gstat = (GReturn)0;
   GReturn gerror = (GReturn)0;
+  char cmnd[BOK_STR_64] = {'\0'};
   char resp[BOK_STR_2048] = {'\0'};
   (void) memset((void *)resp, 0, sizeof(resp));
+  (void) memset((void *)cmnd, 0, sizeof(cmnd));
 
   /* execute command */
-  if ((gstat=GOpen(BOK_GALIL_CMD_BOK, &gfd)) == G_NO_ERROR) {
+  (void) sprintf(cmnd, "%s --command TCP", BOK_GALIL_CMD_BOK);
+  if ((gstat=GOpen(cmnd, &gfd)) == G_NO_ERROR) {
     if ((gstat=GCommand(gfd, cmd, resp, sizeof(resp), 0)) == G_NO_ERROR) {
       (void) fprintf(stdout, "Executed '%s' OK, gstat=%d, response='%s'\n", cmd, gstat, resp); (void) fflush(stdout);
     } else {

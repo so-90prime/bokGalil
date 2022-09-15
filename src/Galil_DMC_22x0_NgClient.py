@@ -8,6 +8,7 @@
 from astropy.time import Time
 from datetime import datetime
 from datetime import timedelta
+from src.__hosts__ import *
 
 import argparse
 import math
@@ -28,10 +29,8 @@ __doc__ = """ python3 Galil_DMC_22x0_NgClient.py --help """
 BOK_NG_HELP = os.path.abspath(os.path.expanduser(os.path.join(os.getenv("BOK_GALIL_DOCS", os.getcwd()), 'bok_ng_commands.txt')))
 BOK_NG_FALSE = [0, '0', 'false', False]
 BOK_NG_GFILTER_SLOTS = [1, 2, 3, 4, 5, 6]
-BOK_NG_HOST = "10.30.1.2"
 BOK_NG_IFILTER_SLOTS = [0, 1, 2, 3, 4, 5]
 BOK_NG_INSTRUMENT = "90PRIME"
-BOK_NG_PORT = 5750
 BOK_NG_STRING = 1024
 BOK_NG_TELESCOPE = "BOK"
 BOK_NG_TIMEOUT = 120.0

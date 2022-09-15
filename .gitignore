@@ -55,6 +55,7 @@ bin/bok_read_instrument_filters
 bin/bok_read_nominal_plane
 bin/Galil_DMC_22x0_CLI
 bin/Galil_DMC_22x0_NgClient
+bin/Galil_DMC_22x0_NgClient.py
 bin/Galil_DMC_22x0_NgServer
 bin/Galil_DMC_22x0_TCP_Read
 bin/Galil_DMC_22x0_TCP_Read.py
@@ -76,6 +77,8 @@ src/Galil_DMC_22x0_UDP_Read
 src/Galil_DMC_22x0_UDP_Write
 src/libbokGalil.a
 src/libbokGalil.so
+src/__hosts__.h
+src/__hosts__.py
 lib/libbokGalil.a
 lib/libbokGalil.so
 

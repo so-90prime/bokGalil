@@ -82,18 +82,20 @@ int main( int argc, char *argv[] ) {
   /* open the ip_addr */
   gstat = G_NO_ERROR;
   if (bok > 0) {
-    (void) fprintf(stdout, "%s <%s> executing '%s', gstat=%d, gfd=%p\n", _NAME_, (simulate == true ? "SIM" : "OK"), BOK_GALIL_CMD_BOK, gstat, gfd);
+    (void) sprintf(command, "%s --command TCP", BOK_GALIL_CMD_BOK);
+    (void) fprintf(stdout, "%s <%s> executing '%s', gstat=%d, gfd=%p\n", _NAME_, (simulate == true ? "SIM" : "OK"), command, gstat, gfd);
     (void) fflush(stdout);
-    if ((gstat=GOpen(BOK_GALIL_CMD_BOK, &gfd)) != G_NO_ERROR) { simulate = true; }
-    (void) printf("GOpen('%s') called, gstat=%d, gfd=%ld\n", BOK_GALIL_CMD_BOK, (int)gstat, (long)gfd);
-    (void) fprintf(stdout, "%s <%s> executed '%s', gstat=%d, gfd=%p\n", _NAME_, (simulate == true ? "SIM" : "OK"), BOK_GALIL_CMD_BOK, gstat, gfd);
+    if ((gstat=GOpen(command, &gfd)) != G_NO_ERROR) { simulate = true; }
+    (void) printf("GOpen('%s') called, gstat=%d, gfd=%ld\n", command, (int)gstat, (long)gfd);
+    (void) fprintf(stdout, "%s <%s> executed '%s', gstat=%d, gfd=%p\n", _NAME_, (simulate == true ? "SIM" : "OK"), command, gstat, gfd);
     (void) fflush(stdout);
   } else {
-    (void) fprintf(stdout, "%s <%s> executing '%s', gstat=%d, gfd=%p\n", _NAME_, (simulate == true ? "SIM" : "OK"), BOK_GALIL_CMD_LAB, gstat, gfd);
+    (void) sprintf(command, "%s --command TCP", BOK_GALIL_CMD_LAB);
+    (void) fprintf(stdout, "%s <%s> executing '%s', gstat=%d, gfd=%p\n", _NAME_, (simulate == true ? "SIM" : "OK"), command, gstat, gfd);
     (void) fflush(stdout);
-    if ((gstat=GOpen(BOK_GALIL_CMD_LAB, &gfd)) != G_NO_ERROR) { simulate = true; }
-    (void) printf("GOpen('%s') called, gstat=%d, gfd=%ld\n", BOK_GALIL_CMD_LAB, (int)gstat, (long)gfd);
-    (void) fprintf(stdout, "%s <%s> executed '%s', gstat=%d, gfd=%p\n", _NAME_, (simulate == true ? "SIM" : "OK"), BOK_GALIL_CMD_LAB, gstat, gfd);
+    if ((gstat=GOpen(command, &gfd)) != G_NO_ERROR) { simulate = true; }
+    (void) printf("GOpen('%s') called, gstat=%d, gfd=%ld\n", command, (int)gstat, (long)gfd);
+    (void) fprintf(stdout, "%s <%s> executed '%s', gstat=%d, gfd=%p\n", _NAME_, (simulate == true ? "SIM" : "OK"), command, gstat, gfd);
     (void) fflush(stdout);
   }
 

@@ -8,6 +8,7 @@
 /*******************************************************************************
  * include(s)
  ******************************************************************************/
+#include "__hosts__.h"
 #include "bokGalil.h"
 
 #include <arpa/inet.h>
@@ -38,6 +39,7 @@ int main( int argc, char *argv[] ) {
   /* declare some variables and initialize them */
   bool simulate = false;
   char buffer[BOK_STR_2048] = {'\0'};
+  char cmnd[BOK_STR_64] = {'\0'};
   GCon gfd = G_NO_ERROR;
   GReturn gstat = G_NO_ERROR;
   int bok = 1;
@@ -59,6 +61,7 @@ int main( int argc, char *argv[] ) {
   udp_val_t udp_val;
 
   sin_len = sizeof(sin);
+  (void) memset(&cmnd, 0, sizeof(cmnd));
   (void) memset(&qr, 0, sizeof(qr));
   (void) memset(&sin, 0, sizeof(sin));
   (void) memset(&udp_val, 0, sizeof(udp_val));
@@ -118,18 +121,20 @@ int main( int argc, char *argv[] ) {
   gstat = G_NO_ERROR;
   if ( ! simulate ) {
     if (bok > 0) {
-      (void) fprintf(stdout, "%s <%s> executing '%s', gstat=%d, gfd=%p\n", _NAME_, (simulate == true ? "SIM" : "OK"), BOK_GALIL_CMD_BOK, gstat, gfd);
+      (void) sprintf(cmnd, "%s --command TCP", BOK_GALIL_CMD_BOK);
+      (void) fprintf(stdout, "%s <%s> executing '%s', gstat=%d, gfd=%p\n", _NAME_, (simulate == true ? "SIM" : "OK"), cmnd, gstat, gfd);
       (void) fflush(stdout);
-      if ((gstat=GOpen(BOK_GALIL_CMD_BOK, &gfd)) != G_NO_ERROR) { simulate = true; }
-      (void) printf("GOpen('%s') called, gstat=%d, gfd=%ld\n", BOK_GALIL_CMD_BOK, (int)gstat, (long)gfd);
-      (void) fprintf(stdout, "%s <%s> executed '%s', gstat=%d, gfd=%p\n", _NAME_, (simulate == true ? "SIM" : "OK"), BOK_GALIL_CMD_BOK, gstat, gfd);
+      if ((gstat=GOpen(cmnd, &gfd)) != G_NO_ERROR) { simulate = true; }
+      (void) printf("GOpen('%s') called, gstat=%d, gfd=%ld\n", cmnd, (int)gstat, (long)gfd);
+      (void) fprintf(stdout, "%s <%s> executed '%s', gstat=%d, gfd=%p\n", _NAME_, (simulate == true ? "SIM" : "OK"), cmnd, gstat, gfd);
       (void) fflush(stdout);
     } else {
-      (void) fprintf(stdout, "%s <%s> executing '%s', gstat=%d, gfd=%p\n", _NAME_, (simulate == true ? "SIM" : "OK"), BOK_GALIL_CMD_LAB, gstat, gfd);
+      (void) sprintf(cmnd, "%s --command TCP", BOK_GALIL_CMD_LAB);
+      (void) fprintf(stdout, "%s <%s> executing '%s', gstat=%d, gfd=%p\n", _NAME_, (simulate == true ? "SIM" : "OK"), cmnd, gstat, gfd);
       (void) fflush(stdout);
-      if ((gstat=GOpen(BOK_GALIL_CMD_LAB, &gfd)) != G_NO_ERROR) { simulate = true; }
-      (void) printf("GOpen('%s') called, gstat=%d, gfd=%ld\n", BOK_GALIL_CMD_LAB, (int)gstat, (long)gfd);
-      (void) fprintf(stdout, "%s <%s> executed '%s', gstat=%d, gfd=%p\n", _NAME_, (simulate == true ? "SIM" : "OK"), BOK_GALIL_CMD_LAB, gstat, gfd);
+      if ((gstat=GOpen(cmnd, &gfd)) != G_NO_ERROR) { simulate = true; }
+      (void) printf("GOpen('%s') called, gstat=%d, gfd=%ld\n", cmnd, (int)gstat, (long)gfd);
+      (void) fprintf(stdout, "%s <%s> executed '%s', gstat=%d, gfd=%p\n", _NAME_, (simulate == true ? "SIM" : "OK"), cmnd, gstat, gfd);
       (void) fflush(stdout);
     }
   }

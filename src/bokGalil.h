@@ -34,7 +34,6 @@
 #define _AUTHOR_             "P. N. Daly"
 #define _DATE_               "26-January-2022"
 #define _EMAIL_              "pndaly@arizona.edu"
-#define _GALIL_              "192.168.0.100"
 #define _VERSION_            "1.1.0"
 
 #define BOK_AXES             8
@@ -43,8 +42,6 @@
 #define BOK_IFILTER_FILE     "bok_ifilters.txt"
 #define BOK_IFILTER_COLUMNS  3
 #define BOK_IFILTER_SLOTS    256
-#define BOK_GALIL_CMD_BOK    "10.30.3.31 --command TCP"
-#define BOK_GALIL_CMD_LAB    "192.168.0.100 --command TCP"
 #define BOK_GFILTERS         6
 #define BOK_GFILTER_FILE     "bok_gfilters.txt"
 #define BOK_GFILTER_COLUMNS  3
@@ -54,8 +51,6 @@
 #define BOK_SFILTER_COLUMNS  3
 #define BOK_SFILTER_SLOTS    7
 #define BOK_IAXIS_INPUTS     10
-#define BOK_NG_HOST          "10.30.1.2"
-#define BOK_NG_PORT          5750
 #define BOK_NG_TELESCOPE     "BOK"
 #define BOK_NG_INSTRUMENT    "90PRIME"
 #define BOK_NG_COMMAND       "COMMAND"
@@ -80,15 +75,11 @@
 #define BOK_STR_512          512
 #define BOK_STR_1024         1024
 #define BOK_STR_2048         2048
-#define BOK_TCP_ADDR         "10.30.3.31"
-#define BOK_TCP_PORT         23
 #define BOK_TCP_DELAY_MS     500
 #define BOK_TIME_STAMP       26
 #define BOK_UDP_DELAY_MS     500
-#define BOK_UDP_ADDR         "10.30.1.2"
 #define BOK_UDP_FAUCET_ON    "DR0;IHE=>-3;IHE=192,168,0,1<5078>1;DR1000,4;"
 #define BOK_UDP_FAUCET_OFF   "DR0;IHE=>-3;"
-#define BOK_UDP_PORT         5078
 #define BOK_MAX_LVDT_DIFF     200.0
 #define BOK_MAX_LVDT         2500.0
 #define BOK_MIN_LVDT         -150.0
