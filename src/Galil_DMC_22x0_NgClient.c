@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
   (void) memset(&server_addr, '\0', sizeof(server_addr));
   server_addr.sin_family = AF_INET;
   server_addr.sin_port = htons(BOK_NG_PORT);
-  server_addr.sin_addr.s_addr = inet_addr(BOK_NG_HOST);
+  server_addr.sin_addr.s_addr = inet_addr(BOK_NG_ADDR);
 
   /* connect the client socket to server socket */
   if ((connection_fd=connect(socket_fd, (struct sockaddr *)&server_addr, sizeof(server_addr))) < 0) {

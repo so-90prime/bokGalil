@@ -113,7 +113,7 @@ class NgClient(object):
     # +
     # method: __init__()
     # -
-    def __init__(self, host: str = BOK_NG_HOST, port: int = BOK_NG_PORT,
+    def __init__(self, host: str = BOK_NG_ADDR, port: int = BOK_NG_PORT,
                  timeout: float = BOK_NG_TIMEOUT, simulate: bool = False, verbose: bool = False) -> None:
 
         # get input(s)
@@ -164,8 +164,8 @@ class NgClient(object):
         return self.__host
 
     @host.setter
-    def host(self, host: str = BOK_NG_HOST) -> None:
-        self.__host = host if host.strip() != '' else BOK_NG_HOST
+    def host(self, host: str = BOK_NG_ADDR) -> None:
+        self.__host = host if host.strip() != '' else BOK_NG_ADDR
 
     @property
     def port(self):
@@ -953,8 +953,8 @@ class NgClient(object):
 # +
 # function: ngclient_check()
 # -
-def ngclient_check(_host: str = BOK_NG_HOST, _port: int = BOK_NG_PORT, _timeout: float = BOK_NG_TIMEOUT, 
-                  _simulate: bool = False, _verbose: bool = False) -> None:
+def ngclient_check(_host: str = BOK_NG_ADDR, _port: int = BOK_NG_PORT, _timeout: float = BOK_NG_TIMEOUT,
+                   _simulate: bool = False, _verbose: bool = False) -> None:
 
     # exercise command(s) and request(s)
     _client = None
@@ -1304,7 +1304,7 @@ if __name__ == '__main__':
     # get command line argument(s)
     _p = argparse.ArgumentParser(description='Galil_DMC_22x0_NgClient', formatter_class=argparse.RawTextHelpFormatter)
     _p.add_argument('--commands', default=False, action='store_true', help='Show supported commands')
-    _p.add_argument('--host', default=f"{BOK_NG_HOST}", help="""Host [%(default)s]""")
+    _p.add_argument('--host', default=f"{BOK_NG_ADDR}", help="""Host [%(default)s]""")
     _p.add_argument('--port', default=BOK_NG_PORT, help="""Port [%(default)s]""")
     _p.add_argument('--timeout', default=BOK_NG_TIMEOUT, help="""Timeout (s) [%(default)s]""")
     _p.add_argument('--simulate', default=False, action='store_true', help='Simulate')
