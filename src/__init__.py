@@ -332,7 +332,7 @@ def is_bitn_set(data: int = 0, bit: int = 0) -> bool:
 # noinspection PyBroadException
 def isot_to_jd(isot: str = '') -> float:
     """ returns jd from isot date string or nan """
-    try:ß
+    try:
         return Time(isot).jd if (re.match(ISO_PATTERN_C, isot) is not None) else math.nan
     except:
         return math.nan
