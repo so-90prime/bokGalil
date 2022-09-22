@@ -235,7 +235,7 @@ def bok_print(msg: str = '', color: str = 'black', height: int = 1) -> None:
 # +
 # function: clear_bitn()
 # -
-def clear_bitn(data: int = 0 , bit: int = 0) -> int:
+def clear_bitn(data: int = 0, bit: int = 0) -> int:
     """ returns data with bit n cleared """
     return data & ~(1 << bit)
 
@@ -308,7 +308,7 @@ def get_isot(day_offset: int = 0, utc: bool = False) -> str:
 # -
 # noinspection PyBroadException
 def get_jd(day_offset: int = 0, utc: bool = False) -> float:
-    """ return date in jd format for any day_offset offset or math.nan """
+    """ return date in jd format for any day_offset offset or nan """
     if not isinstance(day_offset, int) or not isinstance(utc, bool):
         return math.nan
     try:
@@ -331,8 +331,8 @@ def is_bitn_set(data: int = 0, bit: int = 0) -> bool:
 # -
 # noinspection PyBroadException
 def isot_to_jd(isot: str = '') -> float:
-    """ returns jd from isot date string or math.nan """
-    try:
+    """ returns jd from isot date string or nan """
+    try:ß
         return Time(isot).jd if (re.match(ISO_PATTERN_C, isot) is not None) else math.nan
     except:
         return math.nan
