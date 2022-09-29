@@ -69,13 +69,9 @@ done
 # +
 # variable(s)
 # -
-_prc0="Galil_DMC_22x0_TCP_Write"
-_nam0="Galil_DMC_22x0_TCP_Write            "
+_prc0="Galil_DMC_22x0_Write_Memory"
+_nam0="Galil_DMC_22x0_Write_Memory         "
 _pid0=$(ps -ef | grep ${_prc0} | grep -v grep | awk '{print $2}')
-
-_prc1="Galil_DMC_22x0_UDP_Write"
-_nam1="Galil_DMC_22x0_UDP_Write            "
-_pid1=$(ps -ef | grep ${_prc1} | grep -v grep | awk '{print $2}')
 
 _prc2="/dev/shm/tcp_shm"
 _nam2="TCP Shared Memory File              "
@@ -107,13 +103,11 @@ case $(echo ${_command}) in
   start)
     if [[ ${dry_run} -eq 1 ]]; then
       write_magenta "Dry-Run> nohup ${BOK_GALIL_BIN}/${_prc0} >> ${BOK_GALIL_LOG}/${_prc0}.log 2>&1 &"
-      write_magenta "Dry-Run> nohup ${BOK_GALIL_BIN}/${_prc1} >> ${BOK_GALIL_LOG}/${_prc1}.log 2>&1 &"
       write_magenta "Dry-Run> nohup indiserver -vv ${BOK_GALIL_BIN}/${_prc4} >> ${BOK_GALIL_LOG}/${_prc4}.log 2>&1 &"
       write_magenta "Dry-Run> nohup ${BOK_GALIL_BIN}/${_prc5} >> ${BOK_GALIL_LOG}/${_prc5}.log 2>&1 &"
       write_magenta "Dry-Run> nohup python3 ${bok_90prime_gui}/src/${_prc6} >> ${BOK_GALIL_LOG}/${_prc6}.log 2>&1 &"
     else
       [[ -z ${_pid0} ]] && write_green "Starting ${_nam0}" && (nohup ${BOK_GALIL_BIN}/${_prc0} >> ${BOK_GALIL_LOG}/${_prc0}.log 2>&1 &) && write_ok "${_nam0}" "STARTED OK" && sleep 1 || write_error "${_nam0}" "ALREADY RUNNING"
-      [[ -z ${_pid1} ]] && write_green "Starting ${_nam1}" && (nohup ${BOK_GALIL_BIN}/${_prc1} >> ${BOK_GALIL_LOG}/${_prc1}.log 2>&1 &) && write_ok "${_nam1}" "STARTED OK" && sleep 1 || write_error "${_nam1}" "ALREADY RUNNING"
       if [[ ${_indiserver} -eq 1 ]]; then
         [[ -z ${_pid4} ]] && write_green "Starting ${_nam4}" && (nohup indiserver -vv ${BOK_GALIL_BIN}/${_prc4} >> ${BOK_GALIL_LOG}/${_prc4}.log 2>&1 &) && write_ok "${_nam4}" "STARTED OK" && sleep 1 || write_error "${_nam4}" "ALREADY RUNNING"
       fi
@@ -126,7 +120,6 @@ case $(echo ${_command}) in
   stop)
     if [[ ${dry_run} -eq 1 ]]; then
       write_magenta "Dry-Run> kill -SIGINT pidof(${_prc0})"
-      write_magenta "Dry-Run> kill -SIGINT pidof(${_prc1})"
       write_magenta "Dry-Run> kill -9 pidof(${_prc4})"
       write_magenta "Dry-Run> kill -9 pidof(${_prc5})"
       write_magenta "Dry-Run> kill -9 pidof(${_prc6})"
@@ -148,10 +141,9 @@ case $(echo ${_command}) in
     [[ -f ${_prc2} ]] && write_ok "${_nam2}" "EXISTS" || write_error "${_nam2}" "NOT FOUND"
     [[ -f ${_prc3} ]] && write_ok "${_nam3}" "EXISTS" || write_error "${_nam3}" "NOT FOUND"
     [[ ! -z ${_pid0} ]] && write_ok "${_nam0}" "OK (${_pid0})" || write_error "${_nam0}" "NOT RUNNING"
-    [[ ! -z ${_pid1} ]] && write_ok "${_nam1}" "OK (${_pid1})" || write_error "${_nam1}" "NOT RUNNING"
     [[ ! -z ${_pid4} ]] && write_ok "${_nam4}" "OK (${_pid4})" || write_error "${_nam4}" "NOT RUNNING"
     [[ ! -z ${_pid5} ]] && write_ok "${_nam5}" "OK (${_pid5})" || write_error "${_nam5}" "NOT RUNNING"
-    [[ ! -z ${_pid6} ]] && write_ok "${_nam6}" "OK (${_pid6})" || write_error "${_nam6}" "NOT RUNNING"
+    [[ ! -z ${_pid6} ]] && write_ok "${_nam6}" "OK (http://{WEBHOST}:{WEBPORT})" || write_error "${_nam6}" "NOT RUNNING"
     ;;
 esac
 

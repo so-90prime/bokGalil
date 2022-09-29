@@ -179,7 +179,7 @@ int main( int argc, char *argv[] ) {
   /* open the ip_addr */
   gstat = G_NO_ERROR;
   (void) memset((void *)command, 0, sizeof(command));
-  if (! simulate ) {
+  if ( ! simulate ) {
     if (bok > 0) {
       (void) sprintf(command, "%s --command TCP", BOK_GALIL_CMD_BOK);
       (void) fprintf(stdout, "%s <%s> executing '%s', gstat=%d, gfd=%p\n", _NAME_, (simulate == true ? "SIM" : "OK"), command, gstat, gfd);
