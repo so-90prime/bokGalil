@@ -143,7 +143,8 @@ case $(echo ${_command}) in
     [[ ! -z ${_pid0} ]] && write_ok "${_nam0}" "OK (${_pid0})" || write_error "${_nam0}" "NOT RUNNING"
     [[ ! -z ${_pid4} ]] && write_ok "${_nam4}" "OK (${_pid4})" || write_error "${_nam4}" "NOT RUNNING"
     [[ ! -z ${_pid5} ]] && write_ok "${_nam5}" "OK (${_pid5})" || write_error "${_nam5}" "NOT RUNNING"
-    [[ ! -z ${_pid6} ]] && write_ok "${_nam6}" "OK (http://{WEBHOST}:{WEBPORT})" || write_error "${_nam6}" "NOT RUNNING"
+    [[ ! -z ${_pid6} ]] && write_ok "${_nam6}" "OK (${_pid6})" || write_error "${_nam6}" "NOT RUNNING (check https://${WEBHOST}:${WEBPORT}/)"
+
     ;;
 esac
 

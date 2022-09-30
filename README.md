@@ -23,6 +23,48 @@ This software only supports /dev/shm shared memory under Unix.
 
 ## Set Up
 
+On banzai, edit `src/__hosts__.h`:
+
+```bash
+ #define _GALIL_           "192.168.0.100"
+ #define BOK_GALIL_CMD_BOK "10.30.3.31"
+ #define BOK_GALIL_CMD_LAB "192.168.0.100"
+ #define BOK_NG_HOST       "10.30.1.8"
+ #define BOK_NG_PORT       5750
+ #define BOK_TCP_ADDR      "10.30.3.31"
+ #define BOK_TCP_PORT      23
+ #define BOK_UDP_ADDR      "10.30.1.8"
+ #define BOK_UDP_PORT      5078
+```
+
+On bart, edit `src/__hosts__.h` (but this should be obsolete):
+
+```bash
+ #define _GALIL_           "192.168.0.100"
+ #define BOK_GALIL_CMD_BOK "10.30.3.31"
+ #define BOK_GALIL_CMD_LAB "192.168.0.100"
+ #define BOK_NG_HOST       "10.30.1.2"
+ #define BOK_NG_PORT       5750
+ #define BOK_TCP_ADDR      "10.30.3.31"
+ #define BOK_TCP_PORT      23
+ #define BOK_UDP_ADDR      "10.30.1.2"
+ #define BOK_UDP_PORT      5078
+```
+
+On bonsai, edit `src/__hosts__.h`:
+
+```bash
+ #define _GALIL_           "192.168.0.100"
+ #define BOK_GALIL_CMD_BOK "10.30.3.31"
+ #define BOK_GALIL_CMD_LAB "192.168.0.100"
+ #define BOK_NG_HOST       "10.30.1.7"
+ #define BOK_NG_PORT       5750
+ #define BOK_TCP_ADDR      "10.30.3.31"
+ #define BOK_TCP_PORT      23
+ #define BOK_UDP_ADDR      "10.30.1.7"
+ #define BOK_UDP_PORT      5078
+```
+
 ```bash
  % git clone https://github.com/so-90prime/bokGalil.git
  % cd bokGalil
