@@ -2,7 +2,7 @@
 
 ## Requirement(s)
 
- - Ubuntu 20.04
+ - Ubuntu 20.04 or 22.04
 
  - www.indilib.org
 
@@ -43,6 +43,8 @@
      libtheora-dev
 ```
 
+NB: for Ubuntu 22, `libdc1394-22-dev` has been replaced by `libdc1394-dev`.
+
 ## Build (as root)
 
 ```bash
@@ -73,6 +75,6 @@ Then connect with XEphem -> View -> Sky View -> Telescope -> INDI panel -> Conne
 
 --------------------------------------
 
-Last Modified: 20220829
+Last Modified: 20221003
 
 Last Author: Phil Daly (pndaly@arizona.edu)
