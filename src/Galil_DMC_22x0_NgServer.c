@@ -1472,7 +1472,7 @@ int main(int argc, char *argv[]) {
   while ((client_fd=accept(socket_fd, (struct sockaddr *)&client_addr, (socklen_t *)&client_len))) {
     pthread_t this_thread;
     (void) memset(&this_thread, '\0', sizeof(this_thread));
-    new_sock = malloc(1);
+    new_sock = malloc(sizeof(int));
     *new_sock = client_fd;
     if ((istat=pthread_create(&this_thread, NULL, thread_handler, (void *)new_sock)) < 0) {
       (void) logtime(" server pthread_create() failed\n");
