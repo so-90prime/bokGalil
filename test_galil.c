@@ -10,7 +10,7 @@ int main( int argc, char *argv[] ) {
   /* declare some variables and initialize them */
   GCon gfd = G_NO_ERROR;
   GReturn gstat = G_NO_ERROR;
-  int simulate = 1;
+  int bok = 0;
 
   char addresses[2048] = {'\0'};
   char info[2048] = {'\0'};
@@ -20,12 +20,12 @@ int main( int argc, char *argv[] ) {
   /* get command line parameter(s) */
   while ( argc>1L && argv[1][0]=='-' ) {
     switch (argv[1][1]) {
-      case 's': case 'S':
-        simulate = atoi(&argv[1][2]);
+      case 'b': case 'B':
+        bok = atoi(&argv[1][2]);
         break;
       default:
-        (void) fprintf(stdout, "Use: %s [-s<int> -h]\n", argv[0]);
-        (void) fprintf(stdout, "\t-s<int>  : set simulate [default=%d]\n", simulate);
+        (void) fprintf(stdout, "Use: %s [-b<int> -h]\n", argv[0]);
+        (void) fprintf(stdout, "\t-b<int>  : bok=1, lab=0 [default=%d]\n", bok);
         (void) fflush(stdout);
         exit (0);
         break;
@@ -34,7 +34,7 @@ int main( int argc, char *argv[] ) {
   }
 
   /* execute */ 
-  if (simulate > 0) {
+  if (bok <= 0) {
     gstat = GOpen("192.168.0.100 --command TCP", &gfd);
     (void) printf("GOpen('192.168.0.100 --command TCP') called, gstat=%d, gfd=%ld\n", (int)gstat, (long)gfd);
   } else {

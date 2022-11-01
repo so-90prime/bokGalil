@@ -24,6 +24,10 @@ source ${BOK_GALIL_BIN}/functions.sh
 bok_90prime_gui="${HOME}/bok-90prime-gui"
 [[ -f "${bok_90prime_gui}/.env" ]] && source ${bok_90prime_gui}/.env || write_red "<ERROR> No web environment found!"
 
+dataserver="${HOME}/dataserver"
+export PATH=${dataserver}:${PATH}
+[[ -z $(command -v dataserver) ]] && _dataserver=0 || _dataserver=1
+
 
 # +
 # utility functions
@@ -93,6 +97,10 @@ _prc6="bok.py"
 _nam6="PyINDI http://${WEBHOST}:${WEBPORT}/      "
 _pid6=$(ps -ef | grep ${_prc6} | grep -v grep | awk '{print $2}')
 
+_prc7="dataserver"
+_nam7="xterm -e dataserver                  "
+_pid7=$(ps -ef | grep ${_prc7} | grep -v xterm | grep -v grep | awk '{print $2}')
+
 
 # +
 # execute
@@ -106,6 +114,7 @@ case $(echo ${_command}) in
       write_magenta "Dry-Run> nohup indiserver -vv ${BOK_GALIL_BIN}/${_prc4} >> ${BOK_GALIL_LOG}/${_prc4}.log 2>&1 &"
       write_magenta "Dry-Run> nohup ${BOK_GALIL_BIN}/${_prc5} >> ${BOK_GALIL_LOG}/${_prc5}.log 2>&1 &"
       write_magenta "Dry-Run> nohup python3 ${bok_90prime_gui}/src/${_prc6} >> ${BOK_GALIL_LOG}/${_prc6}.log 2>&1 &"
+      write_magenta "Dry-Run> xterm -e ${dataserver}/${_prc7} &"
     else
       [[ -z ${_pid0} ]] && write_green "Starting ${_nam0}" && (nohup ${BOK_GALIL_BIN}/${_prc0} >> ${BOK_GALIL_LOG}/${_prc0}.log 2>&1 &) && write_ok "${_nam0}" "STARTED OK" && sleep 1 || write_error "${_nam0}" "ALREADY RUNNING"
       if [[ ${_indiserver} -eq 1 ]]; then
@@ -113,6 +122,9 @@ case $(echo ${_command}) in
       fi
       [[ -z ${_pid5} ]] && write_green "Starting ${_nam5}" && (nohup ${BOK_GALIL_BIN}/${_prc5} >> ${BOK_GALIL_LOG}/${_prc5}.log 2>&1 &) && write_ok "${_nam5}" "STARTED OK" && sleep 1 || write_error "${_nam5}" "ALREADY RUNNING"
       [[ -z ${_pid6} ]] && write_green "Starting ${_nam6}" && (nohup python3 ${bok_90prime_gui}/src/${_prc6} >> ${BOK_GALIL_LOG}/${_prc6}.log 2>&1 &) && write_ok "${_nam6}" "STARTED OK" && sleep 1 || write_error "${_nam6}" "ALREADY RUNNING"
+      if [[ ${_dataserver} -eq 1 ]]; then
+        [[ -z ${_pid7} ]] && write_green "Starting ${_nam7}" && (xterm -e dataserver &) && write_ok "${_nam7}" "STARTED OK" && sleep 1 || write_error "${_nam7}" "ALREADY RUNNING"
+      fi
     fi
     ;;
 
@@ -123,14 +135,16 @@ case $(echo ${_command}) in
       write_magenta "Dry-Run> kill -9 pidof(${_prc4})"
       write_magenta "Dry-Run> kill -9 pidof(${_prc5})"
       write_magenta "Dry-Run> kill -9 pidof(${_prc6})"
+      write_magenta "Dry-Run> kill -9 pidof(${_prc7})"
       write_magenta "Dry-Run> rm -f ${_prc2}"
       write_magenta "Dry-Run> rm -f ${_prc3}"
     else
       [[ ! -z ${_pid0} ]] && echo "kill -SIGINT ${_pid0}" && kill -SIGINT ${_pid0} && write_ok "${_nam0}" "KILLED OK" || write_error "${_nam0}" "NOT RUNNING"
-      [[ ! -z ${_pid1} ]] && echo "kill -SIGINT ${_pid1}" && kill -SIGINT ${_pid1} && write_ok "${_nam1}" "KILLED OK" || write_error "${_nam1}" "NOT RUNNING"
+      # [[ ! -z ${_pid1} ]] && echo "kill -SIGINT ${_pid1}" && kill -SIGINT ${_pid1} && write_ok "${_nam1}" "KILLED OK" || write_error "${_nam1}" "NOT RUNNING"
       [[ ! -z ${_pid4} ]] && echo "kill -9 ${_pid4}" && kill -9 ${_pid4} &&  write_ok "${_nam4}" "KILLED OK" || write_error "${_nam4}" "NOT RUNNING"
       [[ ! -z ${_pid5} ]] && echo "kill -9 ${_pid5}" && kill -9 ${_pid5} && write_ok "${_nam5}" "KILLED OK" || write_error "${_nam5}" "NOT RUNNING"
-      [[ ! -z ${_pid6} ]] && echo "kill -9 ${_pid6}" && kill -9 ${_pid6} && write_ok "${_nam5}" "KILLED OK" || write_error "${_nam6}" "NOT RUNNING"
+      [[ ! -z ${_pid6} ]] && echo "kill -9 ${_pid6}" && kill -9 ${_pid6} && write_ok "${_nam6}" "KILLED OK" || write_error "${_nam6}" "NOT RUNNING"
+      [[ ! -z ${_pid7} ]] && echo "kill -9 ${_pid7}" && kill -9 ${_pid7} && write_ok "${_nam7}" "KILLED OK" || write_error "${_nam7}" "NOT RUNNING"
       [[ -f ${_prc2} ]] && echo "rm -rf ${_prc2}" && rm -f ${_prc2} || write_error "${_nam2}" "NOT FOUND"
       [[ -f ${_prc3} ]] && echo "rm -rf ${_prc3}" && rm -f ${_prc3} || write_error "${_nam3}" "NOT FOUND"
     fi
@@ -143,7 +157,8 @@ case $(echo ${_command}) in
     [[ ! -z ${_pid0} ]] && write_ok "${_nam0}" "OK (${_pid0})" || write_error "${_nam0}" "NOT RUNNING"
     [[ ! -z ${_pid4} ]] && write_ok "${_nam4}" "OK (${_pid4})" || write_error "${_nam4}" "NOT RUNNING"
     [[ ! -z ${_pid5} ]] && write_ok "${_nam5}" "OK (${_pid5})" || write_error "${_nam5}" "NOT RUNNING"
-    [[ ! -z ${_pid6} ]] && write_ok "${_nam6}" "OK (${_pid6})" || write_error "${_nam6}" "NOT RUNNING (check https://${WEBHOST}:${WEBPORT}/)"
+    [[ ! -z ${_pid6} ]] && write_ok "${_nam6}" "OK (${_pid6})" || write_error "${_nam6}" "NOT RUNNING"
+    [[ ! -z ${_pid7} ]] && write_ok "${_nam7}" "OK (${_pid7})" || write_error "${_nam7}" "NOT RUNNING"
 
     ;;
 esac
