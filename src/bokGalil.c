@@ -106,6 +106,7 @@ void cliParse (const char *cli_delimiter, const char *cli_string, const size_t c
 void decode_fvals( char *b, float f[], int nelms, char delim ) {
   char *ep = (char *)NULL;
   for (int j=0; j<nelms; j++) {
+    errno = 0;
     f[j] = strtof(b, &ep);
     if ((*ep == delim || *ep == EOF) && errno != 0) { f[j] = NAN; }
     b = ++ep;
@@ -117,7 +118,8 @@ void decode_fvals( char *b, float f[], int nelms, char delim ) {
  * decode_float( ... )
  ******************************************************************************/
 void decode_float( char *b, float *fval ) {
-  char * ep = (char *)NULL;
+  char *ep = (char *)NULL;
+  errno = 0;
   replace_word(b, sizeof(b), " ", "");
   *fval = strtof(b, &ep);
   if (ep == (char *)NULL || errno != 0) { *fval = NAN; }
@@ -128,9 +130,10 @@ void decode_float( char *b, float *fval ) {
  * decode_integer( ... )
  ******************************************************************************/
 void decode_integer( char *b, int *ival ) {
-  char * ep = (char *)NULL;
+  char *ep = (char *)NULL;
+  errno = 0;
   replace_word(b, sizeof(b), " ", "");
-  *ival = strtof(b, &ep);
+  *ival = (int)roundf(strtof(b, &ep));
   if (ep == (char *)NULL || errno != 0) { *ival = INT_MIN; }
 }
 

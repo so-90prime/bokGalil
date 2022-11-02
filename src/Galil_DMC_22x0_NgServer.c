@@ -35,10 +35,10 @@
 #define BOK_NG_GUIDER_INIT_TIME        30
 #define BOK_NG_INSTRUMENT_FILTER_TIME  75
 #define BOK_NG_INSTRUMENT_FOCUS_TIME   30
-#define BOK_NG_INSTRUMENT_INIT_TIME    30
-#define BOK_NG_INSTRUMENT_LOAD_TIME    10
+#define BOK_NG_INSTRUMENT_INIT_TIME    45
+#define BOK_NG_INSTRUMENT_LOAD_TIME    15
 #define BOK_NG_INSTRUMENT_LVDT_TIME    30
-#define BOK_NG_INSTRUMENT_UNLOAD_TIME  10
+#define BOK_NG_INSTRUMENT_UNLOAD_TIME  15
 
 
 /*******************************************************************************
@@ -800,11 +800,12 @@ void *thread_handler(void *thread_fd) {
                  (istat=(int)strlen(bok_ng_commands[12])>0) ) {
 
         /* output message */
+        (void) logtime(" setting ifocus A='%s' B='%s' C='%s' T='%s'\n", bok_ng_commands[6], bok_ng_commands[8], bok_ng_commands[10], bok_ng_commands[12]);
         decode_float(bok_ng_commands[6], &focus_a);
         decode_float(bok_ng_commands[8], &focus_b);
         decode_float(bok_ng_commands[10], &focus_c);
         decode_float(bok_ng_commands[12], &tolerance);
-        (void) logtime(" setting instrument focus to %.4f %.4f %.4f within tolerance %.4f\n", focus_a, focus_b, focus_c, tolerance);
+        (void) logtime(" setting ifocus A=%.4f B=%.4f C=%.4f within tolerance %.4f\n", focus_a, focus_b, focus_c, tolerance);
 
         /* in simulation, wait and return success */
         if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
@@ -839,36 +840,31 @@ void *thread_handler(void *thread_fd) {
           /* execute */
           } else {
             is_done = false;
-            float cur_a = round(((float)udp_shm_ptr->a_position * 1000.0));
-            float cur_b = round(((float)udp_shm_ptr->b_position * 1000.0));
-            float cur_c = round(((float)udp_shm_ptr->c_position * 1000.0));
-            float dista = round((focus_a/1000.0 - cur_a/1000.0) * BOK_LVDT_ATOD);
-            float distb = round((focus_b/1000.0 - cur_b/1000.0) * BOK_LVDT_ATOD);
-            float distc = round((focus_c/1000.0 - cur_c/1000.0) * BOK_LVDT_ATOD);
-            float new_a = focus_a;
-            float new_b = focus_b;
-            float new_c = focus_c;
-            (void) logtime(" instrument focus cur_a %.4f new_a %.4f within tolerance %.4f\n", cur_a, new_a, tolerance);
-            (void) logtime(" instrument focus cur_b %.4f new_b %.4f within tolerance %.4f\n", cur_b, new_b, tolerance);
-            (void) logtime(" instrument focus cur_c %.4f new_c %.4f within tolerance %.4f\n", cur_c, new_c, tolerance);
-            (void) logtime(" instrument focus focus_a %.4f dista %.4f\n", focus_a, dista); 
-            (void) logtime(" instrument focus focus_b %.4f distb %.4f\n", focus_b, distb); 
-            (void) logtime(" instrument focus focus_c %.4f distc %.4f\n", focus_c, distc); 
-            (void) xq_hx();
-            if ((gstat=xq_focusind(dista, distb, distc)) == G_NO_ERROR) {
-              countdown = BOK_NG_INSTRUMENT_FOCUS_TIME;
-              while (--countdown > 0) {
-                (void) sleep(1);
-                cur_a = round(((float)udp_shm_ptr->a_position * 1000.0));
-                cur_b = round(((float)udp_shm_ptr->b_position * 1000.0));
-                cur_c = round(((float)udp_shm_ptr->c_position * 1000.0));
-                (void) logtime(" instrument focus cur_a %.4f new_a %.4f within tolerance %.4f\n", cur_a, new_a, tolerance);
-                (void) logtime(" instrument focus cur_b %.4f new_b %.4f within tolerance %.4f\n", cur_b, new_b, tolerance);
-                (void) logtime(" instrument focus cur_c %.4f new_c %.4f within tolerance %.4f\n", cur_c, new_c, tolerance);
-                if ( (abs(round(cur_a - new_a)) <= tolerance) &&
-                     (abs(round(cur_b - new_b)) <= tolerance) &&
-                     (abs(round(cur_c - new_c)) <= tolerance) ) { is_done = true; break; }
-              }
+            countdown = BOK_NG_INSTRUMENT_FOCUS_TIME;
+            while (--countdown > 0) {
+              float cur_a = round(((float)udp_shm_ptr->a_position * 1000.0));
+              float cur_b = round(((float)udp_shm_ptr->b_position * 1000.0));
+              float cur_c = round(((float)udp_shm_ptr->c_position * 1000.0));
+              float dista = round((focus_a/1000.0 - cur_a/1000.0) * BOK_LVDT_ATOD);
+              float distb = round((focus_b/1000.0 - cur_b/1000.0) * BOK_LVDT_ATOD);
+              float distc = round((focus_c/1000.0 - cur_c/1000.0) * BOK_LVDT_ATOD);
+              float new_a = focus_a;
+              float new_b = focus_b;
+              float new_c = focus_c;
+              (void) logtime(" ifocus cur_a=%.4f dista=%.4f focus_a=%.4f new_a=%.4f tolerance=%.4f diff=%.4f\n", cur_a, dista, focus_a, new_a, tolerance, (cur_a - new_a));
+              (void) logtime(" ifocus cur_b=%.4f distb=%.4f focus_b=%.4f new_b=%.4f tolerance=%.4f diff=%.4f\n", cur_b, distb, focus_b, new_b, tolerance, (cur_b - new_b));
+              (void) logtime(" ifocus cur_c=%.4f distc=%.4f focus_c=%.4f new_c=%.4f tolerance=%.4f diff=%.4f\n", cur_c, distc, focus_c, new_c, tolerance, (cur_c - new_c));
+              (void) xq_hx();
+              if ( (abs(round(cur_a - new_a)) <= tolerance) && (abs(round(cur_b - new_b)) <= tolerance) && (abs(round(cur_c - new_c)) <= tolerance) ) {
+                (void) logtime(" ifocus cur_a %.4f new_a %.4f within tolerance %.4f\n", cur_a, new_a, tolerance);
+                (void) logtime(" ifocus cur_b %.4f new_b %.4f within tolerance %.4f\n", cur_b, new_b, tolerance);
+                (void) logtime(" ifocus cur_c %.4f new_c %.4f within tolerance %.4f\n", cur_c, new_c, tolerance);
+                is_done = true; break;
+ 	      }
+              (void) sleep(1);
+              gstat = xq_focusind(dista, distb, distc);
+              (void) logtime(" ifocus xq_focusind(%.4f, %.4f, %.4f), gstat=%d\n", dista, distb, distc, (int)gstat);
+              (void) sleep(1);
             }
             if (is_done) {
               (void) strcat(outgoing, " OK");
@@ -886,7 +882,7 @@ void *thread_handler(void *thread_fd) {
         }
 
       /*******************************************************************************
-       * BOK 90PRIME <cmd-id> COMMAND IFOCUSALL <float> T <float>
+       * BOK 90PRIME <cmd-id> COMMAND IFOCUSALL DELTA <float> T <float>
        ******************************************************************************/
       } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
                  (istat=strncasecmp(bok_ng_commands[4], "IFOCUS", strlen("IFOCUS"))==0) &&
@@ -896,9 +892,10 @@ void *thread_handler(void *thread_fd) {
                  (istat=(int)strlen(bok_ng_commands[8])>0) ) {
 
         /* output message */
+        (void) logtime(" setting ifocusall DELTA='%s' T='%s'\n", bok_ng_commands[6], bok_ng_commands[8]);
         decode_float(bok_ng_commands[6], &fval);
         decode_float(bok_ng_commands[8], &tolerance);
-        (void) logtime(" setting instrument focusall to %.4f within tolerance %.4f\n", fval, tolerance);
+        (void) logtime(" setting ifocusall fval=%.4f tolerance=%.4f\n", fval, tolerance);
 
         /* in simulation, wait and return success */
         if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
@@ -932,33 +929,32 @@ void *thread_handler(void *thread_fd) {
 
           /* execute */
           } else {
+            float new_a = round(((float)udp_shm_ptr->a_position * 1000.0)) + fval;
+            float new_b = round(((float)udp_shm_ptr->b_position * 1000.0)) + fval;
+            float new_c = round(((float)udp_shm_ptr->c_position * 1000.0)) + fval;
             is_done = false;
-            float distall = round((fval / 1000.0) * BOK_LVDT_ATOD);
-            float cur_a = round(((float)udp_shm_ptr->a_position * 1000.0));
-            float cur_b = round(((float)udp_shm_ptr->b_position * 1000.0));
-            float cur_c = round(((float)udp_shm_ptr->c_position * 1000.0));
-            float new_a = cur_a + fval;
-            float new_b = cur_b + fval;
-            float new_c = cur_c + fval;
-            (void) logtime(" instrument focus cur_a %.4f new_a %.4f within tolerance %.4f\n", cur_a, new_a, tolerance);
-            (void) logtime(" instrument focus cur_b %.4f new_b %.4f within tolerance %.4f\n", cur_b, new_b, tolerance);
-            (void) logtime(" instrument focus cur_c %.4f new_c %.4f within tolerance %.4f\n", cur_c, new_c, tolerance);
-            (void) logtime(" instrument focus delta %.4f distall %.4f\n", fval, distall); 
-            (void) xq_hx();
-            if ((gstat=xq_focusind(distall, distall, distall)) == G_NO_ERROR) {
-              countdown = BOK_NG_INSTRUMENT_FOCUS_TIME;
-              while (--countdown > 0) {
-                (void) sleep(1);
-                cur_a = round(((float)udp_shm_ptr->a_position * 1000.0));
-                cur_b = round(((float)udp_shm_ptr->b_position * 1000.0));
-                cur_c = round(((float)udp_shm_ptr->c_position * 1000.0));
-                (void) logtime(" instrument focus cur_a %.4f new_a %.4f within tolerance %.4f\n", cur_a, new_a, tolerance);
-                (void) logtime(" instrument focus cur_b %.4f new_b %.4f within tolerance %.4f\n", cur_b, new_b, tolerance);
-                (void) logtime(" instrument focus cur_c %.4f new_c %.4f within tolerance %.4f\n", cur_c, new_c, tolerance);
-                if ( (abs(round(cur_a - new_a)) <= tolerance) &&
-                     (abs(round(cur_b - new_b)) <= tolerance) &&
-                     (abs(round(cur_c - new_c)) <= tolerance) ) { is_done = true; break; }
+            countdown = BOK_NG_INSTRUMENT_FOCUS_TIME;
+            while (--countdown > 0) {
+              float cur_a = round(((float)udp_shm_ptr->a_position * 1000.0));
+              float cur_b = round(((float)udp_shm_ptr->b_position * 1000.0));
+              float cur_c = round(((float)udp_shm_ptr->c_position * 1000.0));
+              float dista = round((new_a/1000.0 - cur_a/1000.0) * BOK_LVDT_ATOD);
+              float distb = round((new_b/1000.0 - cur_b/1000.0) * BOK_LVDT_ATOD);
+              float distc = round((new_c/1000.0 - cur_c/1000.0) * BOK_LVDT_ATOD);
+              (void) logtime(" ifocusall cur_a=%.4f dista=%.4f fval=%.4f new_a=%.4f tolerance=%.4f diff=%.4f\n", cur_a, dista, fval, new_a, tolerance, (cur_a - new_a));
+              (void) logtime(" ifocusall cur_b=%.4f distb=%.4f fval=%.4f new_b=%.4f tolerance=%.4f diff=%.4f\n", cur_b, distb, fval, new_b, tolerance, (cur_b - new_b));
+              (void) logtime(" ifocusall cur_c=%.4f distc=%.4f fval=%.4f new_c=%.4f tolerance=%.4f diff=%.4f\n", cur_c, distc, fval, new_c, tolerance, (cur_c - new_c));
+              (void) xq_hx();
+              if ( (abs(round(cur_a - new_a)) <= tolerance) && (abs(round(cur_b - new_b)) <= tolerance) && (abs(round(cur_c - new_c)) <= tolerance) ) {
+                (void) logtime(" ifocusall cur_a %.4f new_a %.4f within tolerance %.4f\n", cur_a, new_a, tolerance);
+                (void) logtime(" ifocusall cur_b %.4f new_b %.4f within tolerance %.4f\n", cur_b, new_b, tolerance);
+                (void) logtime(" ifocusall cur_c %.4f new_c %.4f within tolerance %.4f\n", cur_c, new_c, tolerance);
+		is_done = true; break;
               }
+              (void) sleep(1);
+              gstat = xq_focusind(dista, distb, distc);
+              (void) logtime(" ifocusall xq_focusind(%.4f, %.4f, %.4f), gstat=%d\n", dista, distb, distc, (int)gstat);
+              (void) sleep(1);
             }
             if (is_done) {
               (void) strcat(outgoing, " OK");
@@ -976,7 +972,7 @@ void *thread_handler(void *thread_fd) {
         }
 
       /*******************************************************************************
-       * BOK 90PRIME <cmd-id> COMMAND LVDT A <float> B <float> C <float>
+       * BOK 90PRIME <cmd-id> COMMAND LVDT A <float> B <float> C <float> T <float>
        ******************************************************************************/
       } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
                  (istat=strncasecmp(bok_ng_commands[4], "LVDT", strlen("LVDT"))==0) &&
@@ -990,11 +986,12 @@ void *thread_handler(void *thread_fd) {
                  (istat=(int)strlen(bok_ng_commands[12])>0) ) {
 
         /* output message */
+        (void) logtime(" setting ilvdt A='%s' B='%s' C='%s' T='%s'\n", bok_ng_commands[6], bok_ng_commands[8], bok_ng_commands[10], bok_ng_commands[12]);
         decode_float(bok_ng_commands[6], &lvdt_a);
         decode_float(bok_ng_commands[8], &lvdt_b);
         decode_float(bok_ng_commands[10], &lvdt_c);
         decode_float(bok_ng_commands[12], &tolerance);
-        (void) logtime(" setting instrument lvdt to %.4f %.4f %.4f within tolerance %.4f\n", lvdt_a, lvdt_b, lvdt_c, tolerance);
+        (void) logtime(" setting ilvdt A=%.4f B=%.4f C=%.4f within tolerance %.4f\n", lvdt_a, lvdt_b, lvdt_c, tolerance);
 
         /* in simulation, wait and return success */
         if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
@@ -1029,27 +1026,29 @@ void *thread_handler(void *thread_fd) {
           /* execute */
           } else {
             is_done = false;
-            float vala = (float)udp_shm_ptr->baxis_analog_in * BOK_LVDT_STEPS;
-            float valb = (float)udp_shm_ptr->daxis_analog_in * BOK_LVDT_STEPS;
-            float valc = (float)udp_shm_ptr->faxis_analog_in * BOK_LVDT_STEPS;
-            float dista = round((lvdt_a / 1000.0 - vala) * BOK_LVDT_ATOD);
-            float distb = round((lvdt_b / 1000.0 - valb) * BOK_LVDT_ATOD);
-            float distc = round((lvdt_c / 1000.0 - valc) * BOK_LVDT_ATOD);
-            (void) xq_hx();
-            if ((gstat=xq_focusind(dista, distb, distc)) == G_NO_ERROR) {
-              countdown = BOK_NG_INSTRUMENT_LVDT_TIME;
-              while (--countdown > 0) {
-                (void) sleep(1);
-                float vala = (float)udp_shm_ptr->baxis_analog_in * BOK_LVDT_STEPS;
-                float valb = (float)udp_shm_ptr->daxis_analog_in * BOK_LVDT_STEPS;
-                float valc = (float)udp_shm_ptr->faxis_analog_in * BOK_LVDT_STEPS;
-                (void) logtime(" checking instrument focus a %.4f\n", vala);
-                (void) logtime(" checking instrument focus b %.4f\n", valb);
-                (void) logtime(" checking instrument focus c %.4f\n", valc);
-                /* ??? */
-                is_done = true;
-                break;
-              }
+            countdown = BOK_NG_INSTRUMENT_LVDT_TIME;
+            while (--countdown > 0) {
+              float vala = (float)udp_shm_ptr->baxis_analog_in * BOK_LVDT_STEPS;
+              float valb = (float)udp_shm_ptr->daxis_analog_in * BOK_LVDT_STEPS;
+              float valc = (float)udp_shm_ptr->faxis_analog_in * BOK_LVDT_STEPS;
+              float dista = round((lvdt_a / 1000.0 - vala) * BOK_LVDT_ATOD);
+              float distb = round((lvdt_b / 1000.0 - valb) * BOK_LVDT_ATOD);
+              float distc = round((lvdt_c / 1000.0 - valc) * BOK_LVDT_ATOD);
+              (void) logtime(" ilvdt vala=%.4f dista=%.4f lvdt_a=%.4f tolerance=%.4f\n", vala, dista, lvdt_a, tolerance);
+              (void) logtime(" ilvdt valb=%.4f distb=%.4f lvdt_b=%.4f tolerance=%.4f\n", valb, distb, lvdt_b, tolerance);
+              (void) logtime(" ilvdt valc=%.4f distc=%.4f lvdt_c=%.4f tolerance=%.4f\n", valc, distc, lvdt_c, tolerance);
+              (void) xq_hx();
+              (void) sleep(1);
+              gstat = xq_focusind(dista, distb, distc);
+              (void) logtime(" ilvdt xq_focusind(%.4f, %.4f, %.4f), gstat=%d\n", dista, distb, distc, (int)gstat);
+              (void) sleep(1);
+	      /* is this the correct test?? */
+              if ( (abs(round(dista <= tolerance))) && (abs(round(distb)) <= tolerance) && (abs(round(distc)) <= tolerance) ) {
+                (void) logtime(" ilvdt vala=%.4f dista=%.4f lvdt_a=%.4f within tolerance=%.4f\n", vala, dista, lvdt_a, tolerance);
+                (void) logtime(" ilvdt valb=%.4f distb=%.4f lvdt_b=%.4f within tolerance=%.4f\n", valb, distb, lvdt_b, tolerance);
+                (void) logtime(" ilvdt valc=%.4f distc=%.4f lvdt_c=%.4f within tolerance=%.4f\n", valc, distc, lvdt_c, tolerance);
+                is_done = true; break;
+ 	      }
             }
             if (is_done) {
               (void) strcat(outgoing, " OK");
@@ -1076,9 +1075,10 @@ void *thread_handler(void *thread_fd) {
                  (istat=(int)strlen(bok_ng_commands[7])>0) ) {
 
         /* output message */
+        (void) logtime(" setting ilvdtall='%s' T='%s'\n", bok_ng_commands[5], bok_ng_commands[7]);
         decode_float(bok_ng_commands[5], &fval);
         decode_float(bok_ng_commands[7], &tolerance);
-        (void) logtime(" setting instrument lvdtall to %.4f within tolerance %.4f\n", fval, tolerance);
+        (void) logtime(" setting ilvdtall=%.4f T=%.4f\n", fval, tolerance);
 
         /* in simulation, wait and return success */
         if ((istat=strncasecmp(bok_ng_commands[2], "SIMULATE", strlen("SIMULATE"))) == 0) {
@@ -1113,22 +1113,27 @@ void *thread_handler(void *thread_fd) {
           /* execute */
           } else {
             is_done = false;
-            float distall = round((fval / 1000.0) * BOK_LVDT_ATOD);
-            (void) xq_hx();
-            if ((gstat=xq_focusind(distall, distall, distall)) == G_NO_ERROR) {
-              countdown = BOK_NG_INSTRUMENT_LVDT_TIME;
-              while (--countdown > 0) {
-                (void) sleep(1);
-                float vala = (float)udp_shm_ptr->baxis_analog_in * BOK_LVDT_STEPS;
-                float valb = (float)udp_shm_ptr->daxis_analog_in * BOK_LVDT_STEPS;
-                float valc = (float)udp_shm_ptr->faxis_analog_in * BOK_LVDT_STEPS;
-                (void) logtime(" checking instrument focus a %.4f\n", vala);
-                (void) logtime(" checking instrument focus b %.4f\n", valb);
-                (void) logtime(" checking instrument focus c %.4f\n", valc);
-                /* ??? */
-                is_done = true;
-                break;
-              }
+            countdown = BOK_NG_INSTRUMENT_LVDT_TIME;
+            while (--countdown > 0) {
+              float distall = round((fval / 1000.0) * BOK_LVDT_ATOD);
+              float vala = (float)udp_shm_ptr->baxis_analog_in * BOK_LVDT_STEPS;
+              float valb = (float)udp_shm_ptr->daxis_analog_in * BOK_LVDT_STEPS;
+              float valc = (float)udp_shm_ptr->faxis_analog_in * BOK_LVDT_STEPS;
+              (void) logtime(" ilvdtall vala=%.4f distall=%.4f fval=%.4f tolerance=%.4f\n", vala, distall, fval, tolerance);
+              (void) logtime(" ilvdtall valb=%.4f distall=%.4f fval=%.4f tolerance=%.4f\n", valb, distall, fval, tolerance);
+              (void) logtime(" ilvdtall valc=%.4f distall=%.4f fval=%.4f tolerance=%.4f\n", valc, distall, fval, tolerance);
+              (void) xq_hx();
+              (void) sleep(1);
+              gstat = xq_focusind(distall, distall, distall);
+              (void) logtime(" ilvdtall xq_focusind(%.4f, %.4f, %.4f), gstat=%d\n", distall, distall, distall, (int)gstat);
+              (void) sleep(1);
+	      /* is this the correct test?? */
+              if ( abs(round(distall)) <= tolerance ) {
+                (void) logtime(" ilvdtall vala=%.4f distall=%.4f fval=%.4f within tolerance=%.4f\n", vala, distall, fval, tolerance);
+                (void) logtime(" ilvdtall valb=%.4f distall=%.4f fval=%.4f within tolerance=%.4f\n", valb, distall, fval, tolerance);
+                (void) logtime(" ilvdtall valc=%.4f distall=%.4f fval=%.4f within tolerance=%.4f\n", valc, distall, fval, tolerance);
+                is_done = true; break;
+ 	      }
             }
             if (is_done) {
               (void) strcat(outgoing, " OK");
@@ -1144,6 +1149,14 @@ void *thread_handler(void *thread_fd) {
           if (udp_shm_ptr != (udp_val_p)NULL) { (void) munmap(udp_shm_ptr, UDP_VAL_SIZE); }
           if (udp_shm_fd >= 0) { (void) close(udp_shm_fd); }
         }
+
+       /*******************************************************************************
+       * BOK 90PRIME <cmd-id> COMMAND HX
+       ******************************************************************************/
+      } else if ((istat=strncasecmp(bok_ng_commands[3], BOK_NG_COMMAND, strlen(BOK_NG_COMMAND))==0) &&
+                 (istat=strncasecmp(bok_ng_commands[4], "HX", strlen("HX"))==0) ) {
+        (void) xq_hx();
+        (void) strcat(outgoing, " OK");
 
        /*******************************************************************************
        * BOK 90PRIME <cmd-id> COMMAND TEST
