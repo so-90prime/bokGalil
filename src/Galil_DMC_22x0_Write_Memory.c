@@ -176,6 +176,7 @@ int main( int argc, char *argv[] ) {
     (void) fflush(stderr);
     exit(-1);
   }
+
   /* open the ip_addr */
   gstat = G_NO_ERROR;
   (void) memset((void *)command, 0, sizeof(command));
@@ -661,7 +662,7 @@ int main( int argc, char *argv[] ) {
 
             /* {"FILTVALS[0]=?;",     "filter number in slot 0",            }, */
             if (strncasecmp(pr, "FILTVALS[0]=?;", strlen("FILTVALS[0]=?;")) == 0) {
-	      tcp_val.gstatus += gstat;
+	          tcp_val.gstatus += gstat;
               replace_word(buffer, sizeof(buffer), "\n", " ");
               replace_word(buffer, sizeof(buffer), "\r", " ");
               replace_word(buffer, sizeof(buffer), ":", "");
@@ -671,7 +672,7 @@ int main( int argc, char *argv[] ) {
 
             /* {"FILTVALS[1]=?;",     "filter number in slot 1",            }, */
             } else if (strncasecmp(pr, "FILTVALS[1]=?;", strlen("FILTVALS[1]=?;")) == 0) {
-	      tcp_val.gstatus += gstat;
+	          tcp_val.gstatus += gstat;
               replace_word(buffer, sizeof(buffer), "\n", " ");
               replace_word(buffer, sizeof(buffer), "\r", " ");
               replace_word(buffer, sizeof(buffer), ":", "");
@@ -681,7 +682,7 @@ int main( int argc, char *argv[] ) {
 
             /* {"FILTVALS[2]=?;",     "filter number in slot 2",            }, */
             } else if (strncasecmp(pr, "FILTVALS[2]=?;", strlen("FILTVALS[2]=?;")) == 0) {
-	      tcp_val.gstatus += gstat;
+	          tcp_val.gstatus += gstat;
               replace_word(buffer, sizeof(buffer), "\n", " ");
               replace_word(buffer, sizeof(buffer), "\r", " ");
               replace_word(buffer, sizeof(buffer), ":", "");
@@ -691,7 +692,7 @@ int main( int argc, char *argv[] ) {
 
             /* {"FILTVALS[3]=?;",     "filter number in slot 3",            }, */
             } else if (strncasecmp(pr, "FILTVALS[3]=?;", strlen("FILTVALS[3]=?;")) == 0) {
-	      tcp_val.gstatus += gstat;
+	          tcp_val.gstatus += gstat;
               replace_word(buffer, sizeof(buffer), "\n", " ");
               replace_word(buffer, sizeof(buffer), "\r", " ");
               replace_word(buffer, sizeof(buffer), ":", "");
@@ -701,7 +702,7 @@ int main( int argc, char *argv[] ) {
 
             /* {"FILTVALS[4]=?;",     "filter number in slot 4",            }, */
             } else if (strncasecmp(pr, "FILTVALS[4]=?;", strlen("FILTVALS[4]=?;")) == 0) {
-	      tcp_val.gstatus += gstat;
+	          tcp_val.gstatus += gstat;
               replace_word(buffer, sizeof(buffer), "\n", " ");
               replace_word(buffer, sizeof(buffer), "\r", " ");
               replace_word(buffer, sizeof(buffer), ":", "");
@@ -711,7 +712,7 @@ int main( int argc, char *argv[] ) {
 
             /* {"FILTVALS[5]=?;",     "filter number in slot 5",            }, */
             } else if (strncasecmp(pr, "FILTVALS[5]=?;", strlen("FILTVALS[5]=?;")) == 0) {
-	      tcp_val.gstatus += gstat;
+	          tcp_val.gstatus += gstat;
               replace_word(buffer, sizeof(buffer), "\n", " ");
               replace_word(buffer, sizeof(buffer), "\r", " ");
               replace_word(buffer, sizeof(buffer), ":", "");
@@ -721,7 +722,7 @@ int main( int argc, char *argv[] ) {
 
             /* {"LV;",                "list variable",                      }, */
             } else if (strncasecmp(pr, "LV;", strlen("LV;")) == 0) {
-	      tcp_val.gstatus += gstat;
+	          tcp_val.gstatus += gstat;
               replace_word(buffer, sizeof(buffer), "\n", " ");
               replace_word(buffer, sizeof(buffer), "\r", " ");
               replace_word(buffer, sizeof(buffer), ":", "");
@@ -998,7 +999,7 @@ int main( int argc, char *argv[] ) {
 
             /*   {"TB;",                "tell status byte",                   }, */
             } else if (strncasecmp(pr, "TB;", strlen("TB;")) == 0) {
-	      tcp_val.gstatus += gstat;
+	          tcp_val.gstatus += gstat;
               replace_word(buffer, sizeof(buffer), "\n", " ");
               replace_word(buffer, sizeof(buffer), "\r", " ");
               replace_word(buffer, sizeof(buffer), ":", "");
@@ -1008,7 +1009,7 @@ int main( int argc, char *argv[] ) {
 
             /*   {"TP;",                "tell (motor) position",              }, */
             } else if (strncasecmp(pr, "TP;", strlen("TP;")) == 0) {
-	      tcp_val.gstatus += gstat;
+	          tcp_val.gstatus += gstat;
               replace_word(buffer, sizeof(buffer), "\n", " ");
               replace_word(buffer, sizeof(buffer), "\r", " ");
               replace_word(buffer, sizeof(buffer), ":", "");

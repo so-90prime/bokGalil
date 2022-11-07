@@ -80,7 +80,7 @@ On bonsai, edit `src/__hosts__.h`:
 
 ```bash
  % make -f test_galil.make
- % ./test_galil -s0
+ % ./test_galil -b0
 ```
 
 ```bash
