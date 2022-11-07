@@ -34,7 +34,7 @@ BOK 90PRIME NG COMMAND / REQUEST SET
       On failure: BOK 90PRIME <cmd-id> ERROR (reason)
 
     BOK 90PRIME <cmd_id> COMMAND IFILTER NAME <str>
-      Explanation: client commands server to change instrument filter to given number
+      Explanation: client commands server to change instrument filter to given name
       On success: BOK 90PRIME <cmd-id> OK
       On failure: BOK 90PRIME <cmd-id> ERROR (reason)
 
