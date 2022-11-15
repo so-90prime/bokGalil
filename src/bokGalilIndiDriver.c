@@ -142,6 +142,7 @@ static void zero_telemetry(void);
  * static variable(s)
  ******************************************************************************/
 static bool busy = false;
+static bool is_done = false;
 static filter_file_t bok_ifilters[BOK_IFILTER_SLOTS];
 static filter_file_t bok_gfilters[BOK_GFILTER_SLOTS];
 static filter_file_t bok_sfilters[BOK_SFILTER_SLOTS];
@@ -271,7 +272,8 @@ ISwitchVectorProperty ifocus_referenceSP = {
 static INumber ifocus_distN[] = {
   {"dista", "Encoder A", "%5.0f", -100.0, 100.0, 1.0, 0.0, 0, 0, 0},
   {"distb", "Encoder B", "%5.0f", -100.0, 100.0, 1.0, 0.0, 0, 0, 0},
-  {"distc", "Encoder C", "%5.0f", -100.0, 100.0, 1.0, 0.0, 0, 0, 0}
+  {"distc", "Encoder C", "%5.0f", -100.0, 100.0, 1.0, 0.0, 0, 0, 0},
+  {"tolerance", "Tolerance", "%5.0f", BOK_MIN_TOLERANCE, BOK_MAX_TOLERANCE, 1.0, BOK_NOM_TOLERANCE, 0, 0, 0}
 };
 static INumberVectorProperty ifocus_distNP = {
   GALIL_DEVICE, "IFOCUS_DIST", "Focus Steps", IFOCUS_GROUP, IP_WO, 0.0, IPS_IDLE, ifocus_distN, NARRAY(ifocus_distN), "", 0
@@ -289,7 +291,8 @@ static INumberVectorProperty ifocus_distallNP = {
 static INumber ifocus_lvdtN[] = {
   {"lvdta", "Focus A", "%5.0f", BOK_MIN_LVDT, BOK_MAX_LVDT, 1.0, 0.0, 0, 0, 0},
   {"lvdtb", "Focus B", "%5.0f", BOK_MIN_LVDT, BOK_MAX_LVDT, 1.0, 0.0, 0, 0, 0},
-  {"lvdtc", "Focus C", "%5.0f", BOK_MIN_LVDT, BOK_MAX_LVDT, 1.0, 0.0, 0, 0, 0}
+  {"lvdtc", "Focus C", "%5.0f", BOK_MIN_LVDT, BOK_MAX_LVDT, 1.0, 0.0, 0, 0, 0},
+  {"tolerance", "Tolerance", "%5.0f", BOK_MIN_TOLERANCE, BOK_MAX_TOLERANCE, 1.0, BOK_NOM_TOLERANCE, 0, 0, 0}
 };
 static INumberVectorProperty ifocus_lvdtNP = {
   GALIL_DEVICE, "IFOCUS_LVDT", "Main Focus", IFOCUS_GROUP, IP_RW, 0.0, IPS_IDLE, ifocus_lvdtN, NARRAY(ifocus_lvdtN), "", 0
@@ -394,11 +397,12 @@ static ITextVectorProperty telemetryTP = {
 };
 
 static ILight telemetry_ifilterwheelL[] = {
-  {"fout", "Filter Out",         ISS_OFF, 0, 0},
-  {"frot", "FW Rotating",        ISS_OFF, 0, 0},
-  {"flin", "Filter Translating", ISS_OFF, 0, 0},
-  {"fin",  "Filter In",          ISS_OFF, 0, 0},
-  {"ferr", "FW Error",           ISS_OFF, 0, 0}
+  {"fout", "IFilter Out",         ISS_OFF, 0, 0},
+  {"frot", "IFilter Rotating",    ISS_OFF, 0, 0},
+  {"flin", "IFilter Translating", ISS_OFF, 0, 0},
+  {"fin",  "IFilter In",          ISS_OFF, 0, 0},
+  {"ferr", "IFilter Error",       ISS_OFF, 0, 0},
+  {"flim", "IFilter Limit",       ISS_OFF, 0, 0}
 };
 ILightVectorProperty telemetry_ifilterwheelLP = {
   GALIL_DEVICE, "FW_LIGHTS", "Filter Wheel", TELEMETRY_GROUP, IPS_IDLE, telemetry_ifilterwheelL, NARRAY(telemetry_ifilterwheelL), "", 0
@@ -573,6 +577,10 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
     float dista = 0.0;
     float distb = 0.0;
     float distc = 0.0;
+    float focus_a = values[0];
+    float focus_b = values[1];
+    float focus_c = values[2];
+    float tolerance = abs(values[3]);
 
     /* we are setting 1 value, here, not all 3 */
     if (n == 1) {
@@ -609,21 +617,97 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
     /* talk to hardware */
     busy = true;
     ifocus_lvdtNP.s = IPS_BUSY;
+    is_done  = false;
     IDMessage(GALIL_DEVICE, "Calling xq_hx() from '%s'", name);
-    if ((gstat=xq_hx()) == G_NO_ERROR) {
-      IDMessage(GALIL_DEVICE, "Called xq_hx() from '%s' OK", name);
+
+    int countdown = BOK_NG_INSTRUMENT_FOCUS_TIME;
+    int tcp_shm_fd = -1;
+    int udp_shm_fd = -1;
+    tcp_val_p tcp_shm_ptr = (tcp_val_p)NULL;
+    udp_val_p udp_shm_ptr = (udp_val_p)NULL;
+
+    tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
+    tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
+    udp_shm_fd = shm_open(BOK_SHM_UDP_NAME, O_RDONLY, 0666);
+    udp_shm_ptr = (udp_val_p)mmap(0, UDP_VAL_SIZE, PROT_READ, MAP_SHARED, udp_shm_fd, 0);
+    if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
+      IDMessage(GALIL_DEVICE, "<ERROR> invalid TCP shared memory");
+    } else if (udp_shm_fd<0 || udp_shm_ptr==(udp_val_p)NULL) {
+      IDMessage(GALIL_DEVICE, "<ERROR> invalid UDP shared memory");
+
     } else {
-      IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_hx() from '%s', gstat=%d", name, (int)gstat);
+      while (--countdown > 0) {
+        float cur_a = round(((float)udp_shm_ptr->a_position * 1000.0));
+        float cur_b = round(((float)udp_shm_ptr->b_position * 1000.0));
+        float cur_c = round(((float)udp_shm_ptr->c_position * 1000.0));
+        dista = round((focus_a/1000.0 - cur_a/1000.0) * BOK_LVDT_ATOD);
+        distb = round((focus_b/1000.0 - cur_b/1000.0) * BOK_LVDT_ATOD);
+        distc = round((focus_c/1000.0 - cur_c/1000.0) * BOK_LVDT_ATOD);
+        float new_a = values[0];
+        float new_b = values[1];
+        float new_c = values[2];
+        if (tolerance<BOK_MIN_TOLERANCE || tolerance>BOK_MAX_TOLERANCE) { tolerance = BOK_NOM_TOLERANCE; }
+        IDMessage(GALIL_DEVICE, "ifocus cur_a=%.4f dista=%.4f focus_a=%.4f new_a=%.4f tolerance=%.4f diff=%.4f, countdown=%d\n", cur_a, dista, focus_a, new_a, tolerance, (cur_a - new_a), countdown);
+        IDMessage(GALIL_DEVICE, "ifocus cur_b=%.4f distb=%.4f focus_b=%.4f new_b=%.4f tolerance=%.4f diff=%.4f, countdown=%d\n", cur_b, distb, focus_b, new_b, tolerance, (cur_b - new_b), countdown);
+        IDMessage(GALIL_DEVICE, "ifocus cur_c=%.4f distc=%.4f focus_c=%.4f new_c=%.4f tolerance=%.4f diff=%.4f, countdown=%d\n", cur_c, distc, focus_c, new_c, tolerance, (cur_c - new_c), countdown);
+        if ((gstat=xq_hx()) == G_NO_ERROR) {
+          IDMessage(GALIL_DEVICE, "Called xq_hx() from '%s' OK", name);
+        } else {
+          IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_hx() from '%s', gstat=%d", name, (int)gstat);
+        }
+        if ( (abs(round(cur_a - new_a)) <= tolerance) && (abs(round(cur_b - new_b)) <= tolerance) && (abs(round(cur_c - new_c)) <= tolerance) ) {
+          IDMessage(GALIL_DEVICE, "ifocus cur_a %.4f new_a %.4f within tolerance %.4f\n", cur_a, new_a, tolerance);
+          IDMessage(GALIL_DEVICE, "ifocus cur_b %.4f new_b %.4f within tolerance %.4f\n", cur_b, new_b, tolerance);
+          IDMessage(GALIL_DEVICE, "ifocus cur_c %.4f new_c %.4f within tolerance %.4f\n", cur_c, new_c, tolerance);
+          is_done = true; break;
+        }
+        (void) sleep(1);
+        IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f) from '%s' with tolerance %.2f", dista, distb, distc, name, tolerance);
+        if ((gstat=xq_focusind(dista, distb, distc)) == G_NO_ERROR) {
+          IDMessage(GALIL_DEVICE, "Called xq_focusind(a=%.1f, b=%.1f, c=%.1f) from '%s' with tolerance %.2f OK", dista, distb, distc, name, tolerance);
+        } else {
+          IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_focusind(a=%.1f, b=%.1f, c=%.1f) from '%s' with tolerance %.2f, gstat=%d", dista, distb, distc, name, tolerance, (int)gstat);
+        }
+        (void) sleep(1);
+      }
+      if (is_done) {
+        IDMessage(GALIL_DEVICE, "ifocus reached focus_a=%.4f focus_b=%.4f focus_c=%.4f within tolerance=%.4f, countdown=%d OK\n", focus_a, focus_b, focus_c, tolerance, countdown);
+        ifocus_lvdtNP.s = IPS_OK;
+      } else {
+        IDMessage(GALIL_DEVICE, "<ERROR> ifocus failed to reached focus_a=%.4f focus_b=%.4f focus_c=%.4f within tolerance=%.4f, countdown=%d OK\n", focus_a, focus_b, focus_c, tolerance, countdown);
+        ifocus_lvdtNP.s = IPS_ALERT;
+      }
+      if ((gstat=xq_hx()) == G_NO_ERROR) {
+        IDMessage(GALIL_DEVICE, "Called xq_hx() from '%s' OK", name);
+      } else {
+        IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_hx() from '%s', gstat=%d", name, (int)gstat);
+      }
+
+      if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
+      if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
+      if (udp_shm_ptr != (udp_val_p)NULL) { (void) munmap(udp_shm_ptr, UDP_VAL_SIZE); }
+      if (udp_shm_fd >= 0) { (void) close(udp_shm_fd); }
     }
-    IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f) from '%s'", dista, distb, distc, name);
-    if ((gstat=xq_focusind(dista, distb, distc)) == G_NO_ERROR) {
-      IDMessage(GALIL_DEVICE, "Called xq_focusind(a=%.1f, b=%.1f, c=%.1f) from '%s' OK", dista, distb, distc, name);
-    } else {
-      IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_focusind(a=%.1f, b=%.1f, c=%.1f) from '%s', gstat=%d", dista, distb, distc, name, (int)gstat);
-    }
-    ifocus_lvdtNP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
     busy = false;
 
+//    /* talk to hardware */
+//    busy = true;
+//    ifocus_lvdtNP.s = IPS_BUSY;
+//    IDMessage(GALIL_DEVICE, "Calling xq_hx() from '%s'", name);
+//    if ((gstat=xq_hx()) == G_NO_ERROR) {
+//      IDMessage(GALIL_DEVICE, "Called xq_hx() from '%s' OK", name);
+//    } else {
+//      IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_hx() from '%s', gstat=%d", name, (int)gstat);
+//    }
+//    IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f) from '%s'", dista, distb, distc, name);
+//    if ((gstat=xq_focusind(dista, distb, distc)) == G_NO_ERROR) {
+//      IDMessage(GALIL_DEVICE, "Called xq_focusind(a=%.1f, b=%.1f, c=%.1f) from '%s' OK", dista, distb, distc, name);
+//    } else {
+//      IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_focusind(a=%.1f, b=%.1f, c=%.1f) from '%s', gstat=%d", dista, distb, distc, name, (int)gstat);
+//    }
+//    ifocus_lvdtNP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
+//    busy = false;
+//
     /* update widget(s) */
     IDSetNumber(&ifocus_lvdtNP, NULL);
 
@@ -1856,6 +1940,7 @@ static void execute_timer(void *p) {
   telemetry_ifilterwheelL[2].s = (udp_val.gaxis_moving == 1) ? IPS_BUSY : IPS_IDLE;
   telemetry_ifilterwheelL[3].s = (tcp_val.lv.filtisin == 1.0) ? IPS_BUSY : IPS_IDLE;
   telemetry_ifilterwheelL[4].s = (tcp_val.lv.errfilt == 1.0) ? IPS_ALERT : IPS_IDLE;
+  telemetry_ifilterwheelL[5].s = (tcp_val.lv.filttsc==2.0 || tcp_val.lv.filttsc==3.0 ) ? IPS_ALERT : IPS_IDLE;
 
   telemetry_engineeringLP.s = IPS_IDLE;
   telemetry_lightsLP.s = IPS_IDLE;
@@ -1863,7 +1948,9 @@ static void execute_timer(void *p) {
   /* logic to update light for filter wheel lights */
   if (tcp_val.lv.errfilt == 1.0) {
     telemetry_ifilterwheelLP.s = IPS_ALERT;
-  } else if (udp_val.haxis_moving == 1 || udp_val.faxis_moving == 1 || udp_val.gaxis_moving == 1 || tcp_val.lv.filtisin == 1.0) {
+  } else if (tcp_val.lv.filttsc==2.0 || tcp_val.lv.filttsc==3.0) {
+    telemetry_ifilterwheelLP.s = IPS_ALERT;
+  } else if (udp_val.haxis_moving==1 || udp_val.faxis_moving==1 || udp_val.gaxis_moving==1 || tcp_val.lv.filtisin==1.0) {
     telemetry_ifilterwheelLP.s = IPS_BUSY;
   } else if (tcp_val.lv.filtisin != 1.0) {
     telemetry_ifilterwheelLP.s = IPS_OK;

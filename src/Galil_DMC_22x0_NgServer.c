@@ -28,20 +28,6 @@
 
 
 /*******************************************************************************
- * times for action(s)
- ******************************************************************************/
-#define BOK_NG_GUIDER_FILTER_TIME      60
-#define BOK_NG_GUIDER_FOCUS_TIME       30
-#define BOK_NG_GUIDER_INIT_TIME        30
-#define BOK_NG_INSTRUMENT_FILTER_TIME  75
-#define BOK_NG_INSTRUMENT_FOCUS_TIME   30
-#define BOK_NG_INSTRUMENT_INIT_TIME    45
-#define BOK_NG_INSTRUMENT_LOAD_TIME    15
-#define BOK_NG_INSTRUMENT_LVDT_TIME    30
-#define BOK_NG_INSTRUMENT_UNLOAD_TIME  15
-
-
-/*******************************************************************************
  * function: thread_handler()
  ******************************************************************************/
 void *thread_handler(void *thread_fd) {
@@ -860,7 +846,7 @@ void *thread_handler(void *thread_fd) {
                 (void) logtime(" ifocus cur_b %.4f new_b %.4f within tolerance %.4f\n", cur_b, new_b, tolerance);
                 (void) logtime(" ifocus cur_c %.4f new_c %.4f within tolerance %.4f\n", cur_c, new_c, tolerance);
                 is_done = true; break;
- 	      }
+ 	          }
               (void) sleep(1);
               gstat = xq_focusind(dista, distb, distc);
               (void) logtime(" ifocus xq_focusind(%.4f, %.4f, %.4f), gstat=%d\n", dista, distb, distc, (int)gstat);

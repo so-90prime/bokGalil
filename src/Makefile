@@ -63,6 +63,11 @@ all:
 	 gcc $(CFLAGS) -o $(HERE)/$$target $(HERE)/$$target.c $(LLIBS) $(GLIBS);\
 	done
 
+bok:
+	rm -rf $(HERE)/__hosts__.h >> /dev/null 2>&1
+	ln -sf $(HERE)/__hosts__.bok.h $(HERE)/__hosts__.h
+	make everything
+
 clean:
 	for target in $(ATARGETS); do\
 	 rm -rf $(HERE)/$$target >> /dev/null 2>&1;\
@@ -122,6 +127,11 @@ install:
 	cp $(HERE)/Galil_DMC_22x0_TCP_Read.py $(BOK_BIN)/
 	cp $(HERE)/Galil_DMC_22x0_UDP_Read.py $(BOK_BIN)/
 	touch $(BOK_BIN)/*
+
+lab:
+	rm -rf $(HERE)/__hosts__.h >> /dev/null 2>&1
+	ln -sf $(HERE)/__hosts__.lab.h $(HERE)/__hosts__.h
+	make everything
 
 libbokGalil.a: bokGalil.c
 	rm -rf $(HERE)/$@ $(BOK_LIB)/$@ $(HERE)/bokGalil.o >> /dev/null 2>&1

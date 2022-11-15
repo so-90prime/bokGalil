@@ -80,9 +80,26 @@
 #define BOK_UDP_DELAY_MS     500
 #define BOK_UDP_FAUCET_ON    "DR0;IHE=>-3;IHE=192,168,0,1<5078>1;DR1000,4;"
 #define BOK_UDP_FAUCET_OFF   "DR0;IHE=>-3;"
-#define BOK_MAX_LVDT_DIFF     200.0
+#define BOK_MAX_LVDT_DIFF     250.0
 #define BOK_MAX_LVDT         2500.0
 #define BOK_MIN_LVDT         -150.0
+#define BOK_MAX_TOLERANCE     10.0
+#define BOK_MIN_TOLERANCE     3.0
+#define BOK_NOM_TOLERANCE     5.0
+
+
+/*******************************************************************************
+ * times for action(s)
+ ******************************************************************************/
+#define BOK_NG_GUIDER_FILTER_TIME      60
+#define BOK_NG_GUIDER_FOCUS_TIME       30
+#define BOK_NG_GUIDER_INIT_TIME        30
+#define BOK_NG_INSTRUMENT_FILTER_TIME  75
+#define BOK_NG_INSTRUMENT_FOCUS_TIME   30
+#define BOK_NG_INSTRUMENT_INIT_TIME    45
+#define BOK_NG_INSTRUMENT_LOAD_TIME    15
+#define BOK_NG_INSTRUMENT_LVDT_TIME    30
+#define BOK_NG_INSTRUMENT_UNLOAD_TIME  15
 
 
 /*******************************************************************************
