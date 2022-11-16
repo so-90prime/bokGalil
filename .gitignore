@@ -78,8 +78,6 @@ src/Galil_DMC_22x0_UDP_Read
 src/Galil_DMC_22x0_UDP_Write
 src/libbokGalil.a
 src/libbokGalil.so
-src/__hosts__.bok.h
-src/__hosts__.lab.h
 src/__hosts__.h
 src/__hosts__.py
 lib/libbokGalil.a
