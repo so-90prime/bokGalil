@@ -1,0 +1,4 @@
+xLabel.foreground blue
+xLabel.background wheat
+xLabel.relief flat
+xLabel.font *-Lucida-medium-r-medium--16-*

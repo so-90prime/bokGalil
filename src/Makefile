@@ -22,6 +22,7 @@ BOK_ETC  := $(shell env | grep BOK_GALIL_ETC  | cut -d'=' -f2)
 BOK_LIB  := $(shell env | grep BOK_GALIL_LIB  | cut -d'=' -f2)
 BOK_LOG  := $(shell env | grep BOK_GALIL_LOG  | cut -d'=' -f2)
 BOK_SRC  := $(shell env | grep BOK_GALIL_SRC  | cut -d'=' -f2)
+BOK_TCL  := $(shell env | grep BOK_GALIL_TCL  | cut -d'=' -f2)
 
 
 #///////////////////////////////////////////////////////////////////////////////
@@ -61,6 +62,11 @@ bart:
 bonsai:
 	rm -rf $(HERE)/__hosts__.h >> /dev/null 2>&1
 	ln -sf $(HERE)/__hosts__.bonsai.h $(HERE)/__hosts__.h
+	make everything
+
+home:
+	rm -rf $(HERE)/__hosts__.h >> /dev/null 2>&1
+	ln -sf $(HERE)/__hosts__.home.h $(HERE)/__hosts__.h
 	make everything
 
 lab:
@@ -114,8 +120,14 @@ clean:
 	rm -f $(BOK_BIN)/Galil_DMC_22x0_TCP_Read.py >> /dev/null 2>&1
 	rm -f $(BOK_BIN)/Galil_DMC_22x0_UDP_Read.py >> /dev/null 2>&1
 	rm -rf /dev/shm/tcp_shm /dev/shm/udp_shm >> /dev/null 2>&1
-	rm -f $(HERE)/__hosts__.py >> /dev/null 2>&1
-	sed 's?\#define ??g' __hosts__.h | awk '{gsub(/[ ]+/," = ")}1' >> __hosts__.py
+	rm -f $(BOK_SRC)/__hosts__.py >> /dev/null 2>&1
+	sed 's?\#define ??g' $(BOK_SRC)/__hosts__.h | awk '{gsub(/[ ]+/," = ")}1' >> $(BOK_SRC)/__hosts__.py
+	rm -f $(BOK_TCL)/bokHosts.tcl >> /dev/null 2>&1
+	echo "proc bokHosts { } {" >> $(BOK_TCL)/bokHosts.tcl
+	echo "  global env bokLocals bokVersions bokVariables bokWidgets bokXopts" >> $(BOK_TCL)/bokHosts.tcl
+	sed 's?\#define ?  set bokLocals\(?g' $(BOK_SRC)/__hosts__.h | awk  '{gsub(/[ ]+\"/,"\) \"")}1' | sed 's/_PORT/_PORT\)/g' >> $(BOK_TCL)/bokHosts.tcl
+	echo "}" >> $(BOK_TCL)/bokHosts.tcl
+	chmod 755 $(BOK_TCL)/bokHosts.tcl
 
 everything:
 	make clean
