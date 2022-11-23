@@ -1,12 +1,6 @@
 proc bokUpdateWidgets { W } {
-
-  # global(s)
-  global env bokLocals bokVersions bokVariables bokWidgets bokXopts
-
-  # continue?
-  # puts stdout "update gui"
+  global env bokParams bokVariables bokVersions bokWidgets bokXopt
   update
-  # puts stdout "updating widget(s)"
   bokUpdateVariables
   after 1500 bokUpdateWidgets ${W}
 }

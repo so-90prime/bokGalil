@@ -1,9 +1,12 @@
+#+
+# ngui_xopts.cfg
+#-
 # Generic catch-all 
 xforeground black
 xbackground wheat
 # Button
-xButton.background thistle
-xButton.foreground blue
+xButton.background pink
+xButton.foreground black
 xButton.relief raised
 xButton.font *-Lucida-medium-r-normal--16-*
 # Checkbutton
@@ -40,10 +43,9 @@ xFrame.background wheat
 xFrame.foreground black
 xFrame.relief flat
 # Label
-xLabel.foreground DarkRed
-xLabel.background LightYellow
+xLabel.foreground darkred
+xLabel.background wheat
 xLabel.relief flat
-xLabel.font *-Lucida-medium-r-bold--24-*
 # Listboxes
 xListbox.background wheat
 xListbox.foreground black

@@ -1,13 +1,18 @@
 proc bokAbout { W } {
-  global env bokLocals bokVersions bokVariables bokWidgets bokXopts
-  bokSetXopts bokSplash.xdialog
+  global env bokParams bokVariables bokVersions bokWidgets bokXopt
   tk_dialog ${W}.dialog "About ..." $bokVersions(HELP) info 0 Dismiss
-  bokSetXopts bokSplash.xopt
   return 0
 }
 
+proc bokClear { } {
+  global env bokParams bokVariables bokVersions bokWidgets bokXopt
+  $bokWidgets(bok_text_widget) configure -state normal
+  $bokWidgets(bok_text_widget) delete 1.0 end
+  $bokWidgets(bok_text_widget) configure -state disabled
+}
+
 proc bokExit { N } {
-  global env bokLocals bokVersions bokVariables bokWidgets bokXopts
+  global env bokParams bokVariables bokVersions bokWidgets bokXopt
   trace vdelete bokVariables(bok_memory)     w bokTraceVariables
   trace vdelete bokVariables(bok_tcpmem)     w bokTraceVariables
   trace vdelete bokVariables(bok_udpmem)     w bokTraceVariables
@@ -20,11 +25,31 @@ proc bokExit { N } {
   exit ${N}
 }
 
+proc bokInform { M } {
+  global env bokParams bokVariables bokVersions bokWidgets bokXopt
+  if { $bokWidgets(bok_text_widget) != "" } {
+    scan [$bokWidgets(bok_text_widget) index end] %d N
+    if { $N > 750 } { bokClear }
+    $bokWidgets(bok_text_widget) configure -state normal
+    $bokWidgets(bok_text_widget) insert end "$M\n"
+    $bokWidgets(bok_text_widget) yview -pickplace end
+    $bokWidgets(bok_text_widget) configure -state disabled
+    bokStringMatch ERROR " $bokWidgets(bok_text_widget) tag add errs first last "
+  }
+}
+
 proc bokInit { } {
-  global env bokLocals bokVersions bokVariables bokWidgets bokXopts
-  bokInitLocals
+  global env bokParams bokVariables bokVersions bokWidgets bokXopt
   bokInitVersions
-  bokSetXopts bokSplash.xopt
+  set bokVariables(txt_memory)     "Shared Memory Handler"
+  set bokVariables(txt_tcpmem)     "TCP Memory Segment (/dev/shm/tcp_mem)"
+  set bokVariables(txt_udpmem)     "UDP Memory Segment (/dev/shm/udp_mem)"
+  set bokVariables(txt_indidriver) bokGalilIndiDriver
+  set bokVariables(txt_indiserver) "IndiServer ($bokParams(BOK_INDI_ADDR):$bokParams(BOK_INDI_PORT))"
+  set bokVariables(txt_ngserver)   "Ng Server ($bokParams(BOK_NG_ADDR):$bokParams(BOK_NG_PORT))"
+  set bokVariables(txt_website)    "http://$bokParams(BOK_WEB_ADDR):$bokParams(BOK_WEB_PORT)"
+  set bokVariables(txt_dataserver) "DataServer"
+  set bokVariables(txt_ds9)        "ds9"
   trace variable bokVariables(bok_memory)     w bokTraceVariables
   trace variable bokVariables(bok_tcpmem)     w bokTraceVariables
   trace variable bokVariables(bok_udpmem)     w bokTraceVariables
@@ -37,23 +62,18 @@ proc bokInit { } {
   bokUpdateVariables
 }
 
-proc bokInitLocals { } {
-  global env bokLocals bokVersions bokVariables bokWidgets bokXopts
-  set bokLocals(instrument) "90Prime"
-}
-
 proc bokInitVersions { } {
-  global env bokLocals bokVersions bokVariables bokWidgets bokXopts tcl_version tk_version
+  global env bokParams bokVariables bokVersions bokWidgets bokXopt tcl_version tk_version
   set bokVersions(AUTHOR)  "Philip N. Daly"
   set bokVersions(EMAIL)   "pndaly@arizona.edu"
   set bokVersions(DATE)    "21 November 2022"
   set bokVersions(VERSION) 20221121
   set bokVersions(OWNER)   "Steward Observatory"
-  set bokVersions(HELP) "$bokLocals(instrument):\t v$bokVersions(VERSION)\nCopyLeft:\t $bokVersions(OWNER)\nAuthor:\t $bokVersions(AUTHOR)\nE-mail:\t $bokVersions(EMAIL)\nDate:\t $bokVersions(DATE)\nTcl:\t v$tcl_version\nTk:\t v$tk_version\n"
+  set bokVersions(HELP) "$bokParams(BOK_INSTRUMENT):\t v$bokVersions(VERSION)\nCopyLeft:\t $bokVersions(OWNER)\nAuthor:\t $bokVersions(AUTHOR)\nE-mail:\t $bokVersions(EMAIL)\nDate:\t $bokVersions(DATE)\nTcl:\t v$tcl_version\nTk:\t v$tk_version\n"
 }
 
 proc bokPidOf { N } {
-  global env bokLocals bokVersions bokVariables bokWidgets bokXopts
+  global env bokParams bokVariables bokVersions bokWidgets bokXopt
   set _s [catch {exec pidof -zcxd, ${N}} _r]
   if {${_s} == 0} {return ${_r}}
   if {${_s} == 1 && [string compare -nocase ${_r} "child process exited abnormally"]==0} {return 0}
@@ -61,7 +81,7 @@ proc bokPidOf { N } {
 }
 
 proc bokPidOf2 { N } {
-  global env bokLocals bokVersions bokVariables bokWidgets bokXopts
+  global env bokParams bokVariables bokVersions bokWidgets bokXopt
   set _s [catch {exec ps -ef | grep -v grep | grep ${N}} _r]
   if {${_s} == 0} {
     return [lindex [csv::split [string map {" " ","} [regexp -all -inline {\w+} ${_r}]]] 1]
@@ -70,95 +90,76 @@ proc bokPidOf2 { N } {
   }
 }
 
-proc bokSetXopts { F } {
-  global env bokLocals bokVersions bokVariables bokWidgets bokXopts
+proc bokSetXopt { F } {
+  global env bokParams bokVariables bokVersions bokWidgets bokXopt
   if { [file exists $F] == 0 } { return }
   set D [open $F r]
   while { [gets $D T] >= 0 } {
-    if { ([llength $T]==2) && ([string index $T 0]!="#") } { set bokXopts([lindex $T 0]) [lindex $T 1] }
+    if { ([llength $T]==2) && ([string index $T 0]!="#") } { set bokXopt([lindex $T 0]) [lindex $T 1] }
   }
   close $D
-  foreach O [array names bokXopts {x*}] { option add *[string range $O 1 end] $bokXopts($O) }
+  foreach O [array names bokXopt {x*}] { option add *[string range $O 1 end] $bokXopt($O) }
 }
 
-proc bokShowLocals { } {
-  global env bokLocals bokVersions bokVariables bokWidgets bokXopts
-  foreach E [array names bokLocals] { puts stdout "\nbokShowLocals <INFO>: $E = $bokLocals($E)" }
+proc bokShowParameters { } {
+  global env bokParams bokVariables bokVersions bokWidgets bokXopt
+  foreach E [array names bokParams] { bokInform "bokShowParameters <INFO>: $E = $bokParams($E)" }
 }
 
 proc bokShowVariables { } {
-  global env bokLocals bokVersions bokVariables bokWidgets bokXopts
-  foreach E [array names bokVariables] { puts stdout "\nbokShowVariables <INFO>: $E = $bokVariables($E)" }
+  global env bokParams bokVariables bokVersions bokWidgets bokXopt
+  foreach E [array names bokVariables] { bokInform "bokShowVariables <INFO>: $E = $bokVariables($E)" }
 }
 
 proc bokShowWidgets { } {
-  global env bokLocals bokVersions bokVariables bokWidgets bokXopts
-  foreach E [array names bokWidgets] { puts stdout "\nbokShowWidgets <INFO>: $E = $bokWidgets($E)" }
+  global env bokParams bokVariables bokVersions bokWidgets bokXopt
+  foreach E [array names bokWidgets] { bokInform "bokShowWidgets <INFO>: $E = $bokWidgets($E)" }
 }
 
-proc bokStop { } {
-  global env bokLocals bokVersions bokVariables bokWidgets bokXopts
-  if {[info exists bokVariables(bok_indidriver)] && $bokVariables(bok_indidriver) > 0} {
-    puts "\nbokStop <bok_indidriver>: after 500 bokTerminate $bokVariables(bok_indidriver)"
-    after 500 bokTerminate $bokVariables(bok_indidriver)
-  }
-  if {[info exists bokVariables(bok_indiserver)] && $bokVariables(bok_indiserver) > 0} {
-    puts "\nbokStop <bok_indiserver>: after 500 bokTerminate $bokVariables(bok_indiserver)"
-    after 500 bokTerminate $bokVariables(bok_indiserver)
-  }
-  if {[info exists bokVariables(bok_ngserver)] && $bokVariables(bok_ngserver) > 0} {
-    puts "\nbokStop <bok_ngserver>: after 500 bokTerminate $bokVariables(bok_ngserver)"
-    after 500 bokTerminate $bokVariables(bok_ngserver)
-  }
-  if {[info exists bokVariables(bok_memory)] && $bokVariables(bok_memory) > 0} {
-    puts "\nbokStop <bok_memory>: after 500 bokTerminate $bokVariables(bok_memory)"
-    after 500 bokTerminate $bokVariables(bok_memory)
-  }
-  if {[info exists bokVariables(bok_website)] && $bokVariables(bok_website) > 0} {
-    puts "\nbokStop <bok_webiste>: after 500 bokTerminate $bokVariables(bok_website)"
-    after 500 bokTerminate $bokVariables(bok_website)
-  }
-  if {[info exists bokVariables(bok_ds9)] && $bokVariables(bok_ds9) > 0} {
-    puts "\nbokStop <bok_dataserver>: after 500 bokTerminate $bokVariables(bok_ds9)"
-    after 500 bokTerminate $bokVariables(bok_ds9)
-  }
-  if {[info exists bokVariables(bok_dataserver)] && $bokVariables(bok_dataserver) > 0} {
-    puts "\nbokStop <bok_dataserver>: after 500 bokTerminate $bokVariables(bok_dataserver)"
-    after 500 bokTerminate $bokVariables(bok_dataserver)
-  }
-  if {[info exists bokVariables(bok_tcpmem)] && $bokVariables(bok_tcpmem) > 0} {
-    puts "\nbokStop <bok_tcpmem>: file delete -force /dev/shm/tcp_mem"
-    file delete -force /dev/shm/tcp_shm
-  }
-  if {[info exists bokVariables(bok_udpmem)] && $bokVariables(bok_udpmem) > 0} {
-    puts "\nbokStop <bok_udpmem>: file delete -force /dev/shm/udp_mem"
-    file delete -force /dev/shm/udp_shm
+proc bokShowXopt { } {
+  global env bokParams bokVariables bokVersions bokWidgets bokXopt
+  foreach E [array names bokXopt] { bokInform "bokShowXopt <INFO>: $E = $bokXopt($E)" }
+}
+
+proc bokStringMatch { P S } {
+  global env bokParams bokVariables bokVersions bokWidgets bokXopt
+  if { $bokWidgets(bok_text_widget) != "" } {
+    scan [$bokWidgets(bok_text_widget) index end] %d n
+    for {set i 1} {$i < $n} {incr i} {
+      $bokWidgets(bok_text_widget) delete 0.0 1.0
+      $bokWidgets(bok_text_widget) mark set last $i.0
+      while {[regexp -indices $P [$bokWidgets(bok_text_widget) get last "last lineend"] x]} {
+        $bokWidgets(bok_text_widget) mark set first "last + [lindex $x 0] chars"
+        $bokWidgets(bok_text_widget) mark set last "last + 1 chars + [lindex $x 1] chars"
+        uplevel $S
+      }
+    }
   }
 }
 
 proc bokTerminate { N } {
-  global env bokLocals bokVersions bokVariables bokWidgets bokXopts
+  global env bokParams bokVariables bokVersions bokWidgets bokXopt
   set _s [catch {exec kill -9 ${N}} _r]
   if {${_s} == 0} {return ${_s}}
   return "${_s}:${_r}" 
 }
 
 proc bokTraceVariables { name element op } {
-  global env bokLocals bokVersions bokVariables bokWidgets bokXopts
+  global env bokParams bokVariables bokVersions bokWidgets bokXopt
   if { ${element} != "" } { set name ${name}(${element}) }
   upvar ${name} x
   set _elem [string trim ${element}]
   if { [info exists bokWidgets(${_elem})] } {
     if { $x == 0 } {
-      $bokWidgets(${_elem}) configure -bg LightSalmon -fg DarkRed
+      $bokWidgets(${_elem}) configure -bg #B40000 -fg #0000B4
     } else {
-      $bokWidgets(${_elem}) configure -bg PaleGreen -fg DarkGreen
+      $bokWidgets(${_elem}) configure -bg #00B400 -fg #0000B4
     }
   }
 }
 
 proc bokUpdateVariables { } {
-  global env bokLocals bokVersions bokVariables bokWidgets bokXopts
+  global env bokParams bokVariables bokVersions bokWidgets bokXopt
   set bokVariables(bok_memory)     [bokPidOf Galil_DMC_22x0_Write_Memory]
   set bokVariables(bok_tcpmem)     [file exists /dev/shm/tcp_shm] 
   set bokVariables(bok_udpmem)     [file exists /dev/shm/udp_shm] 

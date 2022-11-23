@@ -122,12 +122,12 @@ clean:
 	rm -rf /dev/shm/tcp_shm /dev/shm/udp_shm >> /dev/null 2>&1
 	rm -f $(BOK_SRC)/__hosts__.py >> /dev/null 2>&1
 	sed 's?\#define ??g' $(BOK_SRC)/__hosts__.h | awk '{gsub(/[ ]+/," = ")}1' >> $(BOK_SRC)/__hosts__.py
-	rm -f $(BOK_TCL)/bokHosts.tcl >> /dev/null 2>&1
-	echo "proc bokHosts { } {" >> $(BOK_TCL)/bokHosts.tcl
-	echo "  global env bokLocals bokVersions bokVariables bokWidgets bokXopts" >> $(BOK_TCL)/bokHosts.tcl
-	sed 's?\#define ?  set bokLocals\(?g' $(BOK_SRC)/__hosts__.h | awk  '{gsub(/[ ]+\"/,"\) \"")}1' | sed 's/_PORT/_PORT\)/g' >> $(BOK_TCL)/bokHosts.tcl
-	echo "}" >> $(BOK_TCL)/bokHosts.tcl
-	chmod 755 $(BOK_TCL)/bokHosts.tcl
+	# rm -f $(BOK_TCL)/bokHosts.tcl >> /dev/null 2>&1
+	# echo "proc bokHosts { } {" >> $(BOK_TCL)/bokHosts.tcl
+	# echo "  global env bokLocals bokVersions bokVariables bokWidgets bokXopts" >> $(BOK_TCL)/bokHosts.tcl
+	# sed 's?\#define ?  set bokLocals\(?g' $(BOK_SRC)/__hosts__.h | awk  '{gsub(/[ ]+\"/,"\) \"")}1' | sed 's/_PORT/_PORT\)/g' >> $(BOK_TCL)/bokHosts.tcl
+	# echo "}" >> $(BOK_TCL)/bokHosts.tcl
+	# chmod 755 $(BOK_TCL)/bokHosts.tcl
 
 everything:
 	make clean
