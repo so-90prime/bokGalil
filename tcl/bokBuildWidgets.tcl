@@ -49,15 +49,12 @@ proc bokBuildWidgets { W } {
   pack $bokWidgets(bok_ds9)        -side top -expand yes -fill both
 
   # create button(s)
-  set bokWidgets(bok_start) [button $bokWidgets(bok_lower).bok_start -text "START" -command "puts start"]
+  set bokWidgets(bok_start) [button $bokWidgets(bok_lower).bok_start -text "START" -command bokStart]
   pack $bokWidgets(bok_start) -fill both -expand yes -side left
-
-  #set bokWidgets(bok_exit) [button $bokWidgets(bok_lower).bok_exit -text "EXIT" -command "bokExit 0"]
-  #pack $bokWidgets(bok_exit) -fill both -expand yes -side left
-
-  #set bokWidgets(bok_project) [button $bokWidgets(bok_lower).bok_project -text "Set Project" -command "bokSetProject .proj"]
-  #pack $bokWidgets(bok_project) -fill both -expand yes -side left
-
+  # set bokWidgets(bok_exit) [button $bokWidgets(bok_lower).bok_exit -text "EXIT" -command "bokExit 0"]
+  # pack $bokWidgets(bok_exit) -fill both -expand yes -side left
+  # set bokWidgets(bok_project) [button $bokWidgets(bok_lower).bok_project -text "Set Project" -command "bokSetProject .proj"]
+  # pack $bokWidgets(bok_project) -fill both -expand yes -side left
   set bokWidgets(bok_stop) [button $bokWidgets(bok_lower).bok_stop -text "STOP" -command bokStop]
   pack $bokWidgets(bok_stop) -fill both -expand yes -side left
 

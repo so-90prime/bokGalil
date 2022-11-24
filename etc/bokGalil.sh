@@ -41,6 +41,6 @@ export PYTHONPATH=${BOK_GALIL_HOME}:${BOK_GALIL_SRC}:${PYTHONPATH}
 # -
 if [[ ! -z ${2} ]]; then
   python3 -c 'from src import *; get_iers()'
-  _gui=$(echo ${2} | tr [:upper:] [:lower:])
-  [[ ${_gui} = "gui" ]] && (nohup ${BOK_GALIL_TCL}/bokSplash.tcl &)
+  _gui=$(echo ${2} | tr '[A-Z]' '[a-z]')
+  [[ ${_gui} = "gui" ]] && (nohup ${BOK_GALIL_TCL}/bokSplash.tcl >> /dev/null 2>&1 &)
 fi

@@ -21,9 +21,9 @@ proc bokBuildFrame { W } {
   ${W}.mb.file.menu add command -underline 5 -label "Show Widget(s)"    -command bokShowWidgets
   ${W}.mb.file.menu add command -underline 5 -label "Show Xopt(s)"      -command bokShowXopt
   ${W}.mb.file.menu add separator
-  ${W}.mb.file.menu add command -underline 1 -label "Clear Text Widget"    -command bokClear
-  ${W}.mb.file.menu add command -underline 1 -label "Set Project"          -command "bokSetProject .proj"
-  ${W}.mb.file.menu add command -underline 1 -label "Exit Application GUI" -command "bokExit 0"
+  ${W}.mb.file.menu add command -underline 0 -label "Clear Text Widget"    -command bokClear
+  ${W}.mb.file.menu add command -underline 0 -label "Set Project"          -command "bokSetProject .proj"
+  ${W}.mb.file.menu add command -underline 0 -label "Exit Application GUI" -command "bokExit 0"
 
   menu ${W}.mb.help.menu
   ${W}.mb.help.menu add command -underline 0 -label About -command "bokAbout $W"
