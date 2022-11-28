@@ -29,12 +29,14 @@ proc bokInform { M } {
   global env bokParams bokVariables bokVersions bokWidgets bokXopt
   if { $bokWidgets(bok_text_widget) != "" } {
     scan [$bokWidgets(bok_text_widget) index end] %d N
-    if { $N > 750 } { bokClear }
+    if { $N > 250 } { bokClear }
     $bokWidgets(bok_text_widget) configure -state normal
     $bokWidgets(bok_text_widget) insert end "$M\n"
     $bokWidgets(bok_text_widget) yview -pickplace end
     $bokWidgets(bok_text_widget) configure -state disabled
     bokStringMatch ERROR " $bokWidgets(bok_text_widget) tag add errs first last "
+    bokStringMatch INFO  " $bokWidgets(bok_text_widget) tag add info first last "
+    bokStringMatch WARN  " $bokWidgets(bok_text_widget) tag add warn first last "
   }
 }
 
@@ -103,22 +105,22 @@ proc bokSetXopt { F } {
 
 proc bokShowParameters { } {
   global env bokParams bokVariables bokVersions bokWidgets bokXopt
-  foreach E [array names bokParams] { bokInform "bokShowParameters <INFO>: $E = $bokParams($E)" }
+  foreach E [array names bokParams] { bokInform "$E = $bokParams($E)" }
 }
 
 proc bokShowVariables { } {
   global env bokParams bokVariables bokVersions bokWidgets bokXopt
-  foreach E [array names bokVariables] { bokInform "bokShowVariables <INFO>: $E = $bokVariables($E)" }
+  foreach E [array names bokVariables] { bokInform "$E = $bokVariables($E)" }
 }
 
 proc bokShowWidgets { } {
   global env bokParams bokVariables bokVersions bokWidgets bokXopt
-  foreach E [array names bokWidgets] { bokInform "bokShowWidgets <INFO>: $E = $bokWidgets($E)" }
+  foreach E [array names bokWidgets] { bokInform "$E = $bokWidgets($E)" }
 }
 
 proc bokShowXopt { } {
   global env bokParams bokVariables bokVersions bokWidgets bokXopt
-  foreach E [array names bokXopt] { bokInform "bokShowXopt <INFO>: $E = $bokXopt($E)" }
+  foreach E [array names bokXopt] { bokInform "$E = $bokXopt($E)" }
 }
 
 proc bokStringMatch { P S } {

@@ -49,18 +49,17 @@ proc bokBuildWidgets { W } {
   pack $bokWidgets(bok_ds9)        -side top -expand yes -fill both
 
   # create button(s)
-  set bokWidgets(bok_start) [button $bokWidgets(bok_lower).bok_start -text "START" -command bokStart]
+  set bokWidgets(bok_start) [button $bokWidgets(bok_lower).bok_start -text "Start" -command bokStart]
   pack $bokWidgets(bok_start) -fill both -expand yes -side left
-  # set bokWidgets(bok_exit) [button $bokWidgets(bok_lower).bok_exit -text "EXIT" -command "bokExit 0"]
-  # pack $bokWidgets(bok_exit) -fill both -expand yes -side left
-  # set bokWidgets(bok_project) [button $bokWidgets(bok_lower).bok_project -text "Set Project" -command "bokSetProject .proj"]
-  # pack $bokWidgets(bok_project) -fill both -expand yes -side left
-  set bokWidgets(bok_stop) [button $bokWidgets(bok_lower).bok_stop -text "STOP" -command bokStop]
+  set bokWidgets(bok_status) [button $bokWidgets(bok_lower).bok_status -text "Status" -command bokStatus]
+  pack $bokWidgets(bok_status) -fill both -expand yes -side left
+  set bokWidgets(bok_stop) [button $bokWidgets(bok_lower).bok_stop -text "Stop" -command bokStop]
   pack $bokWidgets(bok_stop) -fill both -expand yes -side left
 
   # create label
   pack [label $bokWidgets(bok_basement).banner -fg blue -text "$bokParams(BOK_INSTRUMENT) v$bokVersions(VERSION) (C) $bokVersions(OWNER), Contact: $bokVersions(AUTHOR) $bokVersions(EMAIL)" -font -adobe-helvetica-italic-r-normal--*-110-* -relief sunken] -expand yes -fill both -side top 
 
   # return
+  bokBindWidgets ${T}
   return ${T}
 }
