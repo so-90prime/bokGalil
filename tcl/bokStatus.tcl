@@ -1,16 +1,3 @@
-# +
-# BOK_INSTRUMENT \ Instrument                 \ 90Prime
-# BOK_INDI_ADDR  \ Indiserver Address         \ 10.130.133.206
-# BOK_INDI_PORT  \ Indiserver Port            \ 7624
-# BOK_NG_ADDR    \ NG Server Address          \ 10.130.133.206
-# BOK_NG_PORT    \ NG Server Port             \ 5750
-# BOK_TCP_ADDR   \ Galil TCP Command Address  \ 10.130.133.206
-# BOK_TCP_PORT   \ Galil TCP Command Port     \ 23
-# BOK_UDP_ADDR   \ Galil UDP Command Address  \ 10.130.133.206
-# BOK_UDP_PORT   \ Galil UDP Command Port     \ 5078
-# BOK_WEB_ADDR   \ pyINDI Website Address     \ 10.130.133.206
-# BOK_WEB_PORT   \ pyINDI Website Port        \ 5905
-# -
 proc bokStatus { } {
   global env bokParams bokVariables bokVersions bokWidgets bokXopt
   bokClear
@@ -34,9 +21,9 @@ proc bokStatus { } {
   }
 
   if {[info exists bokVariables(bok_memory)] && $bokVariables(bok_memory) > 0} {
-    bokInform [format {%4s %-35s %s} "INFO" "Galil_DMC_22x0_Write_memory" "RUNNING (pid(s): $bokVariables(bok_memory))"]
+    bokInform [format {%4s %-35s %s} "INFO" "Galil_DMC_22x0_Write_Memory" "RUNNING (pid(s): $bokVariables(bok_memory))"]
   } else {
-    bokInform [format {%4s %-35s %s} "INFO" "Galil_DMC_22x0_Write_memory" "NOT RUNNING"]
+    bokInform [format {%4s %-35s %s} "INFO" "Galil_DMC_22x0_Write_Memory" "NOT RUNNING"]
   }
 
   if {[info exists bokVariables(bok_website)] && $bokVariables(bok_website) > 0} {

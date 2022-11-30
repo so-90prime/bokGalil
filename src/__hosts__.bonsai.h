@@ -1,7 +1,7 @@
 #define _GALIL_           "192.168.0.100"
 #define BOK_GALIL_CMD_BOK "10.30.3.31"
 #define BOK_GALIL_CMD_LAB "192.168.0.100"
-#define BOK_NG_HOST       "10.30.1.7"
+#define BOK_NG_ADDR       "10.30.1.7"
 #define BOK_NG_PORT       5750
 #define BOK_TCP_ADDR      "10.30.3.31"
 #define BOK_TCP_PORT      23

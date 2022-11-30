@@ -1,7 +1,7 @@
 # +
 # BOK_INSTRUMENT \ Instrument                 \ 90Prime
-# BOK_INDI_ADDR  \ Indiserver Address         \ 10.130.133.206
-# BOK_INDI_PORT  \ Indiserver Port            \ 7624
+# BOK_INDI_ADDR  \ IndiServer Address         \ 10.130.133.206
+# BOK_INDI_PORT  \ IndiServer Port            \ 7624
 # BOK_NG_ADDR    \ NG Server Address          \ 10.130.133.206
 # BOK_NG_PORT    \ NG Server Port             \ 5750
 # BOK_TCP_ADDR   \ Galil TCP Command Address  \ 10.130.133.206
@@ -10,6 +10,8 @@
 # BOK_UDP_PORT   \ Galil UDP Command Port     \ 5078
 # BOK_WEB_ADDR   \ pyINDI Website Address     \ 10.130.133.206
 # BOK_WEB_PORT   \ pyINDI Website Port        \ 5905
+# BOK_DATA_ADDR  \ DataServer Address         \ 10.130.133.206
+# BOK_DATA_PORT  \ DataServer Port            \ 6543
 # -
 
 proc bokSetProjectQuit { W } {
@@ -38,8 +40,8 @@ proc bokSetProjectReInit { X } {
   if { [file exists ${X}] == 0 } { exec rm -f ${X} }
   set F [open ${X} w]
   puts $F [format "BOK_INSTRUMENT \\ Instrument                 \\ %s" [string trim $bokParams(BOK_INSTRUMENT)]]
-  puts $F [format "BOK_INDI_ADDR  \\ Indiserver Address         \\ %s" [string trim $bokParams(BOK_INDI_ADDR)]]
-  puts $F [format "BOK_INDI_PORT  \\ Indiserver Port            \\ %d" [string trim $bokParams(BOK_INDI_PORT)]]
+  puts $F [format "BOK_INDI_ADDR  \\ IndiServer Address         \\ %s" [string trim $bokParams(BOK_INDI_ADDR)]]
+  puts $F [format "BOK_INDI_PORT  \\ IndiServer Port            \\ %d" [string trim $bokParams(BOK_INDI_PORT)]]
   puts $F [format "BOK_NG_ADDR    \\ NG Server Address          \\ %s" [string trim $bokParams(BOK_NG_ADDR)]]
   puts $F [format "BOK_NG_PORT    \\ NG Server Port             \\ %d" [string trim $bokParams(BOK_NG_PORT)]]
   puts $F [format "BOK_TCP_ADDR   \\ Galil TCP Command Address  \\ %s" [string trim $bokParams(BOK_TCP_ADDR)]]
@@ -48,6 +50,8 @@ proc bokSetProjectReInit { X } {
   puts $F [format "BOK_UDP_PORT   \\ Galil UDP Command Port     \\ %d" [string trim $bokParams(BOK_UDP_PORT)]]
   puts $F [format "BOK_WEB_ADDR   \\ pyINDI Website Address     \\ %s" [string trim $bokParams(BOK_WEB_ADDR)]]
   puts $F [format "BOK_WEB_PORT   \\ pyINDI Website Port        \\ %d" [string trim $bokParams(BOK_WEB_PORT)]]
+  puts $F [format "BOK_DATA_ADDR  \\ DataServer Address         \\ %s" [string trim $bokParams(BOK_DATA_ADDR)]]
+  puts $F [format "BOK_DATA_PORT  \\ DataServer Port            \\ %d" [string trim $bokParams(BOK_DATA_PORT)]]
   flush $F
   close $F
 }
@@ -65,6 +69,8 @@ proc bokSetProjectSave { W } {
   set bokParams(BOK_UDP_PORT)   [string trim [$bokWidgets(GUI_UDP_PORT) get]]
   set bokParams(BOK_WEB_ADDR)   [string trim [$bokWidgets(GUI_WEB_ADDR) get]]
   set bokParams(BOK_WEB_PORT)   [string trim [$bokWidgets(GUI_WEB_PORT) get]]
+  set bokParams(BOK_DATA_ADDR)  [string trim [$bokWidgets(GUI_DATA_ADDR) get]]
+  set bokParams(BOK_DATA_PORT)  [string trim [$bokWidgets(GUI_DATA_PORT) get]]
   bokSetProjectReInit $env(BOK_GALIL_TCL)/bokParams.txt
   bokSetProjectQuit $W
 }
@@ -107,7 +113,9 @@ proc bokSetProject { W } {
   set U9 [frame ${U}.u9]
   set UA [frame ${U}.ua]
   set UB [frame ${U}.ub]
-  pack $U1 $U2 $U3 $U4 $U5 $U6 $U7 $U8 $U9 $UA $UB -side top -fill both -expand yes
+  set UC [frame ${U}.uc]
+  set UD [frame ${U}.ud]
+  pack $U1 $U2 $U3 $U4 $U5 $U6 $U7 $U8 $U9 $UA $UB $UC $UD -side top -fill both -expand yes
   set bokWidgets(GUI_INSTRUMENT)  [entry ${U1}.e -width 50 -textvariable bokParams(BOK_INSTRUMENT)]
   set bokWidgets(GUI_INDI_ADDR)   [entry ${U2}.e -width 50 -textvariable bokParams(BOK_INDI_ADDR)]
   set bokWidgets(GUI_INDI_PORT)   [entry ${U3}.e -width 50 -textvariable bokParams(BOK_INDI_PORT)]
@@ -119,10 +127,12 @@ proc bokSetProject { W } {
   set bokWidgets(GUI_UDP_PORT)    [entry ${U9}.e -width 50 -textvariable bokParams(BOK_UDP_PORT)]
   set bokWidgets(GUI_WEB_ADDR)    [entry ${UA}.e -width 50 -textvariable bokParams(BOK_WEB_ADDR)]
   set bokWidgets(GUI_WEB_PORT)    [entry ${UB}.e -width 50 -textvariable bokParams(BOK_WEB_PORT)]
+  set bokWidgets(GUI_DATA_ADDR)   [entry ${UC}.e -width 50 -textvariable bokParams(BOK_DATA_ADDR)]
+  set bokWidgets(GUI_DATA_PORT)   [entry ${UD}.e -width 50 -textvariable bokParams(BOK_DATA_PORT)]
 
   pack [label ${U1}.l -text "Instrument:"                -width 20 -anchor e] $bokWidgets(GUI_INSTRUMENT) -side left -fill both -expand y
-  pack [label ${U2}.l -text "Indiserver Address:"        -width 20 -anchor e] $bokWidgets(GUI_INDI_ADDR)  -side left -fill both -expand y
-  pack [label ${U3}.l -text "Indiserver Port:"           -width 20 -anchor e] $bokWidgets(GUI_INDI_PORT)  -side left -fill both -expand y
+  pack [label ${U2}.l -text "IndiServer Address:"        -width 20 -anchor e] $bokWidgets(GUI_INDI_ADDR)  -side left -fill both -expand y
+  pack [label ${U3}.l -text "IndiServer Port:"           -width 20 -anchor e] $bokWidgets(GUI_INDI_PORT)  -side left -fill both -expand y
   pack [label ${U4}.l -text "NG Server Address:"         -width 20 -anchor e] $bokWidgets(GUI_NG_ADDR)    -side left -fill both -expand y
   pack [label ${U5}.l -text "NG Server Port:"            -width 20 -anchor e] $bokWidgets(GUI_NG_PORT)    -side left -fill both -expand y
   pack [label ${U6}.l -text "Galil TCP Command Address:" -width 20 -anchor e] $bokWidgets(GUI_TCP_ADDR)   -side left -fill both -expand y
@@ -131,4 +141,6 @@ proc bokSetProject { W } {
   pack [label ${U9}.l -text "Galil UDP Command Port:"    -width 20 -anchor e] $bokWidgets(GUI_UDP_PORT)   -side left -fill both -expand y
   pack [label ${UA}.l -text "pyINDI Website Address:"    -width 20 -anchor e] $bokWidgets(GUI_WEB_ADDR)   -side left -fill both -expand y
   pack [label ${UB}.l -text "pyINDI Website Port:"       -width 20 -anchor e] $bokWidgets(GUI_WEB_PORT)   -side left -fill both -expand y
+  pack [label ${UC}.l -text "DataServer Address:"        -width 20 -anchor e] $bokWidgets(GUI_DATA_ADDR)  -side left -fill both -expand y
+  pack [label ${UD}.l -text "DataServer Port:"           -width 20 -anchor e] $bokWidgets(GUI_DATA_PORT)  -side left -fill both -expand y
 }

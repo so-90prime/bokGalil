@@ -46,11 +46,11 @@ proc bokInit { } {
   set bokVariables(txt_memory)     "Shared Memory Handler"
   set bokVariables(txt_tcpmem)     "TCP Memory Segment (/dev/shm/tcp_mem)"
   set bokVariables(txt_udpmem)     "UDP Memory Segment (/dev/shm/udp_mem)"
-  set bokVariables(txt_indidriver) bokGalilIndiDriver
-  set bokVariables(txt_indiserver) "IndiServer ($bokParams(BOK_INDI_ADDR):$bokParams(BOK_INDI_PORT))"
-  set bokVariables(txt_ngserver)   "Ng Server ($bokParams(BOK_NG_ADDR):$bokParams(BOK_NG_PORT))"
-  set bokVariables(txt_website)    "http://$bokParams(BOK_WEB_ADDR):$bokParams(BOK_WEB_PORT)"
-  set bokVariables(txt_dataserver) "DataServer"
+  set bokVariables(txt_indidriver) "bokGalilIndiDriver"
+  set bokVariables(txt_indiserver) "IndiServer (host=$bokParams(BOK_INDI_ADDR) port=$bokParams(BOK_INDI_PORT))"
+  set bokVariables(txt_ngserver)   "NG Server (host=$bokParams(BOK_NG_ADDR) port=$bokParams(BOK_NG_PORT))"
+  set bokVariables(txt_website)    "WebServer (http://$bokParams(BOK_WEB_ADDR):$bokParams(BOK_WEB_PORT)/)"
+  set bokVariables(txt_dataserver) "DataServer (host=$bokParams(BOK_DATA_ADDR) port=$bokParams(BOK_DATA_PORT))"
   set bokVariables(txt_ds9)        "ds9"
   trace variable bokVariables(bok_memory)     w bokTraceVariables
   trace variable bokVariables(bok_tcpmem)     w bokTraceVariables
