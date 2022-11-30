@@ -53,7 +53,7 @@ This software only supports /dev/shm shared memory under Unix.
 then execute the `LV;` command. Data should appear. Use `ctrl-]` to escape to the telnet prompt and enter `quit`.
 
 
-## Start, Stop, Status
+## CLI: Start, Stop, Status
 
 ```bash
  % cd /home/primefocus/bokGalil
@@ -79,11 +79,18 @@ then execute the `LV;` command. Data should appear. Use `ctrl-]` to escape to th
  % bash ${BOK_GALIL_BIN}/Galil_DMC_22x0.sh --command=start
 ```
 
+## GUI: Start, Stop, Status
+
+```bash
+ % cd /home/primefocus/bokGalil
+ % source etc/bokGalil.sh `pwd` gui
+```
+
 Log files are written to $BOK_GALIL_LOG.
 
 ## Status
 
- - 20221116
+ - 20221129
 ```bash
    TODO:
     - Complex commands (eg focus) are currently executed as a sequence of "atomic" statements. At some 
@@ -97,6 +104,6 @@ Log files are written to $BOK_GALIL_LOG.
 
 --------------------------------------
 
-Last Modified: 20221116
+Last Modified: 20221129
 
 Last Author: Phil Daly (pndaly@arizona.edu)
