@@ -11,3 +11,5 @@ BOK_WEB_ADDR   \ pyINDI Website Address     \ 10.30.1.7
 BOK_WEB_PORT   \ pyINDI Website Port        \ 5905
 BOK_DATA_ADDR  \ DataServer Address         \ 10.30.1.7
 BOK_DATA_PORT  \ DataServer Port            \ 6543
+BOK_WEB_REPO   \ pyINDI Website Repository  \ /home/primefocus/bok-90prime-gui
+BOK_DATA_REPO  \ DataServer Repository      \ /home/primefocus/dataserver

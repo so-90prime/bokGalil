@@ -1,19 +1,21 @@
 # +
 # BOK_INSTRUMENT \ Instrument                 \ 90Prime
-# BOK_INDI_ADDR  \ IndiServer Address         \ 10.130.133.206
+# BOK_INDI_ADDR  \ IndiServer Address         \ 10.30.1.7
 # BOK_INDI_PORT  \ IndiServer Port            \ 7624
-# BOK_NG_ADDR    \ NG Server Address          \ 10.130.133.206
+# BOK_NG_ADDR    \ NG Server Address          \ 10.30.1.7
 # BOK_NG_PORT    \ NG Server Port             \ 5750
-# BOK_TCP_ADDR   \ Galil TCP Command Address  \ 10.130.133.206
+# BOK_TCP_ADDR   \ Galil TCP Command Address  \ 10.30.3.31
 # BOK_TCP_PORT   \ Galil TCP Command Port     \ 23
-# BOK_UDP_ADDR   \ Galil UDP Command Address  \ 10.130.133.206
+# BOK_UDP_ADDR   \ Galil UDP Command Address  \ 10.30.1.7
 # BOK_UDP_PORT   \ Galil UDP Command Port     \ 5078
-# BOK_WEB_ADDR   \ pyINDI Website Address     \ 10.130.133.206
+# BOK_WEB_ADDR   \ pyINDI Website Address     \ 10.30.1.7
 # BOK_WEB_PORT   \ pyINDI Website Port        \ 5905
-# BOK_DATA_ADDR  \ DataServer Address         \ 10.130.133.206
+# BOK_DATA_ADDR  \ DataServer Address         \ 10.30.1.7
 # BOK_DATA_PORT  \ DataServer Port            \ 6543
+# BOK_WEB_REPO   \ pyINDI Website Repository  \ /home/primefocus/bok-90prime-gui
+# BOK_DATA_REPO  \ DataServer Repository      \ /home/primefocus/dataserver
 # -
-
+#
 proc bokSetProjectQuit { W } {
   global env bokParams bokVariables bokVersions bokWidgets bokXopt
   return [destroy $W]
@@ -52,6 +54,8 @@ proc bokSetProjectReInit { X } {
   puts $F [format "BOK_WEB_PORT   \\ pyINDI Website Port        \\ %d" [string trim $bokParams(BOK_WEB_PORT)]]
   puts $F [format "BOK_DATA_ADDR  \\ DataServer Address         \\ %s" [string trim $bokParams(BOK_DATA_ADDR)]]
   puts $F [format "BOK_DATA_PORT  \\ DataServer Port            \\ %d" [string trim $bokParams(BOK_DATA_PORT)]]
+  puts $F [format "BOK_WEB_REPO   \\ pyINDI Website Repository  \\ %s" [string trim $bokParams(BOK_WEB_REPO)]]
+  puts $F [format "BOK_DATA_REPO  \\ DataServer Repository      \\ %s" [string trim $bokParams(BOK_DATA_REPO)]]
   flush $F
   close $F
 }
@@ -71,6 +75,8 @@ proc bokSetProjectSave { W } {
   set bokParams(BOK_WEB_PORT)   [string trim [$bokWidgets(GUI_WEB_PORT) get]]
   set bokParams(BOK_DATA_ADDR)  [string trim [$bokWidgets(GUI_DATA_ADDR) get]]
   set bokParams(BOK_DATA_PORT)  [string trim [$bokWidgets(GUI_DATA_PORT) get]]
+  set bokParams(BOK_WEB_REPO)   [string trim [$bokWidgets(GUI_WEB_REPO) get]]
+  set bokParams(BOK_DATA_REPO)  [string trim [$bokWidgets(GUI_DATA_REPO) get]]
   bokSetProjectReInit $env(BOK_GALIL_TCL)/bokParams.txt
   bokSetProjectQuit $W
 }
@@ -115,7 +121,9 @@ proc bokSetProject { W } {
   set UB [frame ${U}.ub]
   set UC [frame ${U}.uc]
   set UD [frame ${U}.ud]
-  pack $U1 $U2 $U3 $U4 $U5 $U6 $U7 $U8 $U9 $UA $UB $UC $UD -side top -fill both -expand yes
+  set UE [frame ${U}.ue]
+  set UF [frame ${U}.uf]
+  pack $U1 $U2 $U3 $U4 $U5 $U6 $U7 $U8 $U9 $UA $UB $UC $UD $UE $UF -side top -fill both -expand yes
   set bokWidgets(GUI_INSTRUMENT)  [entry ${U1}.e -width 50 -textvariable bokParams(BOK_INSTRUMENT)]
   set bokWidgets(GUI_INDI_ADDR)   [entry ${U2}.e -width 50 -textvariable bokParams(BOK_INDI_ADDR)]
   set bokWidgets(GUI_INDI_PORT)   [entry ${U3}.e -width 50 -textvariable bokParams(BOK_INDI_PORT)]
@@ -129,6 +137,8 @@ proc bokSetProject { W } {
   set bokWidgets(GUI_WEB_PORT)    [entry ${UB}.e -width 50 -textvariable bokParams(BOK_WEB_PORT)]
   set bokWidgets(GUI_DATA_ADDR)   [entry ${UC}.e -width 50 -textvariable bokParams(BOK_DATA_ADDR)]
   set bokWidgets(GUI_DATA_PORT)   [entry ${UD}.e -width 50 -textvariable bokParams(BOK_DATA_PORT)]
+  set bokWidgets(GUI_WEB_REPO)    [entry ${UE}.e -width 50 -textvariable bokParams(BOK_WEB_REPO)]
+  set bokWidgets(GUI_DATA_REPO)   [entry ${UF}.e -width 50 -textvariable bokParams(BOK_DATA_REPO)]
 
   pack [label ${U1}.l -text "Instrument:"                -width 20 -anchor e] $bokWidgets(GUI_INSTRUMENT) -side left -fill both -expand y
   pack [label ${U2}.l -text "IndiServer Address:"        -width 20 -anchor e] $bokWidgets(GUI_INDI_ADDR)  -side left -fill both -expand y
@@ -143,4 +153,6 @@ proc bokSetProject { W } {
   pack [label ${UB}.l -text "pyINDI Website Port:"       -width 20 -anchor e] $bokWidgets(GUI_WEB_PORT)   -side left -fill both -expand y
   pack [label ${UC}.l -text "DataServer Address:"        -width 20 -anchor e] $bokWidgets(GUI_DATA_ADDR)  -side left -fill both -expand y
   pack [label ${UD}.l -text "DataServer Port:"           -width 20 -anchor e] $bokWidgets(GUI_DATA_PORT)  -side left -fill both -expand y
+  pack [label ${UE}.l -text "pyINDI Website Repository:" -width 20 -anchor e] $bokWidgets(GUI_WEB_REPO)   -side left -fill both -expand y
+  pack [label ${UF}.l -text "DataServer Repositpry:"     -width 20 -anchor e] $bokWidgets(GUI_DATA_REPO)  -side left -fill both -expand y
 }
