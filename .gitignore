@@ -83,6 +83,7 @@ src/__hosts__.py
 lib/libbokGalil.a
 lib/libbokGalil.so
 tcl/tclIndex
+tcl/bokParams.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
