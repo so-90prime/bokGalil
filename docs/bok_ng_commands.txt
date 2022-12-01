@@ -120,16 +120,6 @@ BOK 90PRIME NG COMMAND / REQUEST SET
       On success: BOK 90PRIME <cmd-id> OK A=-0.355 B=1.443 C=0.345
       On failure: BOK 90PRIME <cmd-id> ERROR (reason)
 
-    BOK 90PRIME <cmd-id> REQUEST WEATHER
-      Explanation: client requests server to report weather
-      On success: BOK 90PRIME <cmd-id> OK <dictionary_as_string>
-      On failure: BOK 90PRIME <cmd-id> ERROR (reason)
-
-    BOK 90PRIME <cmd-id> REQUEST TELEMETRY
-      Explanation: client requests server to report telemetry
-      On success: BOK 90PRIME <cmd-id> OK <dictionary_as_string>
-      On failure: BOK 90PRIME <cmd-id> ERROR (reason)
-
   NB: if <cmd-id> is set to "SIMULATE", no hardware is accessed and dummy response(s) are returned!
 
 --------------------------------------

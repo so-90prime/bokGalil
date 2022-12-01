@@ -27,10 +27,10 @@ JSON_URL = "http://10.30.1.5:42080/latest"
 
 
 # +
-# class: WeatherClient()
+# class: TelemetryClient()
 # -
 # noinspection PyBroadException
-class WeatherClient(object):
+class TelemetryClient(object):
 
     # +
     # method: __init__()
@@ -195,12 +195,12 @@ def get_weather_json(_url: str = JSON_URL, _timeout: float = JSON_TIMEOUT, _key:
 
     # exercise command(s) and request(s)
     try:
-        _client = WeatherClient(url=_url, timeout=_timeout)
+        _client = TelemetryClient(url=_url, timeout=_timeout)
         if _client is not None and hasattr(_client, 'get_json') and hasattr(_client, 'parse_json') and _key.lower() in JSON_KEYS:
             _client.get_json()
             return _client.parse_json(_key=_key)
     except Exception as _e:
-        print(f"failed to instantiate WeatherClient(url={_url}, timeout={_timeout}), error='{_e}'")
+        print(f"failed to instantiate TelemetryClient(url={_url}, timeout={_timeout}), error='{_e}'")
 
 
 # +
