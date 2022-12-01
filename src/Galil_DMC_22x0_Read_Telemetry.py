@@ -31,6 +31,25 @@ JSON_URL = "http://10.30.1.5:42080/latest"
 # -
 # noinspection PyBroadException
 class TelemetryClient(object):
+    """
+        from Galil_DMC_22x0_Read_Telemetry import *
+        _c = TelemetryClient(url='http://10.30.1.5:42080/latest', timeout=5.0)
+        _c.get_json()
+        _x = _c.parse_json(_key='dome')
+        print(f"dome={_x}, type={type(_x)}")
+        _x = _c.parse_json(_key='mirror_cell')
+        print(f"mirror_cell={_x}, type={type(_x)}")
+        _x = _c.parse_json(_key='telemetry')
+        print(f"telemetry={_x}, type={type(_x)}")
+        _x = _c.parse_json(_key='tube')
+        print(f"tube={_x}, type={type(_x)}")
+        _x = _c.parse_json(_key='upper_dome')
+        print(f"upper_dome={_x}, type={type(_x)}")
+        _x = _c.parse_json(_key='wind')
+        print(f"wind={_x}, type={type(_x)}")
+        _x = _c.parse_json(_key='weather')
+        print(f"weather={_x}, type={type(_x)}")
+    """
 
     # +
     # method: __init__()
