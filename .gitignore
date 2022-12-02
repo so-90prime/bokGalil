@@ -46,6 +46,7 @@ docs/
 # +
 # build(s)
 # -
+bok_nominal_plane.txt
 test_galil
 docker/*
 bin/bokGalilIndiDriver
