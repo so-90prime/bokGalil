@@ -813,3 +813,4 @@ GReturn xq_reqfilt               (float);
 GReturn xq_focusall              (float);
 GReturn xq_focusind              (float, float, float);
 GReturn xq_gfocus                (float);
+GReturn xq_reset_errfilt         ();

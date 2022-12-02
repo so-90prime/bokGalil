@@ -1376,3 +1376,10 @@ GReturn xq_gfocus(float a) {
   if ((gstat=xq_distgcam(a)) != G_NO_ERROR) { return gstat; }
   return xq_focgcam();
 }
+
+/*******************************************************************************
+ * xq_reset_errfilt( ... )
+ ******************************************************************************/
+GReturn xq_reset_errfilt() {
+  return xq("ERRFILT=0.0;");
+}
