@@ -43,7 +43,7 @@ This software only supports /dev/shm shared memory under Unix.
 
 ```bash
  % make -f test_galil.make
- % ./test_galil -b0
+ % ./test_galil -b1
 ```
 
 ```bash
@@ -104,6 +104,6 @@ Log files are written to $BOK_GALIL_LOG.
 
 --------------------------------------
 
-Last Modified: 20221129
+Last Modified: 20230124
 
 Last Author: Phil Daly (pndaly@arizona.edu)
