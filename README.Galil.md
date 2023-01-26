@@ -2,28 +2,28 @@
 
 ## Installation of Galil Software
 
-  - Ubuntu 20.04 *only*
+  - Ubuntu 22.04
 
   - Add key from https://www.galil.com/sw/pub/all/crypto/GALIL-GPG-KEY-E29D0E4B.asc
 
   ```bash
-    % curl -O https://www.galil.com/sw/pub/all/crypto/GALIL-GPG-KEY-E29D0E4B.asc
-    % sudo apt-key add GALIL-GPG-KEY-E29D0E4B.asc
+    % wget https://www.galil.com/sw/pub/all/crypto/GALIL-GPG-KEY-E29D0E4B.asc
+    % mv GALIL-GPG-KEY-E29D0E4B.asc /etc/apt/trusted.gpg.d/
   ```
 
-  - Add repository from http://www.galil.com/sw/pub/ubuntu/20.04/galil.list
+  - Add repository from http://www.galil.com/sw/pub/ubuntu/22.04/galil.list
 
   ```bash
-    % curl -O https://www.galil.com/sw/pub/ubuntu/20.04/galil.list
-    % sudo mv galil.list /etc/apt/sources.list.d/
+    % curl -O https://www.galil.com/sw/pub/ubuntu/22.04/galil.list
+    % mv galil.list /etc/apt/sources.list.d/
   ```
 
-  - Update repositories and install
+  - Update repositories, remove old version(s) and install new version(s)
 
   ```bash
-    % sudo apt update
-    % sudo apt install gclib
-    % sudo apt install gcapsd
+    % apt update
+    % apt remove gclib gcapsd
+    % apt install gclib gcapsd
   ```
 
 ## Caveat(s)
@@ -168,6 +168,6 @@ Now, to change the instrument focus, we use the algorithm:
 
 --------------------------------------
 
-Last Modified: 20220829
+Last Modified: 20230126
 
 Last Author: Phil Daly (pndaly@arizona.edu)

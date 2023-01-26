@@ -2,7 +2,7 @@
 
 ## Requirement(s)
 
- - Ubuntu 20.04 or 22.04
+ - Ubuntu 22.04
 
  - www.indilib.org
 
@@ -37,17 +37,16 @@
      libgphoto2-dev \
      build-essential \
      libusb-1.0-0-dev \
-     libdc1394-22-dev \
+     libdc1394-dev \
      libboost-regex-dev \
      libcurl4-gnutls-dev \
      libtheora-dev
 ```
 
-NB: for Ubuntu 22, `libdc1394-22-dev` has been replaced by `libdc1394-dev`.
-
 ## Build (as root)
 
 ```bash
+  % rm -rf /usr/local/IndiProjects/
   % mkdir -p /usr/local/IndiProjects/
   % cd /usr/local/IndiProjects/
   % git clone https://github.com/indilib/indi.git
@@ -75,6 +74,6 @@ Then connect with XEphem -> View -> Sky View -> Telescope -> INDI panel -> Conne
 
 --------------------------------------
 
-Last Modified: 20221003
+Last Modified: 20230126
 
 Last Author: Phil Daly (pndaly@arizona.edu)
