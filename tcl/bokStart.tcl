@@ -32,7 +32,7 @@ proc bokStart { } {
     bokInform [format {%4s %-60s %s} "WARN" "$env(BOK_GALIL_BIN)/bokGalilIndiDriver" "ALREADY RUNNING"]
     bokInform [format {%4s %-60s %s} "WARN" "/usr/bin/indiserver" "ALREADY RUNNING"]
   } else {
-    set _c "/usr/bin/indiserver -vv $env(BOK_GALIL_BIN)/bokGalilIndiDriver"
+    set _c "/usr/bin/indiserver -vvv $env(BOK_GALIL_BIN)/bokGalilIndiDriver"
     set _l $env(BOK_GALIL_LOG)/bokGalilIndiDriver.log
     if {[file exists /usr/bin/indiserver]} {
       bokInform "INFO /usr/bin/indiserver exists"

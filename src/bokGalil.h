@@ -81,8 +81,8 @@
 #define BOK_UDP_FAUCET_ON    "DR0;IHE=>-3;IHE=192,168,0,1<5078>1;DR1000,4;"
 #define BOK_UDP_FAUCET_OFF   "DR0;IHE=>-3;"
 #define BOK_MAX_LVDT_DIFF     250.0
-#define BOK_MAX_LVDT         2500.0
-#define BOK_MIN_LVDT         -150.0
+#define BOK_MAX_LVDT         2850.0
+#define BOK_MIN_LVDT         -250.0
 #define BOK_MAX_TOLERANCE     10.0
 #define BOK_MIN_TOLERANCE     3.0
 #define BOK_NOM_TOLERANCE     5.0

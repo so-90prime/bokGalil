@@ -10,6 +10,7 @@
 #///////////////////////////////////////////////////////////////////////////////
 ATARGETS  = bok_read_filters bok_read_guider_filters bok_read_instrument_filters bok_read_nominal_plane Galil_DMC_22x0_CLI
 DTARGETS  = bokGalilIndiDriver
+PTARGETS  = Galil_DMC_22x0_NgClient.py  Galil_DMC_22x0_NgClient_Requests.py  Galil_DMC_22x0_Read_Telemetry.py  Galil_DMC_22x0_TCP_Read.py  Galil_DMC_22x0_UDP_Read.py
 STARGETS  = Galil_DMC_22x0_NgClient Galil_DMC_22x0_NgServer
 TTARGETS  = Galil_DMC_22x0_TCP_Write Galil_DMC_22x0_TCP_Read
 UTARGETS  = Galil_DMC_22x0_UDP_Write Galil_DMC_22x0_UDP_Read Galil_DMC_22x0_Write_Memory
@@ -100,6 +101,9 @@ clean:
 	 rm -rf $(HERE)/$$target >> /dev/null 2>&1;\
 	 rm -rf $(BOK_BIN)/$$target >> /dev/null 2>&1;\
 	done
+	for target in $(PTARGETS); do\
+	 rm -rf $(BOK_BIN)/$$target >> /dev/null 2>&1;\
+	done
 	for target in $(STARGETS); do\
 	 rm -rf $(HERE)/$$target >> /dev/null 2>&1;\
 	 rm -rf $(BOK_BIN)/$$target >> /dev/null 2>&1;\
@@ -112,19 +116,20 @@ clean:
 	 rm -rf $(HERE)/$$target >> /dev/null 2>&1;\
 	 rm -rf $(BOK_BIN)/$$target >> /dev/null 2>&1;\
 	done
+
+extraclean:
 	rm -f $(HERE)/libbokGalil.a >> /dev/null 2>&1
 	rm -f $(HERE)/libbokGalil.so >> /dev/null 2>&1
 	rm -f $(BOK_LIB)/libbokGalil.a >> /dev/null 2>&1
 	rm -f $(BOK_LIB)/libbokGalil.so >> /dev/null 2>&1
 	rm -rf $(HERE)/__pycache__ >> /dev/null 2>&1
-	rm -f $(BOK_BIN)/Galil_DMC_22x0_TCP_Read.py >> /dev/null 2>&1
-	rm -f $(BOK_BIN)/Galil_DMC_22x0_UDP_Read.py >> /dev/null 2>&1
 	rm -rf /dev/shm/tcp_shm /dev/shm/udp_shm >> /dev/null 2>&1
 	rm -f $(BOK_SRC)/__hosts__.py >> /dev/null 2>&1
 	sed 's?\#define ??g' $(BOK_SRC)/__hosts__.h | awk '{gsub(/[ ]+/," = ")}1' >> $(BOK_SRC)/__hosts__.py
 
 everything:
 	make clean
+	make extraclean
 	make libbokGalil.so libbokGalil.a
 	make all
 	make install
@@ -135,6 +140,9 @@ install:
 	done
 	for target in $(DTARGETS); do\
 	 mv $(HERE)/$$target $(BOK_BIN)/$$target; \
+	done
+	for target in $(PTARGETS); do\
+	 cp $(HERE)/$$target $(BOK_BIN)/$$target; \
 	done
 	for target in $(STARGETS); do\
 	 mv $(HERE)/$$target $(BOK_BIN)/$$target; \
@@ -147,8 +155,6 @@ install:
 	done
 	mv $(HERE)/libbokGalil.a  $(BOK_LIB)/libbokGalil.a
 	mv $(HERE)/libbokGalil.so $(BOK_LIB)/libbokGalil.so
-	cp $(HERE)/Galil_DMC_22x0_TCP_Read.py $(BOK_BIN)/
-	cp $(HERE)/Galil_DMC_22x0_UDP_Read.py $(BOK_BIN)/
 	touch $(BOK_BIN)/*
 
 libbokGalil.a: bokGalil.c

@@ -57,6 +57,8 @@ bin/bok_read_nominal_plane
 bin/Galil_DMC_22x0_CLI
 bin/Galil_DMC_22x0_NgClient
 bin/Galil_DMC_22x0_NgClient.py
+bin/Galil_DMC_22x0_NgClient_Requests.py
+bin/Galil_DMC_22x0_Read_Telemetry.py
 bin/Galil_DMC_22x0_NgServer
 bin/Galil_DMC_22x0_TCP_Read
 bin/Galil_DMC_22x0_TCP_Read.py
