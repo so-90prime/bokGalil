@@ -32,9 +32,9 @@
  * define(s)
  ******************************************************************************/
 #define _AUTHOR_             "P. N. Daly"
-#define _DATE_               "21-September-2022"
+#define _DATE_               "15-February-2023"
 #define _EMAIL_              "pndaly@arizona.edu"
-#define _VERSION_            "1.1.1"
+#define _VERSION_            "1.2.0"
 
 #define BOK_AXES             8
 #define BOK_BAD_FLOAT        (float)123456789.0

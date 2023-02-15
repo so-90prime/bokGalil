@@ -37,6 +37,8 @@ This software only supports /dev/shm shared memory under Unix.
  % mkdir lib log
  % cd ${BOK_GALIL_SRC}
  % make bonsai
+ % cd ${BOK_GALIL_TCL}
+ % make bonsai
 ```
 
 ## Quick Test(s) (At Bok)

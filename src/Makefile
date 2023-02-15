@@ -47,7 +47,7 @@ help:
 	@echo "   all clean everything help install"
 	@echo ""
 	@echo "To re-build the code, use: % make <sys>"
-	@echo "   where <sys> = 'banzai | bart | bonsai | lab'"
+	@echo "   where <sys> = 'banzai | bart | bonsai | home'"
 	@echo ""
 
 banzai:
@@ -68,11 +68,6 @@ bonsai:
 home:
 	rm -rf $(HERE)/__hosts__.h >> /dev/null 2>&1
 	ln -sf $(HERE)/__hosts__.home.h $(HERE)/__hosts__.h
-	make everything
-
-lab:
-	rm -rf $(HERE)/__hosts__.h >> /dev/null 2>&1
-	ln -sf $(HERE)/__hosts__.lab.h $(HERE)/__hosts__.h
 	make everything
 
 all:

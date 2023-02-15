@@ -142,6 +142,8 @@ static void zero_telemetry(void);
  * static variable(s)
  ******************************************************************************/
 static bool busy = false;
+static bool invact = false;
+static bool popact = false;
 static bool is_done = false;
 static filter_file_t bok_ifilters[BOK_IFILTER_SLOTS];
 static filter_file_t bok_gfilters[BOK_GFILTER_SLOTS];
@@ -424,20 +426,21 @@ ILightVectorProperty telemetry_gfilterwheelLP = {
 };
 
 static ILight telemetry_engineeringL[] = {
-  {"tcp",          "TCP Shared Memory", ISS_OFF, 0, 0},
-  {"udp",          "UDP Shared Memory", ISS_OFF, 0, 0},
-  {"populatebusy", "Populate",          ISS_OFF, 0, 0}
+  {"tcp",     "TCP Shared Memory", ISS_OFF, 0, 0},
+  {"udp",     "UDP Shared Memory", ISS_OFF, 0, 0}
 };
 ILightVectorProperty telemetry_engineeringLP = {
   GALIL_DEVICE, "ENGINEERING_LIGHTS", "Engineering", TELEMETRY_GROUP, IPS_IDLE, telemetry_engineeringL, NARRAY(telemetry_engineeringL), "", 0
 };
 
 static ILight telemetry_lightsL[] = {
-  {"swbusy", "Software Busy", ISS_OFF, 0, 0},
-  {"hwbusy", "Hardware Busy", ISS_OFF, 0, 0},  
+  {"swbusy", "Software Busy",  ISS_OFF, 0, 0},
+  {"hwbusy", "Hardware Busy",  ISS_OFF, 0, 0},
+  {"popbusy", "Populate Busy", ISS_OFF, 0, 0},
+  {"invact", "Invalid Action", ISS_OFF, 0, 0} 
 };
 ILightVectorProperty telemetry_lightsLP = {
-  GALIL_DEVICE, "TELEMETRY", "Galil Status", TELEMETRY_GROUP, IPS_IDLE, telemetry_lightsL, NARRAY(telemetry_lightsL), "", 0
+  GALIL_DEVICE, "TELEMETRY", "System Status", TELEMETRY_GROUP, IPS_IDLE, telemetry_lightsL, NARRAY(telemetry_lightsL), "", 0
 };
 
 
@@ -727,11 +730,11 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
     } else {
       IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_hx() from '%s', gstat=%d", name, (int)gstat);
     }
-    IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f) from '%s'", distall, distall, distall, name);
-    if ((gstat=xq_focusind(distall, distall, distall)) == G_NO_ERROR) {
-      IDMessage(GALIL_DEVICE, "Called xq_focusind(a=%.1f, b=%.1f, c=%.1f) from '%s' OK", distall, distall, distall, name);
+    IDMessage(GALIL_DEVICE, "Calling xq_focusall(a=%.1f) from '%s'", distall, name);
+    if ((gstat=xq_focusall(distall)) == G_NO_ERROR) {
+      IDMessage(GALIL_DEVICE, "Called xq_focusall(a=%.1f) from '%s' OK", distall, name);
     } else {
-      IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_focusind(a=%.1f, b=%.1f, c=%.1f) from '%s', gstat=%d", distall, distall, distall, name, (int)gstat);
+      IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_focusall(a=%.1f) from '%s', gstat=%d", distall, name, (int)gstat);
     }
     ifocus_lvdtallNP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
     busy = false; 
@@ -1263,7 +1266,7 @@ void execute_ifilter_engineering(ISState states[], char *names[], int n) {
     state_change = state != sp->s;
     if (! state_change) { continue; }
 
-    /* process 'iFilter Populate' - NB: it's up to the higher-level software to check telemetry */
+    /* process 'iFilter Populate' */
     if (sp == &ifilter_engineeringS[0]) {
       if (tcp_val.lv.filtisin == 1.0) {
         IDMessage(GALIL_DEVICE, "Cannot populate whilst the filter is in the beam");
@@ -1272,23 +1275,26 @@ void execute_ifilter_engineering(ISState states[], char *names[], int n) {
 
         /* talk to hardware */
         busy = true;
+        popact = true;
         telemetry_lightsL[0].s = (busy == true) ? IPS_BUSY : IPS_IDLE;
+        telemetry_lightsL[1].s = IPS_BUSY;
+        telemetry_lightsL[2].s = (popact == true) ? IPS_BUSY : IPS_IDLE;
+        telemetry_lightsL[3].s = IPS_IDLE;
         IDSetLight(&telemetry_lightsLP, NULL);
         ifilter_engineeringSP.s = IPS_BUSY;
-        IDMessage(GALIL_DEVICE, "Calling xq_filtldm()");
+        IDMessage(GALIL_DEVICE, "Calling xq_filtldm() from 'populate'");
         if ((gstat=xq_filtldm()) == G_NO_ERROR) {
-          IDMessage(GALIL_DEVICE, "Called xq_filtldm() OK");
+          IDMessage(GALIL_DEVICE, "Called xq_filtldm() from 'populate' OK");
         } else {
-          IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_filtldm(), gstat=%d", (int)gstat);
+          IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_filtldm() from 'populate', gstat=%d", (int)gstat);
+          busy = false;
+          telemetry_lightsL[0].s = (busy == true) ? IPS_BUSY : IPS_IDLE;
+          telemetry_lightsL[1].s = IPS_IDLE;
+          telemetry_lightsL[2].s = IPS_IDLE;
+          telemetry_lightsL[3].s = IPS_IDLE;
+          IDSetLight(&telemetry_lightsLP, NULL);
         }
         ifilter_engineeringSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
-        busy = false;
-        telemetry_lightsL[0].s = (busy == true) ? IPS_BUSY : IPS_IDLE;
-        IDSetLight(&telemetry_lightsLP, NULL);
-
-        /* update telemetry */
-        telemetry_engineeringL[2].s = gstat == G_NO_ERROR ? IPS_BUSY : IPS_ALERT;
-        IDSetLight(&telemetry_engineeringLP, NULL);
 
       }
       ifilter_engineeringS[0].s = ISS_OFF;
@@ -1297,24 +1303,21 @@ void execute_ifilter_engineering(ISState states[], char *names[], int n) {
     } else if (sp == &ifilter_engineeringS[1]) {
 
       /* talk to hardware */
-      busy = true;
-      telemetry_lightsL[0].s = (busy == true) ? IPS_BUSY : IPS_IDLE;
-      IDSetLight(&telemetry_lightsLP, NULL);
       ifilter_engineeringSP.s = IPS_BUSY;
-      IDMessage(GALIL_DEVICE, "Calling xq_hx() from '%s'", "ifilter_engineeringS[1]");
+      IDMessage(GALIL_DEVICE, "Calling xq_hx() from 'popdone'");
       if ((gstat=xq_hx()) == G_NO_ERROR) {
-        IDMessage(GALIL_DEVICE, "Called xq_hx() from '%s' OK", "ifilter_engineeringS[1]");
+        IDMessage(GALIL_DEVICE, "Called xq_hx() from 'popdone' OK");
       } else {
-        IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_hx() from '%s', gstat=%d", "ifilter_engineeringS[1]", (int)gstat);
+        IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_hx() from 'popdone', gstat=%d", (int)gstat);
       }
-      ifilter_engineeringSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
       busy = false;
+      popact = false;
+      ifilter_engineeringSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
       telemetry_lightsL[0].s = (busy == true) ? IPS_BUSY : IPS_IDLE;
+      telemetry_lightsL[1].s = IPS_IDLE;
+      telemetry_lightsL[2].s = (popact == true) ? IPS_BUSY : IPS_IDLE;
+      telemetry_lightsL[3].s = IPS_IDLE;
       IDSetLight(&telemetry_lightsLP, NULL);
-
-      /* update telemetry */
-      telemetry_engineeringL[2].s = gstat == G_NO_ERROR ? IPS_IDLE : IPS_ALERT;
-      IDSetLight(&telemetry_engineeringLP, NULL);
       ifilter_engineeringS[1].s = ISS_OFF;
 
     /* process 'iFilter Initialize' - NB: it's up to the higher-level software to check telemetry */
@@ -2161,6 +2164,8 @@ static void execute_timer(void *p) {
   telemetry_engineeringL[1].s = (udp_val.simulate == 0) ? IPS_OK : IPS_ALERT;
   telemetry_lightsL[0].s = (busy == true) ? IPS_BUSY : IPS_IDLE;
   telemetry_lightsL[1].s = (IS_BIT_SET(tcp_val.status, 7)) ? IPS_BUSY : IPS_IDLE;
+  telemetry_lightsL[2].s = (busy == true) ? IPS_BUSY : IPS_IDLE;
+  telemetry_lightsL[3].s = (invact == true) ? IPS_BUSY : IPS_IDLE;
   telemetry_gfilterwheelL[0].s = (udp_val.haxis_moving == 1) ? IPS_BUSY : IPS_IDLE;
   telemetry_ifilterwheelL[0].s = (tcp_val.lv.filtisin == 1.0) ? IPS_IDLE : IPS_OK;
   telemetry_ifilterwheelL[1].s = (udp_val.faxis_moving == 1) ? IPS_BUSY : IPS_IDLE;
@@ -2233,6 +2238,7 @@ static void zero_telemetry(void) {
   telemetry_engineeringL[1].s = ISS_OFF;
   telemetry_lightsL[0].s = ISS_OFF;
   telemetry_lightsL[1].s = ISS_OFF;
+  telemetry_lightsL[2].s = ISS_OFF;
   telemetry_gfilterwheelL[0].s = ISS_OFF;
   telemetry_ifilterwheelL[0].s = ISS_OFF;
   telemetry_ifilterwheelL[1].s = ISS_OFF;

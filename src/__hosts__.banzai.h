@@ -7,3 +7,7 @@
 #define BOK_TCP_PORT      23
 #define BOK_UDP_ADDR      "10.30.1.8"
 #define BOK_UDP_PORT      5078
+#define BOK_INDI_ADDR     "10.130.1.8"
+#define BOK_INDI_PORT     7624
+#define BOK_WEB_ADDR      "10.130.1.8"
+#define BOK_WEB_PORT      5905
