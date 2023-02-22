@@ -127,7 +127,7 @@ typedef struct telemetrydata {
  * prototype(s)
  ******************************************************************************/
 static void driver_init(void);
-static void execute_end_of_night(ISState [], char *[], int);
+static void execute_astronomer_actions(ISState [], char *[], int);
 static void execute_gfilter_switches(ISState [], char *[], int);
 static void execute_gfilter_change(ISState [], char *[], int);
 static void execute_ifilter_engineering(ISState [], char *[], int);
@@ -172,7 +172,7 @@ static ISwitch gfilterS[] = {
   {"g_initfw", "Initialize", ISS_OFF, 0, 0},
 };
 ISwitchVectorProperty gfilterSP = {
-  GALIL_DEVICE, "GFILTER_ACTIONS", "Guider FW Actions", GFILTER_GROUP, IP_RW, ISR_1OFMANY, 0.0, IPS_IDLE, gfilterS, NARRAY(gfilterS), "", 0
+  GALIL_DEVICE, "GFILTER_ACTIONS", "Guider Filter Actions", GFILTER_GROUP, IP_RW, ISR_1OFMANY, 0.0, IPS_IDLE, gfilterS, NARRAY(gfilterS), "", 0
 };
 
 static ISwitch gfilter_changeS[] = {
@@ -184,7 +184,7 @@ static ISwitch gfilter_changeS[] = {
   {"g_slot_6",   "gFilter 6", ISS_OFF, 0, 0}
 };
 ISwitchVectorProperty gfilter_changeSP = {
-  GALIL_DEVICE, "GFILTER_CHANGE", "Change Guider Filter", GFILTER_GROUP, IP_RW, ISR_1OFMANY, 0.0, IPS_IDLE, gfilter_changeS, NARRAY(gfilter_changeS), "", 0
+  GALIL_DEVICE, "GFILTER_CHANGE", "Guider Filter(s)", GFILTER_GROUP, IP_RW, ISR_1OFMANY, 0.0, IPS_IDLE, gfilter_changeS, NARRAY(gfilter_changeS), "", 0
 };
 
 static IText gfilterT[] = {
@@ -196,7 +196,7 @@ static IText gfilterT[] = {
   {"gfilter_6", "gFilter 6", gfilter_names.filter_6, 0, 0, 0}
 };
 static ITextVectorProperty gfilterTP = {
-  GALIL_DEVICE, "GFILTER_NAMES", "Guider Filter Names", GFILTER_GROUP, IP_RO, 0.0, IPS_IDLE, gfilterT, NARRAY(gfilterT), "", 0
+  GALIL_DEVICE, "GFILTER_NAMES", "Guider Filter Name(s)", GFILTER_GROUP, IP_RO, 0.0, IPS_IDLE, gfilterT, NARRAY(gfilterT), "", 0
 };
 
 /* GFOCUS_GROUP */
@@ -211,21 +211,21 @@ static INumberVectorProperty gfocus_distNP = {
 
 /* IFILTER_GROUP */
 static ISwitch ifilter_engineeringS[] = {
-  {"i_populate", "Populate",      ISS_OFF, 0, 0},
-  {"i_popdone",  "PopDone",       ISS_OFF, 0, 0},
-  {"i_initfw",   "FW Initialize", ISS_OFF, 0, 0}
+  {"i_populate", "Populate",                     ISS_OFF, 0, 0},
+  {"i_popdone",  "Populate Done",                ISS_OFF, 0, 0},
+  {"i_initfw",   "Initialize Instrument Filter", ISS_OFF, 0, 0},
+  {"i_hx",       "Halt Execution",               ISS_OFF, 0, 0}
 };
 ISwitchVectorProperty ifilter_engineeringSP = {
-  GALIL_DEVICE, "IFILTER_ENGINEERING", "FW Engineering", IFILTER_GROUP, IP_RW, ISR_1OFMANY, 0.0, IPS_IDLE, ifilter_engineeringS, NARRAY(ifilter_engineeringS), "", 0
+  GALIL_DEVICE, "IFILTER_ENGINEERING", "Day Crew Action(s)", IFILTER_GROUP, IP_RW, ISR_1OFMANY, 0.0, IPS_IDLE, ifilter_engineeringS, NARRAY(ifilter_engineeringS), "", 0
 };
 
 static ISwitch ifilterS[] = {
   {"i_load",   "Load Filter",   ISS_OFF, 0, 0},
-  {"i_unload", "Unload Filter", ISS_OFF, 0, 0},
-  {"i_readfw", "Read Filters",  ISS_OFF, 0, 0}
+  {"i_unload", "Unload Filter", ISS_OFF, 0, 0}
 };
 ISwitchVectorProperty ifilterSP = {
-  GALIL_DEVICE, "IFILTER_ACTIONS", "FW Actions", IFILTER_GROUP, IP_RW, ISR_1OFMANY, 0.0, IPS_IDLE, ifilterS, NARRAY(ifilterS), "", 0
+  GALIL_DEVICE, "IFILTER_ACTIONS", "Instrument Filter Action(s)", IFILTER_GROUP, IP_RW, ISR_1OFMANY, 0.0, IPS_IDLE, ifilterS, NARRAY(ifilterS), "", 0
 };
 
 static ISwitch ifilter_changeS[] = {
@@ -237,7 +237,7 @@ static ISwitch ifilter_changeS[] = {
   {"i_slot_6", "iFilter 6", ISS_OFF, 0, 0}
 };
 ISwitchVectorProperty ifilter_changeSP = {
-  GALIL_DEVICE, "IFILTER_CHANGE", "Change Filter", IFILTER_GROUP, IP_RW, ISR_1OFMANY, 0.0, IPS_IDLE, ifilter_changeS, NARRAY(ifilter_changeS), "", 0
+  GALIL_DEVICE, "IFILTER_CHANGE", "Instrument Filter(s)", IFILTER_GROUP, IP_RW, ISR_1OFMANY, 0.0, IPS_IDLE, ifilter_changeS, NARRAY(ifilter_changeS), "", 0
 };
 
 static IText ifilterT[] = {
@@ -249,14 +249,15 @@ static IText ifilterT[] = {
   {"ifilter_6", "iFilter 6", ifilter_names.filter_6, 0, 0, 0}
 };
 static ITextVectorProperty ifilterTP = {
-  GALIL_DEVICE, "IFILTER_NAMES", "Filter Names", IFILTER_GROUP, IP_RO, 0.0, IPS_IDLE, ifilterT, NARRAY(ifilterT), "", 0
+  GALIL_DEVICE, "IFILTER_NAMES", "Instrument Filter Name(s)", IFILTER_GROUP, IP_RO, 0.0, IPS_IDLE, ifilterT, NARRAY(ifilterT), "", 0
 };
 
-static ISwitch endofnightS[] = {
-  {"watchhasended", "End of Night", ISS_OFF, 0, 0}
+static ISwitch astronomerS[] = {
+  {"watchstarted",  "Start of Night", ISS_OFF, 0, 0},
+  {"watchended",    "End of Night",   ISS_OFF, 0, 0}
 };
-ISwitchVectorProperty endofnightSP = {
-  GALIL_DEVICE, "END_OF_NIGHT", "End of Night", IFILTER_GROUP, IP_RW, ISR_ATMOST1, 0.0, IPS_IDLE, endofnightS, NARRAY(endofnightS), "", 0
+ISwitchVectorProperty astronomerSP = {
+  GALIL_DEVICE, "ASTRONOMER", "Astronomer Action(s)", IFILTER_GROUP, IP_RW, ISR_ATMOST1, 0.0, IPS_IDLE, astronomerS, NARRAY(astronomerS), "", 0
 };
 
 /* IFOCUS_GROUP */
@@ -267,7 +268,7 @@ static ISwitch ifocus_referenceS[] = {
   {"resnom", "Restore Nominal Plane", ISS_OFF, 0, 0}
 };
 ISwitchVectorProperty ifocus_referenceSP = {
-  GALIL_DEVICE, "IFOCUS_REFERENCE", "Focus Actions", IFOCUS_GROUP, IP_RW, ISR_ATMOST1, 0.0, IPS_IDLE, ifocus_referenceS, NARRAY(ifocus_referenceS), "", 0
+  GALIL_DEVICE, "IFOCUS_REFERENCE", "Instrument Focus Action(s)", IFOCUS_GROUP, IP_RW, ISR_ATMOST1, 0.0, IPS_IDLE, ifocus_referenceS, NARRAY(ifocus_referenceS), "", 0
 };
 
 /* these limits came from nowhere so we should verify it when we have time */
@@ -278,7 +279,7 @@ static INumber ifocus_distN[] = {
   {"tolerance", "Tolerance", "%5.0f", BOK_MIN_TOLERANCE, BOK_MAX_TOLERANCE, 1.0, BOK_NOM_TOLERANCE, 0, 0, 0}
 };
 static INumberVectorProperty ifocus_distNP = {
-  GALIL_DEVICE, "IFOCUS_DIST", "Focus Steps", IFOCUS_GROUP, IP_WO, 0.0, IPS_IDLE, ifocus_distN, NARRAY(ifocus_distN), "", 0
+  GALIL_DEVICE, "IFOCUS_DIST", "Instrument Encoder(s)", IFOCUS_GROUP, IP_WO, 0.0, IPS_IDLE, ifocus_distN, NARRAY(ifocus_distN), "", 0
 };
 
 /* these limits came from nowhere so we should verify it when we have time */
@@ -286,7 +287,7 @@ static INumber ifocus_distallN[] = {
   {"distall", "All Encoders", "%5.0f", -100.0, 100.0, 1.0, 0.0, 0, 0, 0}
 };
 static INumberVectorProperty ifocus_distallNP = {
-  GALIL_DEVICE, "IFOCUS_DISTALL", "Encoder Steps Move All", IFOCUS_GROUP, IP_WO, 0.0, IPS_IDLE, ifocus_distallN, NARRAY(ifocus_distallN), "", 0
+  GALIL_DEVICE, "IFOCUS_DISTALL", "Instrument Encoder(s) All", IFOCUS_GROUP, IP_WO, 0.0, IPS_IDLE, ifocus_distallN, NARRAY(ifocus_distallN), "", 0
 };
 
 /* documented by Joe and Bruce limit test for LVDT (range -250 to 2850) but we include some buffer but there is an official email */
@@ -297,7 +298,7 @@ static INumber ifocus_lvdtN[] = {
   {"tolerance", "Tolerance", "%5.0f", BOK_MIN_TOLERANCE, BOK_MAX_TOLERANCE, 1.0, BOK_NOM_TOLERANCE, 0, 0, 0}
 };
 static INumberVectorProperty ifocus_lvdtNP = {
-  GALIL_DEVICE, "IFOCUS_LVDT", "Main Focus", IFOCUS_GROUP, IP_RW, 0.0, IPS_IDLE, ifocus_lvdtN, NARRAY(ifocus_lvdtN), "", 0
+  GALIL_DEVICE, "IFOCUS_LVDT", "Instrument Foci", IFOCUS_GROUP, IP_RW, 0.0, IPS_IDLE, ifocus_lvdtN, NARRAY(ifocus_lvdtN), "", 0
 };
 
 /* these limits came from nowhere so we should verify it when we have time */
@@ -305,7 +306,7 @@ static INumber ifocus_lvdtallN[] = {
   {"lvdtall", "Delta Focus All", "%5.0f", -500.0, 500.0, 1.0, 0.0, 0, 0, 0}
 };
 static INumberVectorProperty ifocus_lvdtallNP = {
-  GALIL_DEVICE, "IFOCUS_LVDTALL", "Main Focus All", IFOCUS_GROUP, IP_WO, 0.0, IPS_IDLE, ifocus_lvdtallN, NARRAY(ifocus_lvdtallN), "", 0
+  GALIL_DEVICE, "IFOCUS_LVDTALL", "Instrument Foci All", IFOCUS_GROUP, IP_WO, 0.0, IPS_IDLE, ifocus_lvdtallN, NARRAY(ifocus_lvdtallN), "", 0
 };
 
 /* SUPPORT_GROUP */
@@ -316,7 +317,7 @@ static IText supportT[] = {
   {"version", "Version", supports.version, 0, 0, 0}
 };
 static ITextVectorProperty supportTP = {
-  GALIL_DEVICE, "SUPPORT", "Support Available From", SUPPORT_GROUP, IP_RO, 0, IPS_IDLE, supportT, NARRAY(supportT), "", 0
+  GALIL_DEVICE, "SUPPORT", "Personnel", SUPPORT_GROUP, IP_RO, 0, IPS_IDLE, supportT, NARRAY(supportT), "", 0
 };
 
 /* TELEMETRY_GROUP */
@@ -326,7 +327,7 @@ static IText telemetry_referenceT[] = {
   {"c_reference",  "Focus C Reference", telemetrys.c_reference,  0, 0, 0}
 };
 static ITextVectorProperty telemetry_referenceTP = {
-  GALIL_DEVICE, "TELEMETRY_REFERENCE", "Main Focus References", TELEMETRY_GROUP, IP_RO, 0, IPS_IDLE, telemetry_referenceT, NARRAY(telemetry_referenceT), "", 0
+  GALIL_DEVICE, "TELEMETRY_REFERENCE", "Instrument Focus References", TELEMETRY_GROUP, IP_RO, 0, IPS_IDLE, telemetry_referenceT, NARRAY(telemetry_referenceT), "", 0
 };
 
 static IText telemetry_lvdtT[] = {
@@ -399,15 +400,15 @@ static ITextVectorProperty telemetryTP = {
 };
 
 static ILight telemetry_ifilterwheelL[] = {
-  {"fout", "IFilter Out",         ISS_OFF, 0, 0},
-  {"frot", "IFilter Rotating",    ISS_OFF, 0, 0},
-  {"flin", "IFilter Translating", ISS_OFF, 0, 0},
-  {"fin",  "IFilter In",          ISS_OFF, 0, 0},
-  {"ferr", "IFilter Error",       ISS_OFF, 0, 0},
-  {"flim", "IFilter Limit",       ISS_OFF, 0, 0}
+  {"fout", "Unloaded",    ISS_OFF, 0, 0},
+  {"fin",  "Loaded",      ISS_OFF, 0, 0},
+  {"frot", "Rotating",    ISS_OFF, 0, 0},
+  {"flin", "Translating", ISS_OFF, 0, 0},
+  {"ferr", "Error",       ISS_OFF, 0, 0},
+  {"flim", "Limit",       ISS_OFF, 0, 0}
 };
 ILightVectorProperty telemetry_ifilterwheelLP = {
-  GALIL_DEVICE, "FW_LIGHTS", "Filter Wheel", TELEMETRY_GROUP, IPS_IDLE, telemetry_ifilterwheelL, NARRAY(telemetry_ifilterwheelL), "", 0
+  GALIL_DEVICE, "FW_LIGHTS", "Instrument Filter Status", TELEMETRY_GROUP, IPS_IDLE, telemetry_ifilterwheelL, NARRAY(telemetry_ifilterwheelL), "", 0
 };
 
 static ILight telemetry_glimitsL[] = {
@@ -419,10 +420,10 @@ ILightVectorProperty telemetry_glimitsLP = {
 };
 
 static ILight telemetry_gfilterwheelL[] = {
-  {"grot",   "GW Rotating", ISS_OFF, 0, 0}
+  {"grot", "Rotating", ISS_OFF, 0, 0}
 };
 ILightVectorProperty telemetry_gfilterwheelLP = {
-  GALIL_DEVICE, "GW_LIGHTS", "Guider FW Status", TELEMETRY_GROUP, IPS_IDLE, telemetry_gfilterwheelL, NARRAY(telemetry_gfilterwheelL), "", 0
+  GALIL_DEVICE, "GW_LIGHTS", "Guider Filter Status", TELEMETRY_GROUP, IPS_IDLE, telemetry_gfilterwheelL, NARRAY(telemetry_gfilterwheelL), "", 0
 };
 
 static ILight telemetry_engineeringL[] = {
@@ -430,7 +431,7 @@ static ILight telemetry_engineeringL[] = {
   {"udp",     "UDP Shared Memory", ISS_OFF, 0, 0}
 };
 ILightVectorProperty telemetry_engineeringLP = {
-  GALIL_DEVICE, "ENGINEERING_LIGHTS", "Engineering", TELEMETRY_GROUP, IPS_IDLE, telemetry_engineeringL, NARRAY(telemetry_engineeringL), "", 0
+  GALIL_DEVICE, "ENGINEERING_LIGHTS", "Memory Segments", TELEMETRY_GROUP, IPS_IDLE, telemetry_engineeringL, NARRAY(telemetry_engineeringL), "", 0
 };
 
 static ILight telemetry_lightsL[] = {
@@ -466,7 +467,7 @@ void ISGetProperties(const char *dev) {
   IDDefSwitch(&ifilter_engineeringSP, NULL);
   IDDefSwitch(&ifilterSP, NULL);
   IDDefSwitch(&ifilter_changeSP, NULL);
-  IDDefSwitch(&endofnightSP, NULL);
+  IDDefSwitch(&astronomerSP, NULL);
   IDDefText(&ifilterTP, NULL);
   IDDefSwitch(&ifocus_referenceSP, NULL);
   IDDefNumber(&ifocus_distNP, NULL);
@@ -818,10 +819,10 @@ void ISNewSwitch(const char *dev, const char *name, ISState *states, char *names
     execute_ifocus_reference_switches(states, names, n);
     IUResetSwitch(&ifocus_referenceSP);
     IDSetSwitch(&ifocus_referenceSP, NULL);
-  } else if (! strcmp(name, endofnightSP.name)) {
-    execute_end_of_night(states, names, n);
-    IUResetSwitch(&endofnightSP);
-    IDSetSwitch(&endofnightSP, NULL);
+  } else if (! strcmp(name, astronomerSP.name)) {
+    execute_astronomer_actions(states, names, n);
+    IUResetSwitch(&astronomerSP);
+    IDSetSwitch(&astronomerSP, NULL);
   }
 }
 
@@ -927,9 +928,9 @@ static void driver_init(void) {
 }
 
 /*******************************************************************************
- * action: execute_end_of_night()
+ * action: execute_astronomer_actions()
  ******************************************************************************/
-void execute_end_of_night(ISState states[], char *names[], int n) {
+void execute_astronomer_actions(ISState states[], char *names[], int n) {
 
   /* declare some variables and initialize them */
   GReturn gstat = (GReturn)0;
@@ -937,18 +938,52 @@ void execute_end_of_night(ISState states[], char *names[], int n) {
   ISState state = (ISState)NULL;
   bool state_change = false;
 
-  /* find switches with the passed names in the ifilterSP property */
+  /* find switches with the passed names in the astronomerSP property */
   for (int i=0; i < n; i++) {
-    sp = IUFindSwitch(&endofnightSP, names[i]);
+    sp = IUFindSwitch(&astronomerSP, names[i]);
     state = states[i];
     state_change = state != sp->s;
     if (! state_change) { continue; }
 
-    /* process 'iFilter Unload' - NB: it's up to the higher-level software to check telemetry */
-    if (sp == &endofnightS[0]) {
+    /* start of night task(s) */
+    if (sp == &astronomerS[0]) {
+      if (tcp_val.lv.filtisin == 1.0) {
+        IDMessage(GALIL_DEVICE, "Cannot read wheel whilst the filter is in the beam");
+        ifilterSP.s = IPS_OK;
+      } else {
+
+        /* talk to hardware */
+        busy = true;
+        telemetry_lightsL[0].s = (busy == true) ? IPS_BUSY : IPS_IDLE;
+        IDSetLight(&telemetry_lightsLP, NULL);
+        ifilterSP.s = IPS_BUSY;
+        IDMessage(GALIL_DEVICE, "Calling xq_reset_errfilt()");
+        if ((gstat=xq_reset_errfilt()) == G_NO_ERROR) {
+          IDMessage(GALIL_DEVICE, "Called xq_reset_errfilt() OK");
+        } else {
+          IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_reset_errfilt(), gstat=%d", (int)gstat);
+        }
+        IDMessage(GALIL_DEVICE, "Calling xq_filtrd()");
+        if ((gstat=xq_filtrd()) == G_NO_ERROR) {
+          IDMessage(GALIL_DEVICE, "Called xq_filtrd() OK");
+        } else {
+          IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_filtrd(), gstat=%d", (int)gstat);
+        }
+        ifilterSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
+        busy = false;
+        telemetry_lightsL[0].s = (busy == true) ? IPS_BUSY : IPS_IDLE;
+        IDSetLight(&telemetry_lightsLP, NULL);
+      }
+
+      /* update widget(s) */
+      astronomerS[0].s = ISS_OFF;
+      IDMessage(GALIL_DEVICE, "watch has started, da iawn");
+
+    /* end of night task(s) */
+    } else if (sp == &astronomerS[1]) {
       if (tcp_val.lv.filtisin == 0.0) {
         IDMessage(GALIL_DEVICE, "Filter already out of the beam - nothing to do");
-        endofnightSP.s = IPS_OK;
+        astronomerSP.s = IPS_OK;
       } else {
 
         /* talk to hardware */
@@ -961,20 +996,20 @@ void execute_end_of_night(ISState states[], char *names[], int n) {
         } else {
           IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_filtout(), gstat=%d", (int)gstat);
         }
-        endofnightSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
+        astronomerSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
         busy = false;
         telemetry_lightsL[0].s = (busy == true) ? IPS_BUSY : IPS_IDLE;
         IDSetLight(&telemetry_lightsLP, NULL);
       }
 
       /* update widget(s) */
-      endofnightS[0].s = ISS_OFF;
+      astronomerS[1].s = ISS_OFF;
       IDMessage(GALIL_DEVICE, "watch has ended, nos da");
     }
   }
   /* reset */
-  IUResetSwitch(&endofnightSP);
-  IDSetSwitch(&endofnightSP, NULL);
+  IUResetSwitch(&astronomerSP);
+  IDSetSwitch(&astronomerSP, NULL);
 }
 
 
@@ -1266,7 +1301,7 @@ void execute_ifilter_engineering(ISState states[], char *names[], int n) {
     state_change = state != sp->s;
     if (! state_change) { continue; }
 
-    /* process 'iFilter Populate' */
+    /* process 'Populate' */
     if (sp == &ifilter_engineeringS[0]) {
       if (tcp_val.lv.filtisin == 1.0) {
         IDMessage(GALIL_DEVICE, "Cannot populate whilst the filter is in the beam");
@@ -1299,7 +1334,7 @@ void execute_ifilter_engineering(ISState states[], char *names[], int n) {
       }
       ifilter_engineeringS[0].s = ISS_OFF;
 
-    /* process 'iFilter PopDone' - NB: it's up to the higher-level software to check telemetry */
+    /* process 'PopDone' */
     } else if (sp == &ifilter_engineeringS[1]) {
 
       /* talk to hardware */
@@ -1320,7 +1355,7 @@ void execute_ifilter_engineering(ISState states[], char *names[], int n) {
       IDSetLight(&telemetry_lightsLP, NULL);
       ifilter_engineeringS[1].s = ISS_OFF;
 
-    /* process 'iFilter Initialize' - NB: it's up to the higher-level software to check telemetry */
+    /* process 'Initialize' */
     } else if (sp == &ifilter_engineeringS[2]) {
       if (tcp_val.lv.filtisin == 1.0) {
         IDMessage(GALIL_DEVICE, "Cannot initialize whilst the filter is in the beam");
@@ -1351,6 +1386,26 @@ void execute_ifilter_engineering(ISState states[], char *names[], int n) {
       }
 
       /* update telemetry */
+      ifilter_engineeringS[2].s = ISS_OFF;
+
+    /* process 'Halt Execution' */
+    } else if (sp == &ifilter_engineeringS[2]) {
+
+      /* talk to hardware */
+      ifilter_engineeringSP.s = IPS_BUSY;
+      IDMessage(GALIL_DEVICE, "Calling xq_hx()");
+      if ((gstat=xq_hx()) == G_NO_ERROR) {
+        IDMessage(GALIL_DEVICE, "Called xq_hx() OK");
+      } else {
+        IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_hx(), gstat=%d", (int)gstat);
+      }
+      busy = false;
+      ifilter_engineeringSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
+      telemetry_lightsL[0].s = (busy == true) ? IPS_BUSY : IPS_IDLE;
+      telemetry_lightsL[1].s = IPS_IDLE;
+      telemetry_lightsL[2].s = (popact == true) ? IPS_BUSY : IPS_IDLE;
+      telemetry_lightsL[3].s = IPS_IDLE;
+      IDSetLight(&telemetry_lightsLP, NULL);
       ifilter_engineeringS[2].s = ISS_OFF;
     }
   }
@@ -1675,36 +1730,6 @@ void execute_ifilter_switches(ISState states[], char *names[], int n) {
 
     /* process 'iFilter ReadWheel' - NB: it's up to the higher-level software to check telemetry */
     } else if (sp == &ifilterS[2]) {
-      if (tcp_val.lv.filtisin == 1.0) {
-        IDMessage(GALIL_DEVICE, "Cannot read wheel whilst the filter is in the beam");
-        ifilterSP.s = IPS_OK;
-      } else {
-
-        /* talk to hardware */
-        busy = true;
-        telemetry_lightsL[0].s = (busy == true) ? IPS_BUSY : IPS_IDLE;
-        IDSetLight(&telemetry_lightsLP, NULL);
-        ifilterSP.s = IPS_BUSY;
-        IDMessage(GALIL_DEVICE, "Calling xq_reset_errfilt()");
-        if ((gstat=xq_reset_errfilt()) == G_NO_ERROR) {
-          IDMessage(GALIL_DEVICE, "Called xq_reset_errfilt() OK");
-        } else {
-          IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_reset_errfilt(), gstat=%d", (int)gstat);
-        }
-        IDMessage(GALIL_DEVICE, "Calling xq_filtrd()");
-        if ((gstat=xq_filtrd()) == G_NO_ERROR) {
-          IDMessage(GALIL_DEVICE, "Called xq_filtrd() OK");
-        } else {
-          IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_filtrd(), gstat=%d", (int)gstat);
-        }
-        ifilterSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
-        busy = false;
-        telemetry_lightsL[0].s = (busy == true) ? IPS_BUSY : IPS_IDLE;
-        IDSetLight(&telemetry_lightsLP, NULL);
-      }
-
-      /* update widget(s) */
-      ifilterS[2].s = ISS_OFF;
     }
   }
 
@@ -2167,10 +2192,11 @@ static void execute_timer(void *p) {
   telemetry_lightsL[2].s = (busy == true) ? IPS_BUSY : IPS_IDLE;
   telemetry_lightsL[3].s = (invact == true) ? IPS_BUSY : IPS_IDLE;
   telemetry_gfilterwheelL[0].s = (udp_val.haxis_moving == 1) ? IPS_BUSY : IPS_IDLE;
+
   telemetry_ifilterwheelL[0].s = (tcp_val.lv.filtisin == 1.0) ? IPS_IDLE : IPS_OK;
-  telemetry_ifilterwheelL[1].s = (udp_val.faxis_moving == 1) ? IPS_BUSY : IPS_IDLE;
-  telemetry_ifilterwheelL[2].s = (udp_val.gaxis_moving == 1) ? IPS_BUSY : IPS_IDLE;
-  telemetry_ifilterwheelL[3].s = (tcp_val.lv.filtisin == 1.0) ? IPS_BUSY : IPS_IDLE;
+  telemetry_ifilterwheelL[1].s = (tcp_val.lv.filtisin == 1.0) ? IPS_BUSY : IPS_IDLE;
+  telemetry_ifilterwheelL[2].s = (udp_val.faxis_moving == 1) ? IPS_BUSY : IPS_IDLE;
+  telemetry_ifilterwheelL[3].s = (udp_val.gaxis_moving == 1) ? IPS_BUSY : IPS_IDLE;
   telemetry_ifilterwheelL[4].s = (tcp_val.lv.errfilt == 1.0) ? IPS_ALERT : IPS_IDLE;
   telemetry_ifilterwheelL[5].s = tcp_val.lv.filttsc==1.0 ? IPS_ALERT : IPS_IDLE;
 
@@ -2240,6 +2266,7 @@ static void zero_telemetry(void) {
   telemetry_lightsL[1].s = ISS_OFF;
   telemetry_lightsL[2].s = ISS_OFF;
   telemetry_gfilterwheelL[0].s = ISS_OFF;
+
   telemetry_ifilterwheelL[0].s = ISS_OFF;
   telemetry_ifilterwheelL[1].s = ISS_OFF;
   telemetry_ifilterwheelL[2].s = ISS_OFF;
