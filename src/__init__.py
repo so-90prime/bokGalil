@@ -47,10 +47,9 @@ UTC_OFFSET = datetime.now(TIMEZONE).utcoffset().total_seconds()/60.0/60.0
 # +
 # pattern(s)
 # -
-# n.n.n.n
+# noinspection PyPep8
 IP_PATTERN = '^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$'
 IP_PATTERN_C = re.compile(IP_PATTERN)
-# YYYY-MM-DDThh:mm:ss.ssssss
 ISO_PATTERN = '(1[89][0-9]{2}|2[0-9]{3})-(0[13578]-[012][0-9]|0[13578]-3[0-1]|' \
               '1[02]-[012][0-9]|1[02]-3[0-1]|02-[012][0-9]|0[469]-[012][0-9]|' \
               '0[469]-30|11-[012][0-9]|11-30)[ T](0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](\.[0-9]*)?'
@@ -191,7 +190,8 @@ def bok_print(msg: str = '', color: str = 'black', height: int = 1) -> None:
     """ prints message in single or double height in color (does not work on all screens) """
 
     _msg = msg if (isinstance(msg, str) and msg != '') else ''
-    _clr = color.strip().lower() if (isinstance(color, str) and color.lower() in SUPPORTED_COLORS) else SUPPORTED_COLORS[0]
+    _clr = color.strip().lower() if (isinstance(color, str) and
+                                     color.lower() in SUPPORTED_COLORS) else SUPPORTED_COLORS[0]
     _height = height if (isinstance(height, int) and height > 0) else 1
 
     if _msg != '':
@@ -257,7 +257,7 @@ def get_iers_1() -> None:
     try:
         from astroplan import download_IERS_A
         download_IERS_A()
-    except:
+    except Exception:
         pass
 
 
@@ -273,7 +273,7 @@ def get_iers_2() -> None:
         clear_download_cache()
         iers.IERS_A_URL = f'{IERS_URL_ALTERNATE}'
         download_IERS_A()
-    except:
+    except Exception:
         pass
 
 
@@ -284,7 +284,7 @@ def get_iers_2() -> None:
 def get_iers() -> None:
     try:
         get_iers_2()
-    except:
+    except Exception:
         get_iers_1()
 
 
@@ -299,7 +299,7 @@ def get_isot(day_offset: int = 0, utc: bool = False) -> str:
     try:
         return (datetime.utcnow() + timedelta(days=day_offset)).isoformat() if utc else \
             (datetime.now() + timedelta(days=day_offset)).isoformat()
-    except:
+    except Exception:
         return ''
 
 
@@ -314,7 +314,7 @@ def get_jd(day_offset: int = 0, utc: bool = False) -> float:
     try:
         _date = get_isot(day_offset=day_offset, utc=utc)
         return Time(_date).jd if (re.match(ISO_PATTERN_C, _date) is not None) else math.nan
-    except:
+    except Exception:
         return math.nan
 
 
@@ -334,7 +334,7 @@ def isot_to_jd(isot: str = '') -> float:
     """ returns jd from isot date string or nan """
     try:
         return Time(isot).jd if (re.match(ISO_PATTERN_C, isot) is not None) else math.nan
-    except:
+    except Exception:
         return math.nan
 
 
@@ -348,7 +348,7 @@ def jd_to_isot(jd: float = math.nan) -> str:
         return ''
     try:
         return Time(jd, format='jd', precision=6).isot if abs(jd) is not math.nan else ''
-    except:
+    except Exception:
         return ''
 
 
