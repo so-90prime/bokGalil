@@ -26,7 +26,8 @@ __doc__ = """ python3 Galil_DMC_22x0_NgClient.py --help """
 # +
 # constant(s)
 # -
-BOK_NG_HELP = os.path.abspath(os.path.expanduser(os.path.join(os.getenv("BOK_GALIL_DOCS", os.getcwd()), 'bok_ng_commands.txt')))
+BOK_NG_HELP = os.path.abspath(os.path.expanduser(os.path.join(
+    os.getenv("BOK_GALIL_DOCS", os.getcwd()), 'bok_ng_commands.txt')))
 BOK_NG_FALSE = [0, '0', 'false', False]
 BOK_NG_GFILTER_SLOTS = [1, 2, 3, 4, 5, 6]
 BOK_NG_IFILTER_SLOTS = [0, 1, 2, 3, 4, 5]
@@ -591,10 +592,12 @@ class NgClient(object):
     # +
     # method: command_ifocus()
     # -
-    def command_ifocus(self, a: float = math.nan, b: float = math.nan, c: float = math.nan, t: float = math.nan) -> bool:
+    def command_ifocus(self, a: float = math.nan, b: float = math.nan, c: float = math.nan,
+                       t: float = math.nan) -> bool:
         """ BOK 90PRIME <cmd-id> COMMAND IFOCUS A <float> B <float> C <float> T <float> """
 
-        if (math.nan < a < -math.nan) or (math.nan < b < -math.nan) or (math.nan < c < -math.nan) or (math.nan < t < -math.nan):
+        if (math.nan < a < -math.nan) or (math.nan < b < -math.nan) or (math.nan < c < -math.nan) or \
+                (math.nan < t < -math.nan):
             return False
 
         _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND IFOCUS A {a:.4f} B {b:.4f} C {c:.4f} T {t:.4f}")
@@ -618,7 +621,8 @@ class NgClient(object):
     def command_lvdt(self, a: float = math.nan, b: float = math.nan, c: float = math.nan, t: float = math.nan) -> bool:
         """ BOK 90PRIME <cmd-id> COMMAND LVDT A <float> B <float> C <float> T <float> """
 
-        if (math.nan < a < -math.nan) or (math.nan < b < -math.nan) or (math.nan < c < -math.nan) or (math.nan < t < -math.nan):
+        if (math.nan < a < -math.nan) or (math.nan < b < -math.nan) or (math.nan < c < -math.nan) or \
+                (math.nan < t < -math.nan):
             return False
 
         _reply = self.converse(f"BOK 90PRIME {get_jd()} COMMAND LVDT A {a:.4f} B {b:.4f} C {c:.4f} T {t:.4f}")
@@ -802,7 +806,8 @@ class NgClient(object):
         if 'ERROR' in self.__answer:
             self.__error = f"{self.__error}, {self.__answer}"
 
-        # parse answer, eg 'BOK 90PRIME <cmd-id> OK FILTVAL=18:Bob INBEAM=True ROTATING=False TRANSLATING=False ERRFILT=<int> FILTTSC=<int>'
+        # parse answer, eg 'BOK 90PRIME <cmd-id> OK FILTVAL=18:Bob INBEAM=True ROTATING=False
+        # TRANSLATING=False ERRFILT=<int> FILTTSC=<int>'
         elif 'OK' in self.__answer:
             self.__error = f""
             for _elem in self.__answer.split():
@@ -961,7 +966,8 @@ def ngclient_check(_host: str = BOK_NG_ADDR, _port: int = BOK_NG_PORT, _timeout:
     try:
 
         # instantiate client and connect to server
-        pdh(msg=f"Executing> NgClient(host='{_host}', port={_port}, timeout={_timeout}, simulate={_simulate}, verbose={_verbose})", color='green', height=1)
+        pdh(msg=f"Executing> NgClient(host='{_host}', port={_port}, timeout={_timeout}, simulate={_simulate}, "
+                f"verbose={_verbose})", color='green', height=1)
         _client = NgClient(host=_host, port=_port, timeout=_timeout, simulate=_simulate, verbose=_verbose)
         _client.connect()
         if _client.sock is not None:
@@ -1234,11 +1240,14 @@ def ngclient_check(_host: str = BOK_NG_ADDR, _port: int = BOK_NG_PORT, _timeout:
         _ifocus_b = random.uniform(250.0, 350.0)
         _ifocus_c = random.uniform(250.0, 350.0)
         _tolerance = random.uniform(10.0, 20.0)
-        pdh(msg=f"Executing> command_ifocus({_ifocus_a:.4f}, {_ifocus_b:.4f}, {_ifocus_c:.4f}, {_tolerance:.4f}) ...", color='green', height=1)
+        pdh(msg=f"Executing> command_ifocus({_ifocus_a:.4f}, {_ifocus_b:.4f}, {_ifocus_c:.4f}, {_tolerance:.4f}) ...",
+            color='green', height=1)
         if _client.command_ifocus(a=_ifocus_a, b=_ifocus_b, c=_ifocus_c, t=_tolerance):
-            pdh(msg=f"\tcommand_ifocus({_ifocus_a:.4f}, {_ifocus_b:.4f}, {_ifocus_c:.4f}, {_tolerance:.4f}) succeeded", color='green', height=1)
+            pdh(msg=f"\tcommand_ifocus({_ifocus_a:.4f}, {_ifocus_b:.4f}, {_ifocus_c:.4f}, {_tolerance:.4f}) succeeded",
+                color='green', height=1)
         else:
-            pdh(msg=f"\tcommand_ifocus({_ifocus_a:.4f}, {_ifocus_b:.4f}, {_ifocus_c:.4f}, {_tolerance:.4f}) failed", color='red', height=1)
+            pdh(msg=f"\tcommand_ifocus({_ifocus_a:.4f}, {_ifocus_b:.4f}, {_ifocus_c:.4f}, {_tolerance:.4f}) failed",
+                color='red', height=1)
         if _verbose and _client is not None and hasattr(_client, 'answer') and hasattr(_client, 'error'):
             _ans, _err = _client.answer.replace('\n', ''), _client.error.replace('\n', '')
             pdh(msg=f"\tverbose> answer='{_ans}', error='{_err}'", color='blue', height=1)
@@ -1317,6 +1326,7 @@ if __name__ == '__main__':
             with open(BOK_NG_HELP, 'r') as _f:
                 print(f"{_f.read()}")
         else:
-            ngclient_check(_host=_args.host, _port=int(_args.port), _timeout=float(_args.timeout), _simulate=bool(_args.simulate), _verbose=bool(_args.verbose))
+            ngclient_check(_host=_args.host, _port=int(_args.port), _timeout=float(_args.timeout),
+                           _simulate=bool(_args.simulate), _verbose=bool(_args.verbose))
     except Exception as _:
         print(f"{_}\nUse: {__doc__}")
