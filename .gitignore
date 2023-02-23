@@ -82,11 +82,13 @@ src/Galil_DMC_22x0_UDP_Write
 src/libbokGalil.a
 src/libbokGalil.so
 src/__hosts__.h
+src/__hosts__.home.h
 src/__hosts__.py
 lib/libbokGalil.a
 lib/libbokGalil.so
 tcl/tclIndex
 tcl/bokParams.txt
+tcl/bokParams.home.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
