@@ -169,7 +169,7 @@ telemetry_t telemetrys;
  ******************************************************************************/
 /* GFILTER_GROUP */
 static ISwitch gfilterS[] = {
-  {"g_initfw", "Initialize", ISS_OFF, 0, 0},
+  {"g_initfw", "Initialize Guider Filter", ISS_OFF, 0, 0},
 };
 ISwitchVectorProperty gfilterSP = {
   GALIL_DEVICE, "GFILTER_ACTIONS", "Guider Filter Actions", GFILTER_GROUP, IP_RW, ISR_1OFMANY, 0.0, IPS_IDLE, gfilterS, NARRAY(gfilterS), "", 0
@@ -449,7 +449,6 @@ ILightVectorProperty telemetry_lightsLP = {
  * INDI hook: ISGetProperties()
  ******************************************************************************/
 void ISGetProperties(const char *dev) {
-  // IDMessage(GALIL_DEVICE, "Requesting properties");
 
   /* check device */
   if (dev && strcmp(GALIL_DEVICE, dev)) return;
@@ -923,8 +922,6 @@ static void driver_init(void) {
       IDMessage(GALIL_DEVICE, "added execute_timer(), timer_id=%d, initialized=%d", timer_id, initialized);
     }
   }
-
-  /* should we do a populate / popdone / read filter wheel / initialize guider filter wheel here? */
 }
 
 /*******************************************************************************
@@ -1304,6 +1301,7 @@ void execute_ifilter_engineering(ISState states[], char *names[], int n) {
     /* process 'Populate' */
     if (sp == &ifilter_engineeringS[0]) {
       if (tcp_val.lv.filtisin == 1.0) {
+        (void) dump_tcp_structure(&tcp_val);
         IDMessage(GALIL_DEVICE, "Cannot populate whilst the filter is in the beam");
         ifilter_engineeringSP.s = IPS_OK;
       } else {
