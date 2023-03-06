@@ -1270,8 +1270,6 @@ void execute_gfilter_switches(ISState states[], char *names[], int n) {
       busy = false;
       telemetry_lightsL[0].s = (busy == true) ? IPS_BUSY : IPS_IDLE;
       IDSetLight(&telemetry_lightsLP, NULL);
-
-      /* update widget(s) */
       gfilterS[0].s = ISS_OFF;
     }
   }
@@ -1382,12 +1380,10 @@ void execute_ifilter_engineering(ISState states[], char *names[], int n) {
         telemetry_lightsL[0].s = (busy == true) ? IPS_BUSY : IPS_IDLE;
         IDSetLight(&telemetry_lightsLP, NULL);
       }
-
-      /* update telemetry */
       ifilter_engineeringS[2].s = ISS_OFF;
 
     /* process 'Halt Execution' */
-    } else if (sp == &ifilter_engineeringS[2]) {
+    } else if (sp == &ifilter_engineeringS[3]) {
 
       /* talk to hardware */
       ifilter_engineeringSP.s = IPS_BUSY;
@@ -1398,13 +1394,14 @@ void execute_ifilter_engineering(ISState states[], char *names[], int n) {
         IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_hx(), gstat=%d", (int)gstat);
       }
       busy = false;
+      popact = false;
       ifilter_engineeringSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
       telemetry_lightsL[0].s = (busy == true) ? IPS_BUSY : IPS_IDLE;
       telemetry_lightsL[1].s = IPS_IDLE;
       telemetry_lightsL[2].s = (popact == true) ? IPS_BUSY : IPS_IDLE;
       telemetry_lightsL[3].s = IPS_IDLE;
       IDSetLight(&telemetry_lightsLP, NULL);
-      ifilter_engineeringS[2].s = ISS_OFF;
+      ifilter_engineeringS[3].s = ISS_OFF;
     }
   }
 
