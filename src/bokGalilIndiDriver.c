@@ -1011,6 +1011,40 @@ void execute_astronomer_actions(ISState states[], char *names[], int n) {
 
 
 /*******************************************************************************
+ * action: gfilter_change_doit()
+ ******************************************************************************/
+void gfilter_change_doit(float gfiltnum) {
+  GReturn gstat = (GReturn)0;
+  if (tcp_val.lv.gfiltn == gfiltnum) {
+    IDMessage(GALIL_DEVICE, "gFilter %d is already selected", (int)gfiltnum);
+    gfilter_changeSP.s = IPS_OK;
+  } else {
+    busy = true;
+    telemetry_lightsL[0].s = (busy == true) ? IPS_BUSY : IPS_IDLE;
+    IDSetLight(&telemetry_lightsLP, NULL);
+    gfilter_changeSP.s = IPS_BUSY;
+    IDMessage(GALIL_DEVICE, "Calling xq_gfiltn(%d)", (int)gfiltnum);
+    if ((gstat=xq_gfiltn(gfiltnum)) == G_NO_ERROR) {
+      IDMessage(GALIL_DEVICE, "Called xq_gfiltn(%d) OK", (int)gfiltnum);
+      IDMessage(GALIL_DEVICE, "Calling xq_gfwmov()");
+      if ((gstat=xq_gfwmov()) == G_NO_ERROR) {
+        IDMessage(GALIL_DEVICE, "Called xq_gfwmov() OK");
+      } else {
+        IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_gfwmov(), gstat=%d", (int)gstat);
+      }
+    } else {
+      IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_gfiltn(1), gstat=%d", (int)gstat);
+    }
+    gfilter_changeSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
+    busy = false;
+    telemetry_lightsL[0].s = (busy == true) ? IPS_BUSY : IPS_IDLE;
+    IDSetLight(&telemetry_lightsLP, NULL);
+  }
+  gfilter_changeS[0].s = ISS_OFF;
+}
+
+
+/*******************************************************************************
  * action: execute_gfilter_change()
  ******************************************************************************/
 void execute_gfilter_change(ISState states[], char *names[], int n) {
@@ -1030,36 +1064,7 @@ void execute_gfilter_change(ISState states[], char *names[], int n) {
 
     /* process 'gFilter 1' */
     if (sp == &gfilter_changeS[0]) {
-      if (tcp_val.lv.gfiltn == 1.0) {
-        IDMessage(GALIL_DEVICE, "gFilter 1 is already selected");
-        gfilter_changeSP.s = IPS_OK;
-      } else {
-
-        /* talk to hardware */
-        busy = true;
-        telemetry_lightsL[0].s = (busy == true) ? IPS_BUSY : IPS_IDLE;
-        IDSetLight(&telemetry_lightsLP, NULL);
-        gfilter_changeSP.s = IPS_BUSY;
-        IDMessage(GALIL_DEVICE, "Calling xq_gfiltn(1)");
-        if ((gstat=xq_gfiltn(1.0)) == G_NO_ERROR) {
-          IDMessage(GALIL_DEVICE, "Called xq_gfiltn(1) OK");
-          IDMessage(GALIL_DEVICE, "Calling xq_gfwmov()");
-          if ((gstat=xq_gfwmov()) == G_NO_ERROR) {
-            IDMessage(GALIL_DEVICE, "Called xq_gfwmov() OK");
-          } else {
-            IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_gfwmov(), gstat=%d", (int)gstat);
-          }
-        } else {
-          IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_gfiltn(1), gstat=%d", (int)gstat);
-        }
-        gfilter_changeSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
-        busy = false;
-        telemetry_lightsL[0].s = (busy == true) ? IPS_BUSY : IPS_IDLE;
-        IDSetLight(&telemetry_lightsLP, NULL);
-      }
-
-      /* update widget(s) */
-      gfilter_changeS[0].s = ISS_OFF;
+      (void) gfilter_change_doit(1.0);
 
     /* process 'gFilter 2' */
     } else if (sp == &gfilter_changeS[1]) {
@@ -1412,6 +1417,43 @@ void execute_ifilter_engineering(ISState states[], char *names[], int n) {
 
 
 /*******************************************************************************
+ * action: ifilter_change_doit()
+ ******************************************************************************/
+void ifilter_change_doit(int ifiltslot) {
+  GReturn gstat = (GReturn)0;
+  if (tcp_val.lv.filtisin == 1.0) {
+    IDMessage(GALIL_DEVICE, "Cannot change filter whilst another filter is in the beam");
+    ifilter_changeSP.s = IPS_BUSY;
+  } else if (tcp_val.lv.filtval==tcp_val.lv.reqfilt && tcp_val.lv.reqfilt==tcp_val.filtvals[ifiltslot]) {
+    IDMessage(GALIL_DEVICE, "iFilter %d is already selected", ifiltslot);
+    ifilter_changeSP.s = IPS_OK;
+  } else {
+    busy = true;
+    telemetry_lightsL[0].s = (busy == true) ? IPS_BUSY : IPS_IDLE;
+    IDSetLight(&telemetry_lightsLP, NULL);
+    ifilter_changeSP.s = IPS_BUSY;
+    IDMessage(GALIL_DEVICE, "Calling xq_reqfilt(%.1f)", tcp_val.filtvals[ifiltslot]);
+    if ((gstat=xq_reqfilt(tcp_val.filtvals[ifiltslot])) == G_NO_ERROR) {
+      IDMessage(GALIL_DEVICE, "Called xq_reqfilt(%.1f) OK", tcp_val.filtvals[ifiltslot]);
+      IDMessage(GALIL_DEVICE, "Calling xq_filtmov()");
+      if ((gstat=xq_filtmov()) == G_NO_ERROR) {
+        IDMessage(GALIL_DEVICE, "Called xq_filtmov() OK");
+      } else {
+        IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_filtmov(), gstat=%d", (int)gstat);
+      }
+    } else {
+      IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_reqfilt(%.1f), gstat=%d", tcp_val.filtvals[ifiltslot], (int)gstat);
+    }
+    ifilter_changeSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
+    busy = false;
+    telemetry_lightsL[0].s = (busy == true) ? IPS_BUSY : IPS_IDLE;
+    IDSetLight(&telemetry_lightsLP, NULL);
+  }
+  ifilter_changeS[0].s = ISS_OFF;
+}
+
+
+/*******************************************************************************
  * action: execute_ifilter_change()
  ******************************************************************************/
 void execute_ifilter_change(ISState states[], char *names[], int n) {
@@ -1430,39 +1472,7 @@ void execute_ifilter_change(ISState states[], char *names[], int n) {
 
     /* process 'iFilter 1' - NB: it's up to the higher-level software to check telemetry */
     if (sp == &ifilter_changeS[0]) {
-      if (tcp_val.lv.filtisin == 1.0) {
-        IDMessage(GALIL_DEVICE, "Cannot change filter whilst another filter is in the beam");
-        ifilter_changeSP.s = IPS_BUSY;
-      } else if (tcp_val.lv.filtval==tcp_val.lv.reqfilt && tcp_val.lv.reqfilt==tcp_val.filtvals[0]) {
-        IDMessage(GALIL_DEVICE, "iFilter 1 is already selected");
-        ifilter_changeSP.s = IPS_OK;
-      } else {
-
-        /* talk to hardware */
-        busy = true;
-        telemetry_lightsL[0].s = (busy == true) ? IPS_BUSY : IPS_IDLE;
-        IDSetLight(&telemetry_lightsLP, NULL);
-        ifilter_changeSP.s = IPS_BUSY;
-        IDMessage(GALIL_DEVICE, "Calling xq_reqfilt(%.1f)", tcp_val.filtvals[0]);
-        if ((gstat=xq_reqfilt(tcp_val.filtvals[0])) == G_NO_ERROR) {
-          IDMessage(GALIL_DEVICE, "Called xq_reqfilt(%.1f) OK", tcp_val.filtvals[0]);
-          IDMessage(GALIL_DEVICE, "Calling xq_filtmov()");
-          if ((gstat=xq_filtmov()) == G_NO_ERROR) {
-            IDMessage(GALIL_DEVICE, "Called xq_filtmov() OK");
-          } else {
-            IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_filtmov(), gstat=%d", (int)gstat);
-          }
-        } else {
-          IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_reqfilt(%.1f), gstat=%d", tcp_val.filtvals[0], (int)gstat);
-        }
-        ifilter_changeSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
-        busy = false;
-        telemetry_lightsL[0].s = (busy == true) ? IPS_BUSY : IPS_IDLE;
-        IDSetLight(&telemetry_lightsLP, NULL);
-      }
-
-      /* update widget(s) */
-      ifilter_changeS[0].s = ISS_OFF;
+      (void) ifilter_change_doit(0);
 
     /* process 'iFilter 2' - NB: it's up to the higher-level software to check telemetry */
     } else if (sp == &ifilter_changeS[1]) {
