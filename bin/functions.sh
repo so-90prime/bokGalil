@@ -5,7 +5,7 @@
 # trap error(s)
 # -
 # set -o errexit
-set -u nounset
+# set -u nounset
 
 
 # +

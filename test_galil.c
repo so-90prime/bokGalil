@@ -41,6 +41,10 @@ int main( int argc, char *argv[] ) {
     gstat = GOpen("10.30.3.31 --command TCP", &gfd);
     (void) printf("GOpen('10.30.3.31 --command TCP') called, gstat=%d, gfd=%ld\n", (int)gstat, (long)gfd);
   }
+  if (gstat != G_NO_ERROR) {
+    (void) printf("<ERROR> GOpen() failed, gstat=%d, gfd=%ld\n", (int)gstat, (long)gfd);
+    return -1;
+  }
 
   (void) memset((void *)version, '\0', 2048);
   gstat = GVersion(version, sizeof(version));
