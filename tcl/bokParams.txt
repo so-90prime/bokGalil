@@ -1,1 +1,1 @@
-/home/pndaly/PycharmProjects/bokGalil/tcl/bokParams.home.txt
+/home/primefocus/bokGalil/tcl/bokParams.bonsai.txt
