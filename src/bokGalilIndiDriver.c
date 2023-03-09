@@ -149,7 +149,6 @@ GReturn astronomer_action_doit(bool);
  * static variable(s)
  ******************************************************************************/
 static bool busy = false;
-static bool invact = false;
 static bool popact = false;
 static bool is_done = false;
 static filter_file_t bok_ifilters[BOK_IFILTER_SLOTS];
@@ -444,8 +443,7 @@ ILightVectorProperty telemetry_engineeringLP = {
 static ILight telemetry_lightsL[] = {
   {"swbusy", "Software Busy",  ISS_OFF, 0, 0},
   {"hwbusy", "Hardware Busy",  ISS_OFF, 0, 0},
-  {"popbusy", "Populate Busy", ISS_OFF, 0, 0},
-  {"invact", "Invalid Action", ISS_OFF, 0, 0} 
+  {"popbusy", "Populate Busy", ISS_OFF, 0, 0}
 };
 ILightVectorProperty telemetry_lightsLP = {
   GALIL_DEVICE, "TELEMETRY", "System Status", TELEMETRY_GROUP, IPS_IDLE, telemetry_lightsL, NARRAY(telemetry_lightsL), "", 0
@@ -1158,7 +1156,6 @@ void execute_ifilter_engineering(ISState states[], char *names[], int n) {
         telemetry_lightsL[0].s = (busy == true) ? IPS_BUSY : IPS_IDLE;
         telemetry_lightsL[1].s = IPS_BUSY;
         telemetry_lightsL[2].s = (popact == true) ? IPS_BUSY : IPS_IDLE;
-        telemetry_lightsL[3].s = IPS_IDLE;
         IDSetLight(&telemetry_lightsLP, NULL);
         ifilter_engineeringSP.s = IPS_BUSY;
         IDMessage(GALIL_DEVICE, "Calling xq_filtldm() from 'populate'");
@@ -1170,7 +1167,6 @@ void execute_ifilter_engineering(ISState states[], char *names[], int n) {
           telemetry_lightsL[0].s = (busy == true) ? IPS_BUSY : IPS_IDLE;
           telemetry_lightsL[1].s = IPS_IDLE;
           telemetry_lightsL[2].s = IPS_IDLE;
-          telemetry_lightsL[3].s = IPS_IDLE;
           IDSetLight(&telemetry_lightsLP, NULL);
         }
         ifilter_engineeringSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
@@ -1195,7 +1191,6 @@ void execute_ifilter_engineering(ISState states[], char *names[], int n) {
       telemetry_lightsL[0].s = (busy == true) ? IPS_BUSY : IPS_IDLE;
       telemetry_lightsL[1].s = IPS_IDLE;
       telemetry_lightsL[2].s = (popact == true) ? IPS_BUSY : IPS_IDLE;
-      telemetry_lightsL[3].s = IPS_IDLE;
       IDSetLight(&telemetry_lightsLP, NULL);
       ifilter_engineeringS[1].s = ISS_OFF;
 
@@ -1247,7 +1242,6 @@ void execute_ifilter_engineering(ISState states[], char *names[], int n) {
       telemetry_lightsL[0].s = (busy == true) ? IPS_BUSY : IPS_IDLE;
       telemetry_lightsL[1].s = IPS_IDLE;
       telemetry_lightsL[2].s = (popact == true) ? IPS_BUSY : IPS_IDLE;
-      telemetry_lightsL[3].s = IPS_IDLE;
       IDSetLight(&telemetry_lightsLP, NULL);
       ifilter_engineeringS[3].s = ISS_OFF;
     }
@@ -2067,7 +2061,6 @@ static void unscheduled_telemetry(void *p) {
   telemetry_lightsL[0].s = (busy == true) ? IPS_BUSY : IPS_IDLE;
   telemetry_lightsL[1].s = (IS_BIT_SET(tcp_val.status, 7)) ? IPS_BUSY : IPS_IDLE;
   telemetry_lightsL[2].s = (popact == true) ? IPS_BUSY : IPS_IDLE;
-  telemetry_lightsL[3].s = (invact == true) ? IPS_BUSY : IPS_IDLE;
   telemetry_gfilterwheelL[0].s = (udp_val.haxis_moving == 1) ? IPS_BUSY : IPS_IDLE;
 
   telemetry_ifilterwheelL[0].s = (tcp_val.lv.filtisin == 1.0) ? IPS_IDLE : IPS_OK;
@@ -2292,7 +2285,6 @@ static void scheduled_telemetry(void *p) {
   telemetry_lightsL[0].s = (busy == true) ? IPS_BUSY : IPS_IDLE;
   telemetry_lightsL[1].s = (IS_BIT_SET(tcp_val.status, 7)) ? IPS_BUSY : IPS_IDLE;
   telemetry_lightsL[2].s = (popact == true) ? IPS_BUSY : IPS_IDLE;
-  telemetry_lightsL[3].s = (invact == true) ? IPS_BUSY : IPS_IDLE;
   telemetry_gfilterwheelL[0].s = (udp_val.haxis_moving == 1) ? IPS_BUSY : IPS_IDLE;
 
   telemetry_ifilterwheelL[0].s = (tcp_val.lv.filtisin == 1.0) ? IPS_IDLE : IPS_OK;
@@ -2366,7 +2358,6 @@ static void zero_telemetry(void) {
   telemetry_lightsL[0].s = ISS_OFF;
   telemetry_lightsL[1].s = ISS_OFF;
   telemetry_lightsL[2].s = ISS_OFF;
-  telemetry_lightsL[3].s = ISS_OFF;
   telemetry_gfilterwheelL[0].s = ISS_OFF;
 
   telemetry_ifilterwheelL[0].s = ISS_OFF;
