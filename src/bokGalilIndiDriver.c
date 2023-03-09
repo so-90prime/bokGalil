@@ -526,7 +526,7 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
     IDMessage(GALIL_DEVICE, "dump name='%s', value[%d]=%.3f", name, idx, values[idx]);
   }
 
-  /* focus dist value(s) */
+  /* focus dist value(s) - what uses this?? */
   if (!strcmp(name, ifocus_distNP.name)) {
     IDMessage(GALIL_DEVICE, "Calling ifocus_distNP from '%s'", name);
     float dista = values[0];
@@ -561,7 +561,7 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
     ifocus_distNP.np[2].value = distc;
     IDSetNumber(&ifocus_distNP, NULL);
 
-  /* focus distall value(s) */
+  /* focus distall value(s) - what uses this?? */
   } else if (!strcmp(name, ifocus_distallNP.name)) {
     IDMessage(GALIL_DEVICE, "Calling ifocus_distallNP from '%s'", name);
     float distall = values[0];
@@ -583,6 +583,8 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
     } else {
       IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_focusall(a=%.1f), gstat=%d", distall, (int)gstat);
     }
+    /* there is no way to check completion so we just wait a couple seconds */
+    (void) sleep(2);
     ifocus_distallNP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
     busy = false;
     telemetry_lightsL[0].s = (busy == true) ? IPS_BUSY : IPS_IDLE;
@@ -685,7 +687,7 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
       IDMessage(GALIL_DEVICE, "main ifocus reached focus_a=%.4f focus_b=%.4f focus_c=%.4f within tolerance=%.4f OK", focus_a, focus_b, focus_c, tolerance);
       ifocus_lvdtNP.s = IPS_OK;
     } else {
-      IDMessage(GALIL_DEVICE, "<ERROR> main ifocus failed to reached focus_a=%.4f focus_b=%.4f focus_c=%.4f within tolerance=%.4f, countdown=%d OK\n", focus_a, focus_b, focus_c, tolerance, countdown);
+      IDMessage(GALIL_DEVICE, "<ERROR> main ifocus failed to reached focus_a=%.4f focus_b=%.4f focus_c=%.4f within tolerance=%.4f, countdown=%d OK", focus_a, focus_b, focus_c, tolerance, countdown);
       ifocus_lvdtNP.s = IPS_ALERT;
     }
     if ((gstat=xq_hx()) == G_NO_ERROR) {
@@ -753,6 +755,8 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
     } else {
       IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_gfocus(a=%.1f), gstat=%d", distgcam, (int)gstat);
     }
+    /* there is no way to check completion so we just wait a couple seconds */
+    (void) sleep(2);
     gfocus_distNP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
     busy = false;
     telemetry_lightsL[0].s = (busy == true) ? IPS_BUSY : IPS_IDLE;
@@ -873,7 +877,7 @@ static void driver_init(void) {
   read_filters_from_file(gname, (filter_file_t *)bok_gfilters, BOK_GFILTER_SLOTS, BOK_GFILTER_COLUMNS);
   for (int j=0; j<BOK_GFILTER_SLOTS; j++) {
     if (strlen(bok_gfilters[j].code)>0 && strlen(bok_gfilters[j].name)>0) {
-      (void) fprintf(stderr, "guider filters> index=%d, code='%s', name='%s'\n", j, bok_gfilters[j].code, bok_gfilters[j].name);
+      (void) fprintf(stderr, "guider filters> index=%d, code='%s', name='%s'", j, bok_gfilters[j].code, bok_gfilters[j].name);
       (void) fflush(stderr);
     }
   }
@@ -883,7 +887,7 @@ static void driver_init(void) {
   read_filters_from_file(iname, (filter_file_t *)bok_ifilters, BOK_IFILTER_SLOTS, BOK_IFILTER_COLUMNS);
   for (int j=0; j<BOK_IFILTER_SLOTS; j++) {
     if (strlen(bok_ifilters[j].code)>0 && strlen(bok_ifilters[j].name)>0) {
-      (void) fprintf(stderr, "instrument filters> index=%d, code='%s', name='%s'\n", j, bok_ifilters[j].code, bok_ifilters[j].name);
+      (void) fprintf(stderr, "instrument filters> index=%d, code='%s', name='%s'", j, bok_ifilters[j].code, bok_ifilters[j].name);
       (void) fflush(stderr);
     }
   }
@@ -893,7 +897,7 @@ static void driver_init(void) {
   read_filters_from_file(sname, (filter_file_t *)bok_sfilters, BOK_SFILTER_SLOTS, BOK_SFILTER_COLUMNS);
   for (int k=0; k<BOK_SFILTER_SLOTS; k++) {
     if (strlen(bok_sfilters[k].code)>0 && strlen(bok_sfilters[k].name)>0) {
-      (void) fprintf(stderr, "sensor filters> index=%d, code='%s', name='%s'\n", k, bok_sfilters[k].code, bok_sfilters[k].name);
+      (void) fprintf(stderr, "sensor filters> index=%d, code='%s', name='%s'", k, bok_sfilters[k].code, bok_sfilters[k].name);
       (void) fflush(stderr);
     }
   }
@@ -1376,7 +1380,7 @@ GReturn ifilter_read_doit(void) {
   busy = true;
   telemetry_lightsL[0].s = (busy == true) ? IPS_BUSY : IPS_IDLE;
   IDSetLight(&telemetry_lightsLP, NULL);
-  unscheduled_telemetry((void *)NULL);
+  //unscheduled_telemetry((void *)NULL);
   if ((gstat=xq_hx()) == G_NO_ERROR) {
     IDMessage(GALIL_DEVICE, "Called xq_hx() from '%s' OK", "ifilter_read_doit");
   } else {
@@ -1700,86 +1704,67 @@ void execute_ifocus_reference_switches(ISState states[], char *names[], int n) {
         telemetry_lightsL[0].s = (busy == true) ? IPS_BUSY : IPS_IDLE;
         IDSetLight(&telemetry_lightsLP, NULL);
         ifocus_lvdtNP.s = IPS_BUSY;
-        is_done  = false;
+        is_done = false;
 
+        /* talk to hardware */
         int countdown = BOK_NG_INSTRUMENT_FOCUS_TIME;
-        int tcp_shm_fd = -1;
-        int udp_shm_fd = -1;
-        tcp_val_p tcp_shm_ptr = (tcp_val_p)NULL;
-        udp_val_p udp_shm_ptr = (udp_val_p)NULL;
+        while (--countdown > 0) {
 
-        tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
-        tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
-        udp_shm_fd = shm_open(BOK_SHM_UDP_NAME, O_RDONLY, 0666);
-        udp_shm_ptr = (udp_val_p)mmap(0, UDP_VAL_SIZE, PROT_READ, MAP_SHARED, udp_shm_fd, 0);
-        if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
-          IDMessage(GALIL_DEVICE, "<ERROR> invalid TCP shared memory");
-        } else if (udp_shm_fd<0 || udp_shm_ptr==(udp_val_p)NULL) {
-          IDMessage(GALIL_DEVICE, "<ERROR> invalid UDP shared memory");
-
-        } else {
-          while (--countdown > 0) {
-            float cur_a = round(((float)udp_shm_ptr->a_position * 1000.0));
-            float cur_b = round(((float)udp_shm_ptr->b_position * 1000.0));
-            float cur_c = round(((float)udp_shm_ptr->c_position * 1000.0));
-            dista = round((focus_a/1000.0 - cur_a/1000.0) * BOK_LVDT_ATOD);
-            distb = round((focus_b/1000.0 - cur_b/1000.0) * BOK_LVDT_ATOD);
-            distc = round((focus_c/1000.0 - cur_c/1000.0) * BOK_LVDT_ATOD);
-            float new_a = ifoci.refa * 1000.0;
-            float new_b = ifoci.refb * 1000.0;
-            float new_c = ifoci.refc * 1000.0;
-            if (tolerance<BOK_MIN_TOLERANCE || tolerance>BOK_MAX_TOLERANCE) { tolerance = BOK_NOM_TOLERANCE; }
-            IDMessage(GALIL_DEVICE, "restore ifocus cur_a=%.4f dista=%.4f focus_a=%.4f new_a=%.4f tolerance=%.4f diff=%.4f, countdown=%d\n", cur_a, dista, focus_a, new_a, tolerance, (cur_a - new_a), countdown);
-            IDMessage(GALIL_DEVICE, "restore ifocus cur_b=%.4f distb=%.4f focus_b=%.4f new_b=%.4f tolerance=%.4f diff=%.4f, countdown=%d\n", cur_b, distb, focus_b, new_b, tolerance, (cur_b - new_b), countdown);
-            IDMessage(GALIL_DEVICE, "restore ifocus cur_c=%.4f distc=%.4f focus_c=%.4f new_c=%.4f tolerance=%.4f diff=%.4f, countdown=%d\n", cur_c, distc, focus_c, new_c, tolerance, (cur_c - new_c), countdown);
-            if ((gstat=xq_hx()) == G_NO_ERROR) {
-              IDMessage(GALIL_DEVICE, "Called xq_hx() from '%s' OK", "restore ifocus");
-            } else {
-              IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_hx() from '%s', gstat=%d", "restore ifocus", (int)gstat);
-            }
-            if ( (abs(round(cur_a - new_a)) <= tolerance) && (abs(round(cur_b - new_b)) <= tolerance) && (abs(round(cur_c - new_c)) <= tolerance) ) {
-              IDMessage(GALIL_DEVICE, "restore ifocus cur_a %.4f new_a %.4f within tolerance %.4f\n", cur_a, new_a, tolerance);
-              IDMessage(GALIL_DEVICE, "restore ifocus cur_b %.4f new_b %.4f within tolerance %.4f\n", cur_b, new_b, tolerance);
-              IDMessage(GALIL_DEVICE, "restore ifocus cur_c %.4f new_c %.4f within tolerance %.4f\n", cur_c, new_c, tolerance);
-              is_done = true; break;
-            }
-            (void) sleep(1);
-            IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f) from '%s' with tolerance %.2f", dista, distb, distc, "restore ifocus", tolerance);
-            if ((gstat=xq_focusind(dista, distb, distc)) == G_NO_ERROR) {
-              IDMessage(GALIL_DEVICE, "Called xq_focusind(a=%.1f, b=%.1f, c=%.1f) from '%s' with tolerance %.2f OK", dista, distb, distc, "restore ifocus", tolerance);
-            } else {
-              IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_focusind(a=%.1f, b=%.1f, c=%.1f) from '%s' with tolerance %.2f, gstat=%d", dista, distb, distc, "restore ifocus", tolerance, (int)gstat);
-            }
-            (void) sleep(1);
-          }
-          if (is_done) {
-            IDMessage(GALIL_DEVICE, "restore ifocus reached focus_a=%.4f focus_b=%.4f focus_c=%.4f within tolerance=%.4f, countdown=%d OK\n", focus_a, focus_b, focus_c, tolerance, countdown);
-            ifocus_lvdtNP.s = IPS_OK;
-          } else {
-            IDMessage(GALIL_DEVICE, "<ERROR> restore ifocus failed to reached focus_a=%.4f focus_b=%.4f focus_c=%.4f within tolerance=%.4f, countdown=%d OK\n", focus_a, focus_b, focus_c, tolerance, countdown);
-            ifocus_lvdtNP.s = IPS_ALERT;
-          }
+          /* get fresh telemetry */
+          unscheduled_telemetry((void *)NULL);
+          float cur_a = round(((float)udp_val.a_position * 1000.0));
+          float cur_b = round(((float)udp_val.b_position * 1000.0));
+          float cur_c = round(((float)udp_val.c_position * 1000.0));
+          dista = round((focus_a/1000.0 - cur_a/1000.0) * BOK_LVDT_ATOD);
+          distb = round((focus_b/1000.0 - cur_b/1000.0) * BOK_LVDT_ATOD);
+          distc = round((focus_c/1000.0 - cur_c/1000.0) * BOK_LVDT_ATOD);
+          float new_a = ifoci.refa * 1000.0;
+          float new_b = ifoci.refb * 1000.0;
+          float new_c = ifoci.refc * 1000.0;
+          if (tolerance<BOK_MIN_TOLERANCE || tolerance>BOK_MAX_TOLERANCE) { tolerance = BOK_NOM_TOLERANCE; }
+          IDMessage(GALIL_DEVICE, "restore ifocus cur_a=%.4f dista=%.4f focus_a=%.4f new_a=%.4f tolerance=%.4f diff=%.4f timestamp='%s' countdown=%d", cur_a, dista, focus_a, new_a, tolerance, (cur_a - new_a), tcp_val.timestamp, countdown);
+          IDMessage(GALIL_DEVICE, "restore ifocus cur_b=%.4f distb=%.4f focus_b=%.4f new_b=%.4f tolerance=%.4f diff=%.4f timestamp='%s' countdown=%d", cur_b, distb, focus_b, new_b, tolerance, (cur_b - new_b), tcp_val.timestamp, countdown);
+          IDMessage(GALIL_DEVICE, "restore ifocus cur_c=%.4f distc=%.4f focus_c=%.4f new_c=%.4f tolerance=%.4f diff=%.4f timestamp='%s' countdown=%d", cur_c, distc, focus_c, new_c, tolerance, (cur_c - new_c), tcp_val.timestamp, countdown);
+    
+          /* end if within tolerance */
+          if ( (abs(round(cur_a - new_a)) <= tolerance) && (abs(round(cur_b - new_b)) <= tolerance) && (abs(round(cur_c - new_c)) <= tolerance) ) { is_done = true; break; }
+    
+          /* stop current execution */
           if ((gstat=xq_hx()) == G_NO_ERROR) {
-            IDMessage(GALIL_DEVICE, "Called xq_hx() from '%s' OK", "restore ifocus");
+            IDMessage(GALIL_DEVICE, "Called xq_hx() from '%s' OK", "ifocus lvdt");
           } else {
-            IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_hx() from '%s', gstat=%d", "restore ifocus", (int)gstat);
+            IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_hx() from '%s', gstat=%d", "ifocus lvdt", (int)gstat);
           }
-
-          if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
-          if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
-          if (udp_shm_ptr != (udp_val_p)NULL) { (void) munmap(udp_shm_ptr, UDP_VAL_SIZE); }
-          if (udp_shm_fd >= 0) { (void) close(udp_shm_fd); }
+    
+          /* start new drive */
+          if ((gstat=xq_focusind(dista, distb, distc)) == G_NO_ERROR) {
+            IDMessage(GALIL_DEVICE, "Called xq_focusind(a=%.1f, b=%.1f, c=%.1f) from '%s' with tolerance %.2f OK", dista, distb, distc, "ifocus lvdt", tolerance);
+          } else {
+            IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_focusind(a=%.1f, b=%.1f, c=%.1f) from '%s' with tolerance %.2f, gstat=%d", dista, distb, distc, "ifocus lvdt", tolerance, (int)gstat);
+          }
+          (void) sleep(1);
+        }
+        if (is_done) {
+          IDMessage(GALIL_DEVICE, "restore ifocus reached focus_a=%.4f focus_b=%.4f focus_c=%.4f within tolerance=%.4f OK", focus_a, focus_b, focus_c, tolerance);
+          ifocus_lvdtNP.s = IPS_OK;
+        } else {
+          IDMessage(GALIL_DEVICE, "<ERROR> restore ifocus failed to reached focus_a=%.4f focus_b=%.4f focus_c=%.4f within tolerance=%.4f, countdown=%d OK", focus_a, focus_b, focus_c, tolerance, countdown);
+          ifocus_lvdtNP.s = IPS_ALERT;
+        }
+        if ((gstat=xq_hx()) == G_NO_ERROR) {
+          IDMessage(GALIL_DEVICE, "Called xq_hx() from '%s' OK", "ifocus lvdt");
+        } else {
+          IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_hx() from '%s', gstat=%d", "ifocus lvdt", (int)gstat);
         }
         busy = false;
         telemetry_lightsL[0].s = (busy == true) ? IPS_BUSY : IPS_IDLE;
         IDSetLight(&telemetry_lightsLP, NULL);
+        IDSetNumber(&ifocus_lvdtNP, NULL);
+        ifocus_referenceSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
+        telemetry_referenceTP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
+        ifocus_referenceS[1].s = ISS_OFF;
+        IDSetNumber(&ifocus_lvdtNP, NULL);
       }
-
-      /* update widget(s) */
-      ifocus_referenceSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
-      telemetry_referenceTP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
-      ifocus_referenceS[1].s = ISS_OFF;
-      IDSetNumber(&ifocus_lvdtNP, NULL);
 
     /* process 'Save Nominal Plane' */
     } else if (sp == &ifocus_referenceS[2]) {
@@ -1816,77 +1801,60 @@ void execute_ifocus_reference_switches(ISState states[], char *names[], int n) {
         IDSetLight(&telemetry_lightsLP, NULL);
         ifocus_lvdtNP.s = IPS_BUSY;
         is_done  = false;
-
         int countdown = BOK_NG_INSTRUMENT_FOCUS_TIME;
-        int tcp_shm_fd = -1;
-        int udp_shm_fd = -1;
-        tcp_val_p tcp_shm_ptr = (tcp_val_p)NULL;
-        udp_val_p udp_shm_ptr = (udp_val_p)NULL;
 
-        tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
-        tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
-        udp_shm_fd = shm_open(BOK_SHM_UDP_NAME, O_RDONLY, 0666);
-        udp_shm_ptr = (udp_val_p)mmap(0, UDP_VAL_SIZE, PROT_READ, MAP_SHARED, udp_shm_fd, 0);
-        if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
-          IDMessage(GALIL_DEVICE, "<ERROR> invalid TCP shared memory");
-        } else if (udp_shm_fd<0 || udp_shm_ptr==(udp_val_p)NULL) {
-          IDMessage(GALIL_DEVICE, "<ERROR> invalid UDP shared memory");
+	/* get value(s) */
+        unscheduled_telemetry((void *)NULL);
+        focus_a = round(((float)udp_val.a_position * 1000.0)) + ifoci.noma;
+        focus_b = round(((float)udp_val.b_position * 1000.0)) + ifoci.nomb;
+        focus_c = round(((float)udp_val.c_position * 1000.0)) + ifoci.nomc;
 
-        } else {
-          focus_a = round(((float)udp_shm_ptr->a_position * 1000.0)) + ifoci.noma;
-          focus_b = round(((float)udp_shm_ptr->b_position * 1000.0)) + ifoci.nomb;
-          focus_c = round(((float)udp_shm_ptr->c_position * 1000.0)) + ifoci.nomc;
-          while (--countdown > 0) {
-            float cur_a = round(((float)udp_shm_ptr->a_position * 1000.0));
-            float cur_b = round(((float)udp_shm_ptr->b_position * 1000.0));
-            float cur_c = round(((float)udp_shm_ptr->c_position * 1000.0));
-            dista = round((focus_a/1000.0 - cur_a/1000.0) * BOK_LVDT_ATOD);
-            distb = round((focus_b/1000.0 - cur_b/1000.0) * BOK_LVDT_ATOD);
-            distc = round((focus_c/1000.0 - cur_c/1000.0) * BOK_LVDT_ATOD);
-            float new_a = focus_a;
-            float new_b = focus_b;
-            float new_c = focus_c;
-            if (tolerance<BOK_MIN_TOLERANCE || tolerance>BOK_MAX_TOLERANCE) { tolerance = BOK_NOM_TOLERANCE; }
-            IDMessage(GALIL_DEVICE, "nominal ifocus cur_a=%.4f dista=%.4f focus_a=%.4f new_a=%.4f tolerance=%.4f diff=%.4f, countdown=%d\n", cur_a, dista, focus_a, new_a, tolerance, (cur_a - new_a), countdown);
-            IDMessage(GALIL_DEVICE, "nominal ifocus cur_b=%.4f distb=%.4f focus_b=%.4f new_b=%.4f tolerance=%.4f diff=%.4f, countdown=%d\n", cur_b, distb, focus_b, new_b, tolerance, (cur_b - new_b), countdown);
-            IDMessage(GALIL_DEVICE, "nominal ifocus cur_c=%.4f distc=%.4f focus_c=%.4f new_c=%.4f tolerance=%.4f diff=%.4f, countdown=%d\n", cur_c, distc, focus_c, new_c, tolerance, (cur_c - new_c), countdown);
-            if ((gstat=xq_hx()) == G_NO_ERROR) {
-              IDMessage(GALIL_DEVICE, "Called xq_hx() from '%s' OK", "nominal ifocus");
-            } else {
-              IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_hx() from '%s', gstat=%d", "nominal ifocus", (int)gstat);
-            }
-            if ( (abs(round(cur_a - new_a)) <= tolerance) && (abs(round(cur_b - new_b)) <= tolerance) && (abs(round(cur_c - new_c)) <= tolerance) ) {
-              IDMessage(GALIL_DEVICE, "nominal ifocus cur_a %.4f new_a %.4f within tolerance %.4f\n", cur_a, new_a, tolerance);
-              IDMessage(GALIL_DEVICE, "nominal ifocus cur_b %.4f new_b %.4f within tolerance %.4f\n", cur_b, new_b, tolerance);
-              IDMessage(GALIL_DEVICE, "nominal ifocus cur_c %.4f new_c %.4f within tolerance %.4f\n", cur_c, new_c, tolerance);
-              is_done = true; break;
-            }
-            (void) sleep(1);
-            IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f) from '%s' with tolerance %.2f", dista, distb, distc, "nominal ifocus", tolerance);
-            if ((gstat=xq_focusind(dista, distb, distc)) == G_NO_ERROR) {
-              IDMessage(GALIL_DEVICE, "Called xq_focusind(a=%.1f, b=%.1f, c=%.1f) from '%s' with tolerance %.2f OK", dista, distb, distc, "nominal ifocus", tolerance);
-            } else {
-              IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_focusind(a=%.1f, b=%.1f, c=%.1f) from '%s' with tolerance %.2f, gstat=%d", dista, distb, distc, "nominal ifocus", tolerance, (int)gstat);
-            }
-            (void) sleep(1);
-          }
-          if (is_done) {
-            IDMessage(GALIL_DEVICE, "nominal ifocus reached focus_a=%.4f focus_b=%.4f focus_c=%.4f within tolerance=%.4f, countdown=%d OK\n", focus_a, focus_b, focus_c, tolerance, countdown);
-            ifocus_lvdtNP.s = IPS_OK;
-          } else {
-            IDMessage(GALIL_DEVICE, "<ERROR> nominal ifocus failed to reached focus_a=%.4f focus_b=%.4f focus_c=%.4f within tolerance=%.4f, countdown=%d OK\n", focus_a, focus_b, focus_c, tolerance, countdown);
-            ifocus_lvdtNP.s = IPS_ALERT;
-          }
+        while (--countdown > 0) {
+          unscheduled_telemetry((void *)NULL);
+          float cur_a = round(((float)udp_val.a_position * 1000.0));
+          float cur_b = round(((float)udp_val.b_position * 1000.0));
+          float cur_c = round(((float)udp_val.c_position * 1000.0));
+          dista = round((focus_a/1000.0 - cur_a/1000.0) * BOK_LVDT_ATOD);
+          distb = round((focus_b/1000.0 - cur_b/1000.0) * BOK_LVDT_ATOD);
+          distc = round((focus_c/1000.0 - cur_c/1000.0) * BOK_LVDT_ATOD);
+          float new_a = focus_a;
+          float new_b = focus_b;
+          float new_c = focus_c;
+          if (tolerance<BOK_MIN_TOLERANCE || tolerance>BOK_MAX_TOLERANCE) { tolerance = BOK_NOM_TOLERANCE; }
+          IDMessage(GALIL_DEVICE, "nominal ifocus cur_a=%.4f dista=%.4f focus_a=%.4f new_a=%.4f tolerance=%.4f diff=%.4f, countdown=%d", cur_a, dista, focus_a, new_a, tolerance, (cur_a - new_a), countdown);
+          IDMessage(GALIL_DEVICE, "nominal ifocus cur_b=%.4f distb=%.4f focus_b=%.4f new_b=%.4f tolerance=%.4f diff=%.4f, countdown=%d", cur_b, distb, focus_b, new_b, tolerance, (cur_b - new_b), countdown);
+          IDMessage(GALIL_DEVICE, "nominal ifocus cur_c=%.4f distc=%.4f focus_c=%.4f new_c=%.4f tolerance=%.4f diff=%.4f, countdown=%d", cur_c, distc, focus_c, new_c, tolerance, (cur_c - new_c), countdown);
           if ((gstat=xq_hx()) == G_NO_ERROR) {
             IDMessage(GALIL_DEVICE, "Called xq_hx() from '%s' OK", "nominal ifocus");
           } else {
             IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_hx() from '%s', gstat=%d", "nominal ifocus", (int)gstat);
           }
-
-          if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
-          if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
-          if (udp_shm_ptr != (udp_val_p)NULL) { (void) munmap(udp_shm_ptr, UDP_VAL_SIZE); }
-          if (udp_shm_fd >= 0) { (void) close(udp_shm_fd); }
+          if ( (abs(round(cur_a - new_a)) <= tolerance) && (abs(round(cur_b - new_b)) <= tolerance) && (abs(round(cur_c - new_c)) <= tolerance) ) {
+            IDMessage(GALIL_DEVICE, "nominal ifocus cur_a %.4f new_a %.4f within tolerance %.4f", cur_a, new_a, tolerance);
+            IDMessage(GALIL_DEVICE, "nominal ifocus cur_b %.4f new_b %.4f within tolerance %.4f", cur_b, new_b, tolerance);
+            IDMessage(GALIL_DEVICE, "nominal ifocus cur_c %.4f new_c %.4f within tolerance %.4f", cur_c, new_c, tolerance);
+            is_done = true; break;
+          }
+          (void) sleep(1);
+          IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f) from '%s' with tolerance %.2f", dista, distb, distc, "nominal ifocus", tolerance);
+          if ((gstat=xq_focusind(dista, distb, distc)) == G_NO_ERROR) {
+            IDMessage(GALIL_DEVICE, "Called xq_focusind(a=%.1f, b=%.1f, c=%.1f) from '%s' with tolerance %.2f OK", dista, distb, distc, "nominal ifocus", tolerance);
+          } else {
+            IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_focusind(a=%.1f, b=%.1f, c=%.1f) from '%s' with tolerance %.2f, gstat=%d", dista, distb, distc, "nominal ifocus", tolerance, (int)gstat);
+          }
+          (void) sleep(1);
+        }
+        if (is_done) {
+          IDMessage(GALIL_DEVICE, "nominal ifocus reached focus_a=%.4f focus_b=%.4f focus_c=%.4f within tolerance=%.4f, countdown=%d OK", focus_a, focus_b, focus_c, tolerance, countdown);
+          ifocus_lvdtNP.s = IPS_OK;
+        } else {
+          IDMessage(GALIL_DEVICE, "<ERROR> nominal ifocus failed to reached focus_a=%.4f focus_b=%.4f focus_c=%.4f within tolerance=%.4f, countdown=%d OK", focus_a, focus_b, focus_c, tolerance, countdown);
+          ifocus_lvdtNP.s = IPS_ALERT;
+        }
+        if ((gstat=xq_hx()) == G_NO_ERROR) {
+          IDMessage(GALIL_DEVICE, "Called xq_hx() from '%s' OK", "nominal ifocus");
+        } else {
+          IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_hx() from '%s', gstat=%d", "nominal ifocus", (int)gstat);
         }
         busy = false;
         telemetry_lightsL[0].s = (busy == true) ? IPS_BUSY : IPS_IDLE;
