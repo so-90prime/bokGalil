@@ -17,6 +17,7 @@ export BOK_GALIL_LIB=${BOK_GALIL_HOME}/lib
 export BOK_GALIL_LOG=${BOK_GALIL_HOME}/log
 export BOK_GALIL_SRC=${BOK_GALIL_HOME}/src
 export BOK_GALIL_TCL=${BOK_GALIL_HOME}/tcl
+export BOK_GALIL_TEX=${BOK_GALIL_HOME}/tex
 
 
 # +
