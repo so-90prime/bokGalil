@@ -42,20 +42,26 @@ exactly the same from \sfmagenta{banzai (10.30.1.8)} but with the different IP a
 
 \emteal{cd /home/primefocus/bokGalil}
 
-\emteal{source /home/primefocus/bokGalil/etc/bokGalil.sh \$(pwd) gui} \\
+\emteal{source \hspace{1mm} etc/bokGalil.sh \hspace{1mm} \$(pwd) \hspace{1mm} gui}\footnote{
+  You can also replace the \emph{\$(pwd)} syntax with the `backward apostrophe' syntax: 
+  \emph{{\small $^\backprime$}~pwd~{\small $^\backprime$}}. The `backward apostrophe' is often 
+  located at the top-left of the keyboard sharing the `$\sim$' key below the {\sc esc} key.
+  However, this syntax only works in the /home/primefocus/bokGalil sub-directory. From \emph{any} location, 
+  use the full command syntax: \emph{source \hspace{1mm} /home/primefocus/bokGalil/etc/bokGalil.sh \hspace{1mm} /home/primefocus/bokGalil \hspace{1mm} gui}.} \\
 
-\noindent Allow the interface shown in Figure~\ref{boktcl} to appear and press the \emteal{start} button. Then choose an 
-appropriate web interface as shown in Figure~\ref{bokgui}: \\
+\noindent Allow the interface shown in Figure~\ref{boktcl} to appear and press the \emteal{start} button. The last element
+to appear---indicating that startup is complete---is the \emph{ds9} window  Then choose an appropriate web interface as shown 
+in Figure~\ref{bokgui}: \\
 
-\emteal{http://10.30.1.7:5905} for astronomers, or
+\ttblue{http://10.30.1.7:5905} for astronomers, or
 
-\emteal{http://10.30.1.7:5905/indi} for engineers. \\
+\ttblue{http://10.30.1.7:5905/indi} for engineers. \\
 
 \begin{figure}[!h]
  \centering
  \includegraphics[width=0.4\linewidth]{bokSplashOff.png}
  \includegraphics[width=0.4\linewidth]{bokSplashOn.png}
- \caption{The 90Prime Startup and Shutdown Interface.}.
+ \caption{The 90Prime Startup and Shutdown Interface.}
  \label{boktcl}
 \end{figure}
 
@@ -63,7 +69,7 @@ appropriate web interface as shown in Figure~\ref{bokgui}: \\
  \centering
  \includegraphics[width=0.5\linewidth]{AstronomerGUI.png}
  \includegraphics[width=0.4\linewidth]{EngineerGUI.png}
- \caption{The 90Prime Astronomer (left) and Engineer (right, only partially shown) GUIs.}.
+ \caption{The 90Prime Astronomer (left) and Engineer (right, only partially shown) GUIs.}
  \label{bokgui}
 \end{figure}
 
@@ -74,11 +80,11 @@ by changing that element from \emph{green} to \emph{red}. Note that the \emteal{
 actions are global with no application to specific tasks. If a single task crashes, it is easiest to re-start the whole system
 (and takes a few seconds at most).
 
-\subsection{Day Crew Actions}
+\subsection{Day Crew Action(s)}
 \label{daycrewactions}
 
 \noindent When the software is started, the day crew will typically initialize the system via the following action(s)
-accessed via the engineering interface (http://10.30.1.7:5905/indi, and see Figure~\ref{engineer}):
+accessed via the engineering interface (\ttblue{http://10.30.1.7:5905/indi}) as shown in Figure~\ref{engineer}):
 
 \begin{description}
  \item[{\sc populate}] This command, once executed, allows the day crew to install various filters using the side button on the dewar.
@@ -92,11 +98,11 @@ accessed via the engineering interface (http://10.30.1.7:5905/indi, and see Figu
  \centering
  \includegraphics[width=0.5\linewidth]{DayCrewActions1.png}
  \includegraphics[width=0.5\linewidth]{DayCrewActions2.png}
- \caption{The Day Crew Actions Within The Engineering GUI.}.
+ \caption{The Day Crew Actions Within The Engineering GUI.}
  \label{engineer}
 \end{figure}
 
-\subsection{Astronomer Actions}
+\subsection{Astronomer Action(s)}
 \label{astronomeractions}
 
 \noindent These commands are optional (but good practice): 
@@ -106,13 +112,20 @@ accessed via the engineering interface (http://10.30.1.7:5905/indi, and see Figu
  \item[{\sc end of night}] This command unloads any previously loaded instrument filter.
 \end{description}
 
+\subsection{/nfs/data/primefocus/\emph{yyyymmdd}}
+\label{datadirectory}
+
+A cronjob runs every day to create a new data directory in /nfs/data/primefocus/\emph{yyyymmdd} where \emph{yyyymmdd} is
+the date at the start of the observing night (\emph{i.e. viz.,} local time). The observer or engineer will have to (manually)
+enter this directory in AzCam.
+
 \section{Hardware}
 \label{Hardware}
 
 \begin{figure}
  \centering
  \includegraphics[angle=0,scale=0.75]{bokrack.png}
- \caption{The 90Prime System Rack.}.
+ \caption{The 90Prime System Rack.}
  \label{bokrack}
 \end{figure}
 
@@ -161,7 +174,7 @@ for the Steward code base and well-documented procedures for obtaining the suppo
 \begin{figure}
  \centering
  \includegraphics[angle=0,scale=0.75]{bokGalilIndiDriver.png}
- \caption{The 90Prime Software Architecture.}.
+ \caption{The 90Prime Software Architecture.}
  \label{bokGalilIndiDriver}
 \end{figure}
 
@@ -181,9 +194,9 @@ The software can built and run on any machine that supports the following:
 Other repositories required to support operations are:
 
 \begin{description}
-\item[dataserver] https://github.com/so-mops/dataserver.git \\
-\item[bok-90prime-gui] https://github.com/so-90prime/bok-90prime-gui.git \\
-\item[pyINDI] git+https://github.com/MMTObservatory/pyINDI.git \\
+\item[dataserver] \ttblue{https://github.com/so-mops/dataserver.git} \\
+\item[bok-90prime-gui] \ttblue{https://github.com/so-90prime/bok-90prime-gui.git} \\
+\item[pyINDI] \ttblue{git+https://github.com/MMTObservatory/pyINDI.git} \\
 \end{description}
 
 \subsection{Required Components}
@@ -288,7 +301,7 @@ Connect either to the astronomer interface (\ttblue{http://10.30.1.7:5905}) or t
 \begin{landscape}
 \begin{table}[h]
  \centering
- \caption{bokGalil Configuration Variable(s)}
+ \caption{bokGalil Configuration Variable(s).}
  \label{variables}
  \begin{tabular}{llcc}
   \hline \hline
