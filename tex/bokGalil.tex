@@ -50,7 +50,7 @@ exactly the same from \sfmagenta{banzai (10.30.1.8)} but with the different IP a
   use the full command syntax: \emph{source \hspace{1mm} /home/primefocus/bokGalil/etc/bokGalil.sh \hspace{1mm} /home/primefocus/bokGalil \hspace{1mm} gui}.} \\
 
 \noindent Allow the interface shown in Figure~\ref{boktcl} to appear and press the \emteal{start} button. The last element
-to appear---indicating that startup is complete---is the \emph{ds9} window  Then choose an appropriate web interface as shown 
+to appear---indicating that startup is complete---is a \emph{ds9} window  Then choose an appropriate web interface as shown 
 in Figure~\ref{bokgui}: \\
 
 \ttblue{http://10.30.1.7:5905} for astronomers, or
@@ -74,11 +74,34 @@ in Figure~\ref{bokgui}: \\
 \end{figure}
 
 \noindent To stop the system, press the \emteal{stop} button. The system status can be interrogated at any time by pressing 
-the \emteal{status} button. Figure~\ref{bokgui} shows the system completely stopped on the left-hand side (all red) and
+the \emteal{status} button. Figure~\ref{boktcl} shows the system completely stopped on the left-hand side (all red) and
 the system fully enabled on the right-hand side (all green). If any subsystem crashes, this interface will reflect the status
 by changing that element from \emph{green} to \emph{red}. Note that the \emteal{start}, \emteal{stop} and \emteal{status} 
 actions are global with no application to specific tasks. If a single task crashes, it is easiest to re-start the whole system
 (and takes a few seconds at most).
+
+\subsection{Filter File(s)}
+\label{filterfiles}
+
+\noindent The list(s) of available filters are stored in separate files in \$BOK\_GALIL\_DOCS:
+
+\begin{description}
+ \item[{\sc bok\_gfilters.txt}] This file lists the available guider wheel filters;
+ \item[{\sc bok\_ifilters.txt}] This file lists the available instrument wheel filters and corresponds to the file in
+                               /home/primefocus/90prime/galil/filters.txt on {\sc bart};
+ \item[{\sc bok\_sfilters.txt}] This file lists the available guider wheel filters and should be synchronized with bok\_gfilters.txt above.
+\end{description}
+
+\noindent These files can be edited as required. After editing, to check that the file(s) are usuable by the system, execute: \\
+
+\emteal{cd \$BOK\_GALIL\_BIN}
+
+\emteal{./bok\_read\_filters -f\$BOK\_GALIL\_DOCS/bok\_gfilters.txt}
+
+\emteal{./bok\_read\_filters -f\$BOK\_GALIL\_DOCS/bok\_ifilters.txt}
+
+\emteal{./bok\_read\_filters -f\$BOK\_GALIL\_DOCS/bok\_sfilters.txt} \\
+
 
 \subsection{Day Crew Action(s)}
 \label{daycrewactions}
@@ -87,12 +110,14 @@ actions are global with no application to specific tasks. If a single task crash
 accessed via the engineering interface (\ttblue{http://10.30.1.7:5905/indi}) as shown in Figure~\ref{engineer}):
 
 \begin{description}
- \item[{\sc populate}] This command, once executed, allows the day crew to install various filters using the side button on the dewar.
- \item[{\sc populate done}] This command completes the populate filter wheel sequence.
- \item[{\sc initialize instrument filter}] This command reads the instrument filter wheel and must be allowed to complete.
+ \item[{\sc populate}] This command, once executed, allows the day crew to install various filters using the side 
+                       button on the dewar;
+ \item[{\sc populate done}] This command completes the populate filter wheel sequence;
+ \item[{\sc initialize instrument filter}] This command reads the instrument filter wheel and must be allowed to complete;
  \item[{\sc initialize guider filter}] This (optional) command reads the guider filter wheel and, if invoked, must be allowed 
                                        to complete.
 \end{description}
+
 
 \begin{figure}[!h]
  \centering
@@ -108,7 +133,7 @@ accessed via the engineering interface (\ttblue{http://10.30.1.7:5905/indi}) as 
 \noindent These commands are optional (but good practice): 
 
 \begin{description}
- \item[{\sc start of night}] This command reads the instrument filter wheel and must be allowed to complete.
+ \item[{\sc start of night}] This command reads the instrument filter wheel and must be allowed to complete;
  \item[{\sc end of night}] This command unloads any previously loaded instrument filter.
 \end{description}
 
@@ -206,7 +231,8 @@ In Figure~\ref{bokGalilIndiDriver} the minimum set of components required to run
 
 \begin{description}
  \item[INDI / pyINDI] is the infrastructure software. The \emph{indiserver} can be installed following the intructions in
-       Appendix~\ref{AppendixA}. The pyINDI software from the MMT is installed direct from a GitHub repository.
+       Appendix~\ref{AppendixA}. The pyINDI software from the MMT is installed direct from a GitHub repository as part of
+       the \emph{bok-90prime-gui} installation.
  \item[libgalil.so] This is the software library delivered by the vendor. It can be installed following the instructions in
        Appendix~\ref{AppendixB}.
  \item[libbokGalil.so] is the support library written by the author of this document to abstract the communications
