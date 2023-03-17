@@ -32,6 +32,7 @@ the Bok 90-inch telescope. \\
 \listoffigures
 \listoftables
 
+\newpage
 \section{Quick Start}
 \label{quickstart}
 
@@ -86,10 +87,11 @@ actions are global with no application to specific tasks. If a single task crash
 \noindent The list(s) of available filters are stored in separate files in \$BOK\_GALIL\_DOCS:
 
 \begin{description}
- \item[{\sc bok\_gfilters.txt}] This file lists the available guider wheel filters;
- \item[{\sc bok\_ifilters.txt}] This file lists the available instrument wheel filters and corresponds to the file in
-                               /home/primefocus/90prime/galil/filters.txt on {\sc bart};
- \item[{\sc bok\_sfilters.txt}] This file lists the available guider wheel filters and should be synchronized with bok\_gfilters.txt above.
+ \item[bok\_gfilters.txt] This file lists the available guider wheel filters;
+ \item[bok\_ifilters.txt] This file lists the available instrument wheel filters and corresponds to the file in
+                          /home/primefocus/90prime/galil/filters.txt on {\sc bart};
+ \item[bok\_sfilters.txt] This file lists the available guider wheel filters and should be synchronized with 
+                          bok\_gfilters.txt above.
 \end{description}
 
 \noindent These files can be edited as required. After editing, to check that the file(s) are usuable by the system, execute: \\
@@ -102,7 +104,7 @@ actions are global with no application to specific tasks. If a single task crash
 
 \emteal{./bok\_read\_filters -f\$BOK\_GALIL\_DOCS/bok\_sfilters.txt} \\
 
-\noindent If these files are changed whilst the system is running, the system must be re-started for them to take effect.
+\noindent If these files are changed whilst the system is running, the system \emph{must} be re-started for them to take effect.
 
 \subsection{Day Crew Action(s)}
 \label{daycrewactions}
