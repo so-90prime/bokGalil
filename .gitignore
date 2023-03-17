@@ -89,6 +89,7 @@ lib/libbokGalil.so
 tcl/tclIndex
 tcl/bokParams.txt
 tcl/bokParams.home.txt
+tex/bokGalil.pdf
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
