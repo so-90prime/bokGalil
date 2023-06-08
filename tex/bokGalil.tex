@@ -147,6 +147,58 @@ A cronjob runs every day to create a new data directory in /nfs/data/primefocus/
 the date at the start of the observing night (\emph{i.e. viz.,} local time). The observer or engineer will have to (manually)
 enter this directory in AzCam.
 
+\section{Emergency Shutdown}
+\label{Emergency Shutdown}
+
+Normally, the computer rack is \emph{always on} but there are times when an emergency shutdown is warranted. Even in this case, 
+the KVM-switch (kvm), network switch (bokqnap) and UPS (bokups) are left powered up. The important hardware to shutdown cleanly 
+are the NAS (\sfmagenta{boknas}) and 2 computers (\sfmagenta{bonsai}, \sfmagenta{banzai}). The following is the standard operating
+procedure in this circumstance.
+
+\subsection{Shutdown the NAS}
+\begin{figure}[!h]
+ \centering
+ \includegraphics[width=0.45\linewidth]{boknas1.png}
+ \includegraphics[width=0.45\linewidth]{boknas3.png}
+ \caption{Shutting Down the NAS (\sfmagenta{boknas}).}
+ \label{boknasshutdown}
+\end{figure}
+
+\begin{enumerate}
+\item Login to either \sfmagenta{bonsai} or \sfmagenta{bonsai}.
+\item Start a web-browser.
+\item Navigate to http://10.30.1.9:5000 ... the screen should appear looking like the LHS of Figure~\ref{boknasshutdown}.
+\item Login as \emph{mtnops} but the \emph{usual} password should have the `d' character capitalized to `D'!
+\item The screen should change to looking like the RHS of Figure~\ref{boknasshutdown}.
+\item Locate the person icon on the top right and click to see the drop-down menu.
+\item Click on `Shut Down'.
+\end{enumerate}
+
+Allow a minute or two for the NAS to shutdown before proceeding to shutdown the computers.
+
+\subsection{Shutdown the Computers}
+\begin{figure}[!h]
+ \centering
+ \includegraphics[width=0.45\linewidth]{bonsai1.png}
+ \includegraphics[width=0.45\linewidth]{bonsai2.png}
+ \caption{Shutting Down the Computers (\sfmagenta{bonsai}, \sfmagenta{banzai}).}
+ \label{computershutdown}
+\end{figure}
+
+The procedure for shutting down the computers is the same for both. Here we use \sfmagenta{bonsai} as the example.
+The order is unimportant.
+
+\begin{enumerate}
+\item Login to either \sfmagenta{bonsai} as \emph{mtnops} with the usual password.
+\item Click on the username (which should say `mtnops') in the top right of the screen to bringup the menu.
+\item Click on `Shut Down'.
+\item The pop-up window shown in Figure~\ref{computershutdown} should appear so click on `Shut Down'.
+\item Repeat for \sfmagenta{banzai}.
+\end{enumerate}
+
+If you have difficulty using the GUI, a power off can be executed from the command line using `sudo poweroff'
+(and you will be prompted for the mtnops password again).
+
 \section{Hardware}
 \label{Hardware}
 
