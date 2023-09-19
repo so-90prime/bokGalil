@@ -64,6 +64,7 @@ typedef struct ifocusdata {
   float vala;
   float valb;
   float valc;
+  float tolerance;
 } ifocus_t, *ifocus_p, **ifocus_s;
 
 typedef struct supportdata {
@@ -92,6 +93,7 @@ typedef struct telemetrydata {
   char lvdta[BOK_STR_32];
   char lvdtb[BOK_STR_32];
   char lvdtc[BOK_STR_32];
+  char tolerance[BOK_STR_32];
   char distall[BOK_STR_32];
   char dista[BOK_STR_32];
   char distb[BOK_STR_32];
@@ -337,9 +339,10 @@ static ITextVectorProperty telemetry_referenceTP = {
 };
 
 static IText telemetry_lvdtT[] = {
-  {"lvdta",  "LVDT A", telemetrys.lvdta,  0, 0, 0},
-  {"lvdtb",  "LVDT B", telemetrys.lvdtb,  0, 0, 0},
-  {"lvdtc",  "LVDT C", telemetrys.lvdtc,  0, 0, 0}
+  {"lvdta",     "LVDT A",    telemetrys.lvdta,     0, 0, 0},
+  {"lvdtb",     "LVDT B",    telemetrys.lvdtb,     0, 0, 0},
+  {"lvdtc",     "LVDT C",    telemetrys.lvdtc,     0, 0, 0},
+  {"tolerance", "Tolerance", telemetrys.tolerance, 0, 0, 0}
 };
 static ITextVectorProperty telemetry_lvdtTP = {
   GALIL_DEVICE, "TELEMETRY_LVDT", "LVDT Telemetry", TELEMETRY_GROUP, IP_RO, 0, IPS_IDLE, telemetry_lvdtT, NARRAY(telemetry_lvdtT), "", 0
@@ -372,6 +375,7 @@ static IText telemetryT[] = {
   {"lvdta",           "LVDT A                          ", telemetrys.lvdta,           0, 0, 0},
   {"lvdtb",           "LVDT B                          ", telemetrys.lvdtb,           0, 0, 0},
   {"lvdtc",           "LVDT C                          ", telemetrys.lvdtc,           0, 0, 0},
+  {"tolerance",       "Tolerance                       ", telemetrys.tolerance,       0, 0, 0},
   {"distall",         "distall                         ", telemetrys.distall,         0, 0, 0},
   {"dista",           "dista                           ", telemetrys.dista,           0, 0, 0},
   {"distb",           "distb                           ", telemetrys.distb,           0, 0, 0},
@@ -595,45 +599,94 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
   /* focus lvdt value(s) - this is the main interface in the pyINDI gui */
   } else if (!strcmp(name, ifocus_lvdtNP.name)) {
     IDMessage(GALIL_DEVICE, "Calling ifocus_lvdtNP from '%s'", name);
+    IDMessage(GALIL_DEVICE, "Calling ifocus_lvdtNP values[0]=%.4f values[1]=%.4f values[2]=%.4f values[3]=%.4f", values[0], values[1], values[2], values[3]);
 
     float dista = 0.0;
     float distb = 0.0;
     float distc = 0.0;
-    float focus_a = values[0];
-    float focus_b = values[1];
-    float focus_c = values[2];
-    float tolerance = abs(values[3]);
+    float focus_a = 0.0;
+    float focus_b = 0.0;
+    float focus_c = 0.0;
+    float new_a = 0.0;
+    float new_b = 0.0;
+    float new_c = 0.0;
+    float tolerance = ifoci.tolerance;
 
     /* we are setting 1 value, here, not all 3 */
     if (n == 1) {
-      if (abs(values[0] - ifoci.vala * 1000.0) > BOK_MAX_LVDT_DIFF || 
-          abs(values[0] - ifoci.valb * 1000.0) > BOK_MAX_LVDT_DIFF || 
-          abs(values[0] - ifoci.valc * 1000.0) > BOK_MAX_LVDT_DIFF) {
-        IDMessage(GALIL_DEVICE, "<ERROR> lvdt input values differ more than %.0f units", BOK_MAX_LVDT_DIFF);
-        return;
-      }
       IDMessage(GALIL_DEVICE, "Moving only %s", names[0]);
       
       /* so which property are we setting? */
       if (!strcmp(names[0], "lvdta")) {
+        if (abs(values[0] - ifoci.vala * 1000.0) > BOK_MAX_LVDT_DIFF) { 
+          IDMessage(GALIL_DEVICE, "<ERROR> lvdta input value differs more than %.0f units", BOK_MAX_LVDT_DIFF);
+          return;
+        }
         dista = round((values[0] / 1000.0 - ifoci.vala) * BOK_LVDT_ATOD);
+        distb = 0.0;
+        distc = 0.0;
+        new_a = values[0];
+        new_b = 0.0;
+        new_c = 0.0;
+        focus_a = values[0];
+        focus_b = 0.0;
+        focus_c = 0.0;
       } else if (!strcmp(names[0], "lvdtb")) {
+        if (abs(values[0] - ifoci.valb * 1000.0) > BOK_MAX_LVDT_DIFF) { 
+          IDMessage(GALIL_DEVICE, "<ERROR> lvdtb input value differs more than %.0f units", BOK_MAX_LVDT_DIFF);
+          return;
+        }
+        dista = 0.0;
         distb = round((values[0] / 1000.0 - ifoci.valb) * BOK_LVDT_ATOD);
+        distc = 0.0;
+        new_a = 0.0;
+        new_b = values[0];
+        new_c = 0.0;
+        focus_a = 0.0;
+        focus_b = values[0];
+        focus_c = 0.0;
       } else if (!strcmp(names[0], "lvdtc")) {
+        if (abs(values[0] - ifoci.valc * 1000.0) > BOK_MAX_LVDT_DIFF) { 
+          IDMessage(GALIL_DEVICE, "<ERROR> lvdtc input value differs more than %.0f units", BOK_MAX_LVDT_DIFF);
+          return;
+        }
+        dista = 0.0;
+        distb = 0.0;
         distc = round((values[0] / 1000.0 - ifoci.valc) * BOK_LVDT_ATOD);
+        new_a = 0.0;
+        new_b = 0.0;
+        new_c = values[0];
+        focus_a = 0.0;
+        focus_b = 0.0;
+        focus_c = values[0];
+      } else if (!strcmp(names[0], "tolerance")) {
+        tolerance = abs(values[0]);
+        if (tolerance<BOK_MIN_TOLERANCE || tolerance>BOK_MAX_TOLERANCE) { tolerance = BOK_NOM_TOLERANCE; }
+        IDMessage(GALIL_DEVICE, "changing tolerance from %.4f to %.4f", ifoci.tolerance, tolerance);
+        ifoci.tolerance = tolerance;
+        return;
       }
 
     /* we are setting all 3 values, here, not just 1 */
     } else {
-      if (abs(values[0] - values[1]) > BOK_MAX_LVDT_DIFF || 
-          abs(values[1] - values[2]) > BOK_MAX_LVDT_DIFF || 
-          abs(values[2] - values[0]) > BOK_MAX_LVDT_DIFF) {
-        IDMessage(GALIL_DEVICE, "<ERROR> lvdt input values differ more than %.0f units", BOK_MAX_LVDT_DIFF);
+      if (abs(values[0] - ifoci.vala * 1000.0) > BOK_MAX_LVDT_DIFF || 
+          abs(values[1] - ifoci.valb * 1000.0) > BOK_MAX_LVDT_DIFF || 
+          abs(values[2] - ifoci.valc * 1000.0) > BOK_MAX_LVDT_DIFF) {
+        IDMessage(GALIL_DEVICE, "<ERROR> lvdt inputs values differ more than %.0f units", BOK_MAX_LVDT_DIFF);
         return;
       }
       dista = round((values[0] / 1000.0 - ifoci.vala) * BOK_LVDT_ATOD);
       distb = round((values[1] / 1000.0 - ifoci.valb) * BOK_LVDT_ATOD);
       distc = round((values[2] / 1000.0 - ifoci.valc) * BOK_LVDT_ATOD);
+      new_a = values[0];
+      new_b = values[1];
+      new_c = values[2];
+      focus_a = values[0];
+      focus_b = values[1];
+      focus_c = values[2];
+      tolerance = abs(values[3]);
+      if (tolerance<BOK_MIN_TOLERANCE || tolerance>BOK_MAX_TOLERANCE) { tolerance = BOK_NOM_TOLERANCE; }
+      ifoci.tolerance = tolerance;
     }
 
     /* talk to hardware */
@@ -644,6 +697,7 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
     is_done = false;
 
     /* talk to hardware */
+    IDMessage(GALIL_DEVICE, "main ifocus pre-entry dista=%.4f new_a=%.4f focus_a=%.4f distb=%.4f new_b=%.4f focus_b=%.4f distc=%.4f new_c=%.4f focus_c=%.4f tolerance=%.4f", dista, new_a, focus_a, distb, new_b, focus_b, distc, new_c, focus_c, tolerance);
     int countdown = BOK_NG_INSTRUMENT_FOCUS_TIME;
     while (--countdown > 0) {
 
@@ -655,10 +709,12 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
       dista = round((focus_a/1000.0 - cur_a/1000.0) * BOK_LVDT_ATOD);
       distb = round((focus_b/1000.0 - cur_b/1000.0) * BOK_LVDT_ATOD);
       distc = round((focus_c/1000.0 - cur_c/1000.0) * BOK_LVDT_ATOD);
+      /*
       float new_a = values[0];
       float new_b = values[1];
       float new_c = values[2];
-      if (tolerance<BOK_MIN_TOLERANCE || tolerance>BOK_MAX_TOLERANCE) { tolerance = BOK_NOM_TOLERANCE; }
+      */
+      // if (tolerance<BOK_MIN_TOLERANCE || tolerance>BOK_MAX_TOLERANCE) { tolerance = BOK_NOM_TOLERANCE; }
       IDMessage(GALIL_DEVICE, "main ifocus cur_a=%.4f dista=%.4f focus_a=%.4f new_a=%.4f tolerance=%.4f diff=%.4f timestamp='%s' countdown=%d", cur_a, dista, focus_a, new_a, tolerance, (cur_a - new_a), tcp_val.timestamp, countdown);
       IDMessage(GALIL_DEVICE, "main ifocus cur_b=%.4f distb=%.4f focus_b=%.4f new_b=%.4f tolerance=%.4f diff=%.4f timestamp='%s' countdown=%d", cur_b, distb, focus_b, new_b, tolerance, (cur_b - new_b), tcp_val.timestamp, countdown);
       IDMessage(GALIL_DEVICE, "main ifocus cur_c=%.4f distc=%.4f focus_c=%.4f new_c=%.4f tolerance=%.4f diff=%.4f timestamp='%s' countdown=%d", cur_c, distc, focus_c, new_c, tolerance, (cur_c - new_c), tcp_val.timestamp, countdown);
@@ -1691,7 +1747,7 @@ void execute_ifocus_reference_switches(ISState states[], char *names[], int n) {
         float focus_a = ifoci.refa * 1000.0;
         float focus_b = ifoci.refb * 1000.0;
         float focus_c = ifoci.refc * 1000.0;
-        float tolerance = BOK_NOM_TOLERANCE;
+        float tolerance = ifoci.tolerance;
 
         /* talk to hardware */
         busy = true;
@@ -1715,7 +1771,7 @@ void execute_ifocus_reference_switches(ISState states[], char *names[], int n) {
           float new_a = ifoci.refa * 1000.0;
           float new_b = ifoci.refb * 1000.0;
           float new_c = ifoci.refc * 1000.0;
-          if (tolerance<BOK_MIN_TOLERANCE || tolerance>BOK_MAX_TOLERANCE) { tolerance = BOK_NOM_TOLERANCE; }
+          // if (tolerance<BOK_MIN_TOLERANCE || tolerance>BOK_MAX_TOLERANCE) { tolerance = BOK_NOM_TOLERANCE; }
           IDMessage(GALIL_DEVICE, "restore ifocus cur_a=%.4f dista=%.4f focus_a=%.4f new_a=%.4f tolerance=%.4f diff=%.4f timestamp='%s' countdown=%d", cur_a, dista, focus_a, new_a, tolerance, (cur_a - new_a), tcp_val.timestamp, countdown);
           IDMessage(GALIL_DEVICE, "restore ifocus cur_b=%.4f distb=%.4f focus_b=%.4f new_b=%.4f tolerance=%.4f diff=%.4f timestamp='%s' countdown=%d", cur_b, distb, focus_b, new_b, tolerance, (cur_b - new_b), tcp_val.timestamp, countdown);
           IDMessage(GALIL_DEVICE, "restore ifocus cur_c=%.4f distc=%.4f focus_c=%.4f new_c=%.4f tolerance=%.4f diff=%.4f timestamp='%s' countdown=%d", cur_c, distc, focus_c, new_c, tolerance, (cur_c - new_c), tcp_val.timestamp, countdown);
@@ -1787,7 +1843,7 @@ void execute_ifocus_reference_switches(ISState states[], char *names[], int n) {
         float focus_a = 0.0;
         float focus_b = 0.0;
         float focus_c = 0.0;
-        float tolerance = BOK_NOM_TOLERANCE;
+        float tolerance = ifoci.tolerance;
 
         /* talk to hardware */
         busy = true;
@@ -1814,7 +1870,7 @@ void execute_ifocus_reference_switches(ISState states[], char *names[], int n) {
           float new_a = focus_a;
           float new_b = focus_b;
           float new_c = focus_c;
-          if (tolerance<BOK_MIN_TOLERANCE || tolerance>BOK_MAX_TOLERANCE) { tolerance = BOK_NOM_TOLERANCE; }
+          // if (tolerance<BOK_MIN_TOLERANCE || tolerance>BOK_MAX_TOLERANCE) { tolerance = BOK_NOM_TOLERANCE; }
           IDMessage(GALIL_DEVICE, "nominal ifocus cur_a=%.4f dista=%.4f focus_a=%.4f new_a=%.4f tolerance=%.4f diff=%.4f, countdown=%d", cur_a, dista, focus_a, new_a, tolerance, (cur_a - new_a), countdown);
           IDMessage(GALIL_DEVICE, "nominal ifocus cur_b=%.4f distb=%.4f focus_b=%.4f new_b=%.4f tolerance=%.4f diff=%.4f, countdown=%d", cur_b, distb, focus_b, new_b, tolerance, (cur_b - new_b), countdown);
           IDMessage(GALIL_DEVICE, "nominal ifocus cur_c=%.4f distc=%.4f focus_c=%.4f new_c=%.4f tolerance=%.4f diff=%.4f, countdown=%d", cur_c, distc, focus_c, new_c, tolerance, (cur_c - new_c), countdown);
@@ -2012,6 +2068,7 @@ static void unscheduled_telemetry(void *p) {
   (void) sprintf(telemetrys.lvdta,        "%.0f",           ifoci.vala * 1000.0);
   (void) sprintf(telemetrys.lvdtb,        "%.0f",           ifoci.valb * 1000.0);
   (void) sprintf(telemetrys.lvdtc,        "%.0f",           ifoci.valc * 1000.0);
+  (void) sprintf(telemetrys.tolerance,    "%.0f",           ifoci.tolerance);
   (void) sprintf(telemetrys.distall,      "%08.1f",         tcp_val.lv.distall);
   (void) sprintf(telemetrys.dista,        "%08.1f",         tcp_val.lv.dista);
   (void) sprintf(telemetrys.distb,        "%08.1f",         tcp_val.lv.distb);
@@ -2236,6 +2293,7 @@ static void scheduled_telemetry(void *p) {
   (void) sprintf(telemetrys.lvdta,        "%.0f",           ifoci.vala * 1000.0);
   (void) sprintf(telemetrys.lvdtb,        "%.0f",           ifoci.valb * 1000.0);
   (void) sprintf(telemetrys.lvdtc,        "%.0f",           ifoci.valc * 1000.0);
+  (void) sprintf(telemetrys.tolerance,    "%.0f",           ifoci.tolerance);
   (void) sprintf(telemetrys.distall,      "%08.1f",         tcp_val.lv.distall);
   (void) sprintf(telemetrys.dista,        "%08.1f",         tcp_val.lv.dista);
   (void) sprintf(telemetrys.distb,        "%08.1f",         tcp_val.lv.distb);
@@ -2347,6 +2405,7 @@ static void zero_telemetry(void) {
   ifoci.vala = BOK_BAD_FLOAT;
   ifoci.valb = BOK_BAD_FLOAT;
   ifoci.valc = BOK_BAD_FLOAT;
+  ifoci.tolerance = BOK_NOM_TOLERANCE;
 
   (void) sprintf(supports.author,  "%s", _AUTHOR_);
   (void) sprintf(supports.date,    "%s", _DATE_);

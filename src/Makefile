@@ -70,6 +70,11 @@ home:
 	ln -sf $(HERE)/__hosts__.home.h $(HERE)/__hosts__.h
 	make everything
 
+steward:
+	rm -rf $(HERE)/__hosts__.h >> /dev/null 2>&1
+	ln -sf $(HERE)/__hosts__.steward.h $(HERE)/__hosts__.h
+	make everything
+
 all:
 	for target in $(ATARGETS); do\
 	 gcc $(CFLAGS) -o $(HERE)/$$target $(HERE)/$$target.c $(LLIBS) $(GLIBS);\

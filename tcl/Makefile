@@ -19,10 +19,8 @@ help:
 	@echo ""
 	@echo "Main targets are available:"
 	@echo ""
-	@echo "   all clean everything help install"
-	@echo ""
 	@echo "To re-build the code, use: % make <sys>"
-	@echo "   where <sys> = 'banzai | bart | bonsai | home'"
+	@echo "   where <sys> = 'banzai | bart | bonsai | home | steward'"
 	@echo ""
 
 banzai:
@@ -41,3 +39,6 @@ home:
 	rm -rf $(HERE)/bokParams.txt >> /dev/null 2>&1
 	ln -sf $(HERE)/bokParams.home.txt $(HERE)/bokParams.txt
 
+steward:
+	rm -rf $(HERE)/bokParams.txt >> /dev/null 2>&1
+	ln -sf $(HERE)/bokParams.steward.txt $(HERE)/bokParams.txt
