@@ -54,6 +54,13 @@ This software only supports /dev/shm shared memory under Unix.
 
 then execute the `LV;` command. Data should appear. Use `ctrl-]` to escape to the telnet prompt and enter `quit`.
 
+To test the NG Server running on 10.30.1.7 5750
+
+```bash
+ % echo 'BOK 90PRIME 123 REQUEST IFILTERS' | nc -w 5 10.30.1.7 5750
+
+ BOK 90PRIME 123 OK 0=0:F0 1=9:F9 2=0:F0 3=1:Open 4=0:F0 5=8:sagev
+```
 
 ## CLI: Start, Stop, Status
 
