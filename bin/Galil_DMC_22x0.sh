@@ -111,7 +111,7 @@ case $(echo ${_command}) in
   start)
     if [[ ${dry_run} -eq 1 ]]; then
       write_magenta "Dry-Run> nohup ${BOK_GALIL_BIN}/${_prc0} >> ${BOK_GALIL_LOG}/${_prc0}.log 2>&1 &"
-      write_magenta "Dry-Run> nohup indiserver -vv ${BOK_GALIL_BIN}/${_prc4} >> ${BOK_GALIL_LOG}/${_prc4}.log 2>&1 &"
+      write_magenta "Dry-Run> nohup indiserver -vvv ${BOK_GALIL_BIN}/${_prc4} >> ${BOK_GALIL_LOG}/${_prc4}.log 2>&1 &"
       write_magenta "Dry-Run> nohup ${BOK_GALIL_BIN}/${_prc5} >> ${BOK_GALIL_LOG}/${_prc5}.log 2>&1 &"
       write_magenta "Dry-Run> nohup python3 ${bok_90prime_gui}/src/${_prc6} >> ${BOK_GALIL_LOG}/${_prc6}.log 2>&1 &"
       write_magenta "Dry-Run> xterm -e ${dataserver}/${_prc7} &"

@@ -534,6 +534,7 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
     float dista = values[0];
     float distb = values[1];
     float distc = values[2];
+    float tolerance = values[3];
 
     /* talk to hardware */
     busy = true;
@@ -546,11 +547,11 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
     } else {
       IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_hx() from '%s', gstat=%d", "ifocus dist", (int)gstat);
     }
-    IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f) from '%s'", dista, distb, distc, "ifocus dist");
+    IDMessage(GALIL_DEVICE, "Calling xq_focusind(a=%.1f, b=%.1f, c=%.1f) with tolerance %.1f from '%s'", dista, distb, distc, tolerance, "ifocus dist");
     if ((gstat=xq_focusind(dista, distb, distc)) == G_NO_ERROR) {
-      IDMessage(GALIL_DEVICE, "Called xq_focusind(a=%.1f, b=%.1f, c=%.1f) from '%s' OK", dista, distb, distc, "ifocus dist");
+      IDMessage(GALIL_DEVICE, "Called xq_focusind(a=%.1f, b=%.1f, c=%.1f) with tolerance %.1f from '%s' OK", dista, distb, distc, tolerance, "ifocus dist");
     } else {
-      IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_focusind(a=%.1f, b=%.1f, c=%.1f) from '%s', gstat=%d", dista, distb, distc, "ifocus dist", (int)gstat);
+      IDMessage(GALIL_DEVICE, "<ERROR> Failed calling xq_focusind(a=%.1f, b=%.1f, c=%.1f) with tolerance %.1f from '%s', gstat=%d", dista, distb, distc, tolerance, "ifocus dist", (int)gstat);
     }
     ifocus_distNP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
     busy = false;
@@ -561,6 +562,7 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
     ifocus_distNP.np[0].value = dista;
     ifocus_distNP.np[1].value = distb;
     ifocus_distNP.np[2].value = distc;
+    ifocus_distNP.np[3].value = tolerance;
     IDSetNumber(&ifocus_distNP, NULL);
 
   /* focus distall value(s) - what uses this?? */
