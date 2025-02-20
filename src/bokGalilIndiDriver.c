@@ -144,7 +144,7 @@ GReturn ifilter_load_doit(void);
 GReturn ifilter_move_doit(int);
 GReturn ifilter_read_doit(void);
 GReturn ifilter_unload_doit(void);
-GReturn astronomer_action_doit(bool);
+GReturn astronomer_action_doit(int);
 
 
 /*******************************************************************************
@@ -261,8 +261,9 @@ static ITextVectorProperty ifilterTP = {
 };
 
 static ISwitch astronomerS[] = {
-  {"watchstarted",  "Start of Night", ISS_OFF, 0, 0},
-  {"watchended",    "End of Night",   ISS_OFF, 0, 0}
+  {"watchstarted",  "Read Filter(s)", ISS_OFF, 0, 0},
+  {"watchended",    "Unload Filter",  ISS_OFF, 0, 0},
+  {"watchbegun",    "Load Filter",    ISS_OFF, 0, 0}
 };
 ISwitchVectorProperty astronomerSP = {
   GALIL_DEVICE, "ASTRONOMER", "Astronomer Action(s)", IFILTER_GROUP, IP_RW, ISR_ATMOST1, 0.0, IPS_IDLE, astronomerS, NARRAY(astronomerS), "", 0
@@ -975,13 +976,16 @@ static void driver_init(void) {
 /*******************************************************************************
  * action: astronomer_action_doit()
  ******************************************************************************/
-GReturn astronomer_action_doit(bool startofnight) {
-  if (startofnight) { 
+GReturn astronomer_action_doit(int faction) {
+  if (faction == 0) { 
     (void) ifilter_unload_doit();
     return ifilter_read_doit();
-  } else {
+  } else if (faction == 1) { 
     return ifilter_unload_doit();
+  } else if (faction == 2) { 
+    return ifilter_load_doit();
   }
+  return (GReturn)0;
 }
 
 
@@ -1003,19 +1007,26 @@ void execute_astronomer_actions(ISState states[], char *names[], int n) {
     state_change = state != sp->s;
     if (! state_change) { continue; }
 
-    /* start of night task(s) */
+    /* read filters */
     if (sp == &astronomerS[0]) {
-      gstat = astronomer_action_doit(true);
+      gstat = astronomer_action_doit(0);
       astronomerSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
       astronomerS[0].s = ISS_OFF;
-      IDMessage(GALIL_DEVICE, "watch has started, da iawn");
+      IDMessage(GALIL_DEVICE, "filters read");
 
-    /* end of night task(s) */
+    /* unload filter */
     } else if (sp == &astronomerS[1]) {
-      gstat = astronomer_action_doit(false);
+      gstat = astronomer_action_doit(1);
       astronomerSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
       astronomerS[1].s = ISS_OFF;
-      IDMessage(GALIL_DEVICE, "watch has ended, nos da");
+      IDMessage(GALIL_DEVICE, "filter unloaded");
+
+    /* load filter */
+    } else if (sp == &astronomerS[2]) {
+      gstat = astronomer_action_doit(2);
+      astronomerSP.s = gstat == G_NO_ERROR ? IPS_OK : IPS_ALERT;
+      astronomerS[1].s = ISS_OFF;
+      IDMessage(GALIL_DEVICE, "filter loaded");
     }
   }
 
