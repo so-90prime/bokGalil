@@ -106,6 +106,29 @@ actions are global with no application to specific tasks. If a single task crash
 
 \noindent If these files are changed whilst the system is running, the system \emph{must} be re-started for them to take effect.
 
+\subsection{/nfs/data/primefocus/\emph{yyyymmdd}}
+\label{datadirectory}
+
+A cronjob runs every day to create a new data directory in /nfs/data/primefocus/\emph{yyyymmdd} where \emph{yyyymmdd} is
+the date at the start of the observing night (\emph{i.e. viz.,} local time). The observer or engineer will have to (manually)
+enter this directory in AzCam.
+
+\subsection{Transferring Data Downtown}
+\label{Transferring Data Downtown}
+
+The \emph{primefocus} accounts on both \sfmagenta{bonsai} or \sfmagenta{banzai} have ssh-keys registered using the \emph{bok}
+account on \sfmagenta{beast.as.arizona.edu}. Some command(s) to transfer this data are: \\
+ 
+\emteal{ssh bokbeast mkdir data/yyyymmdd}
+
+\emteal{ssh bokbeast chown -R bok:users data/yyyymmdd}
+
+\emteal{scp -r /nfs/data/primefocus/yyyymmdd bokbeast:data/}
+
+\emteal{ssh bokbeast chown -R bok:users data/yyyymmdd} \\
+
+\noindent where \emph{yyyymmdd} is the observation date associated with the data directory shown in section~\ref{datadirectory} on page~\pageref{datadirectory}.
+
 \subsection{Day Crew Action(s)}
 \label{daycrewactions}
 
@@ -121,7 +144,6 @@ accessed via the engineering interface (\ttblue{http://10.30.1.7:5905/indi}) as 
                                        to complete.
 \end{description}
 
-
 \begin{figure}[!h]
  \centering
  \includegraphics[width=0.5\linewidth]{DayCrewActions1.png}
@@ -130,22 +152,29 @@ accessed via the engineering interface (\ttblue{http://10.30.1.7:5905/indi}) as 
  \label{engineer}
 \end{figure}
 
+\subsection{Running IRAF}
+\label{Running IRAF}
+Once the instrument is fully connected, day crew usually take an image to visually check the output array and check counts. This can be done
+from {\sfmagenta bonsai} or {\sfmagenta banzai} by logging into the \emph{primefocus} account and executing: \\
+
+\emteal{cd iraf\_docker}
+
+\emteal{bash iraf yyyymmdd}
+
+\noindent or
+
+\emteal{bash iraf-community yyyymmdd} \\
+
+where \emph{yyyymmdd} is the observation date associated with the data directory shown in section~\ref{datadirectory} on page~\pageref{datadirectory}.
+
 \subsection{Astronomer Action(s)}
 \label{astronomeractions}
 
-\noindent These commands are optional (but good practice): 
-
 \begin{description}
- \item[{\sc start of night}] This command reads the instrument filter wheel and must be allowed to complete;
- \item[{\sc end of night}] This command unloads any previously loaded instrument filter.
+ \item[{\sc read filters}] This command reads the instrument filter wheel and must be allowed to complete. Do this at the start of every observing run;
+ \item[{\sc load filter}] This command loads the currently selected instrument filter.
+ \item[{\sc unload filter}] This command unloads any previously loaded instrument filter.
 \end{description}
-
-\subsection{/nfs/data/primefocus/\emph{yyyymmdd}}
-\label{datadirectory}
-
-A cronjob runs every day to create a new data directory in /nfs/data/primefocus/\emph{yyyymmdd} where \emph{yyyymmdd} is
-the date at the start of the observing night (\emph{i.e. viz.,} local time). The observer or engineer will have to (manually)
-enter this directory in AzCam.
 
 \section{Emergency Shutdown}
 \label{Emergency Shutdown}
