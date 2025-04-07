@@ -29,23 +29,25 @@ proc bokBuildWidgets { W } {
   pack $bokWidgets(bok_text_widget) -side right -fill both -expand yes
 
   # create label(s) in middle
-  set bokWidgets(bok_memory)       [label $bokWidgets(bok_middle).memory -textvariable bokVariables(txt_memory)]
+  set bokWidgets(bok_memory)       [label $bokWidgets(bok_middle).memory      -textvariable bokVariables(txt_memory)]
   pack $bokWidgets(bok_memory)     -side top -expand yes -fill both
-  set bokWidgets(bok_tcpmem)       [label $bokWidgets(bok_middle).tcpmem  -textvariable bokVariables(txt_tcpmem)]
+  set bokWidgets(bok_tcpmem)       [label $bokWidgets(bok_middle).tcpmem      -textvariable bokVariables(txt_tcpmem)]
   pack $bokWidgets(bok_tcpmem)     -side top -expand yes -fill both
-  set bokWidgets(bok_udpmem)       [label $bokWidgets(bok_middle).udpmem  -textvariable bokVariables(txt_udpmem)]
+  set bokWidgets(bok_udpmem)       [label $bokWidgets(bok_middle).udpmem      -textvariable bokVariables(txt_udpmem)]
   pack $bokWidgets(bok_udpmem)     -side top -expand yes -fill both
   set bokWidgets(bok_indidriver)   [label $bokWidgets(bok_middle).indidriver  -textvariable bokVariables(txt_indidriver)]
   pack $bokWidgets(bok_indidriver) -side top -expand yes -fill both
   set bokWidgets(bok_indiserver)   [label $bokWidgets(bok_middle).indiserver  -textvariable bokVariables(txt_indiserver)]
   pack $bokWidgets(bok_indiserver) -side top -expand yes -fill both
-  set bokWidgets(bok_ngserver)     [label $bokWidgets(bok_middle).ngserver  -textvariable bokVariables(txt_ngserver)]
+  set bokWidgets(bok_ngserver)     [label $bokWidgets(bok_middle).ngserver    -textvariable bokVariables(txt_ngserver)]
   pack $bokWidgets(bok_ngserver)   -side top -expand yes -fill both
-  set bokWidgets(bok_website)      [label $bokWidgets(bok_middle).website  -textvariable bokVariables(txt_website)]
+  set bokWidgets(bok_website)      [label $bokWidgets(bok_middle).website     -textvariable bokVariables(txt_website)]
   pack $bokWidgets(bok_website)    -side top -expand yes -fill both
   set bokWidgets(bok_dataserver)   [label $bokWidgets(bok_middle).dataserver  -textvariable bokVariables(txt_dataserver)]
   pack $bokWidgets(bok_dataserver) -side top -expand yes -fill both
-  set bokWidgets(bok_ds9)          [label $bokWidgets(bok_middle).ds9  -textvariable bokVariables(txt_ds9)]
+  set bokWidgets(bok_flatfield)    [label $bokWidgets(bok_middle).flatfield   -textvariable bokVariables(txt_flatfield)]
+  pack $bokWidgets(bok_flatfield)  -side top -expand yes -fill both
+  set bokWidgets(bok_ds9)          [label $bokWidgets(bok_middle).ds9         -textvariable bokVariables(txt_ds9)]
   pack $bokWidgets(bok_ds9)        -side top -expand yes -fill both
 
   # create button(s)

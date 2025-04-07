@@ -48,7 +48,7 @@ proc bokStop { } {
     bokInform "after 500 bokTerminate $bokVariables(bok_website)"
     after 500 bokTerminate $bokVariables(bok_website)
   } else {
-    bokInform [format {%4s %-60s %s} "WARN" "$bokParams(BOK_WEB_REPO)/bok.py" "ALREADY STOPPED"]
+    bokInform [format {%4s %-60s %s} "WARN" "$bokParams(BOK_WEB_REPO)/src/bok.py" "ALREADY STOPPED"]
   }
 
   if {[info exists bokVariables(bok_dataserver)] && $bokVariables(bok_dataserver)>0} {
@@ -56,6 +56,13 @@ proc bokStop { } {
     after 500 bokTerminate $bokVariables(bok_dataserver)
   } else {
     bokInform [format {%4s %-60s %s} "WARN" "$bokParams(BOK_DATA_REPO)/dataserver" "ALREADY STOPPED"]
+  }
+
+  if {[info exists bokVariables(bok_flatfield)] && $bokVariables(bok_flatfield)>0} {
+    bokInform "after 500 bokTerminate $bokVariables(bok_flatfield)"
+    after 500 bokTerminate $bokVariables(bok_flatfield)
+  } else {
+    bokInform [format {%4s %-60s %s} "WARN" "$bokParams(BOK_DATA_REPO)/bff_src/bok-flat-field.py" "ALREADY STOPPED"]
   }
 
   if {[info exists bokVariables(bok_ds9)] && $bokVariables(bok_ds9)>0} {

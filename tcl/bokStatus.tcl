@@ -39,15 +39,21 @@ proc bokStatus { } {
   }
 
   if {[info exists bokVariables(bok_website)] && $bokVariables(bok_website)>0} {
-    bokInform [format {%4s %-60s %s} "INFO" "$bokParams(BOK_WEB_REPO)/bok.py" "RUNNING \[pid(s): $bokVariables(bok_website)\]"]
+    bokInform [format {%4s %-60s %s} "INFO" "$bokParams(BOK_WEB_REPO)/src/bok.py" "RUNNING \[pid(s): $bokVariables(bok_website)\]"]
   } else {
-    bokInform [format {%4s %-60s %s} "INFO" "$bokParams(BOK_WEB_REPO)/bok.py" "NOT RUNNING"]
+    bokInform [format {%4s %-60s %s} "INFO" "$bokParams(BOK_WEB_REPO)/src/bok.py" "NOT RUNNING"]
   }
 
   if {[info exists bokVariables(bok_dataserver)] && $bokVariables(bok_dataserver)>0} {
     bokInform [format {%4s %-60s %s} "INFO" "$bokParams(BOK_DATA_REPO)/dataserver" "RUNNING \[pid(s): $bokVariables(bok_dataserver)\]"]
   } else {
     bokInform [format {%4s %-60s %s} "INFO" "$bokParams(BOK_DATA_REPO)/dataserver" "NOT RUNNING"]
+  }
+
+  if {[info exists bokVariables(bok_flatfield)] && $bokVariables(bok_flatfield)>0} {
+    bokInform [format {%4s %-60s %s} "INFO" "$bokParams(BOK_FF_REPO)/bff_src/bok-flat-field.py" "RUNNING \[pid(s): $bokVariables(bok_flatfield)\]"]
+  } else {
+    bokInform [format {%4s %-60s %s} "INFO" "$bokParams(BOK_FF_REPO)/bff_src/bok-flat-field.py" "NOT RUNNING"]
   }
 
   if {[info exists bokVariables(bok_ds9)] && $bokVariables(bok_ds9)>0} {

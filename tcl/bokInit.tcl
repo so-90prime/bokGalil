@@ -21,6 +21,7 @@ proc bokExit { N } {
   trace vdelete bokVariables(bok_ngserver)   w bokTraceVariables
   trace vdelete bokVariables(bok_website)    w bokTraceVariables
   trace vdelete bokVariables(bok_dataserver) w bokTraceVariables
+  trace vdelete bokVariables(bok_flatfield)  w bokTraceVariables
   trace vdelete bokVariables(bok_ds9)        w bokTraceVariables
   exit ${N}
 }
@@ -49,8 +50,9 @@ proc bokInit { } {
   set bokVariables(txt_indidriver) "bokGalilIndiDriver"
   set bokVariables(txt_indiserver) "IndiServer (host=$bokParams(BOK_INDI_ADDR) port=$bokParams(BOK_INDI_PORT))"
   set bokVariables(txt_ngserver)   "NG Server (host=$bokParams(BOK_NG_ADDR) port=$bokParams(BOK_NG_PORT))"
-  set bokVariables(txt_website)    "WebServer (http://$bokParams(BOK_WEB_ADDR):$bokParams(BOK_WEB_PORT)/)"
+  set bokVariables(txt_website)    "GalilWebServer (http://$bokParams(BOK_WEB_ADDR):$bokParams(BOK_WEB_PORT)/)"
   set bokVariables(txt_dataserver) "DataServer (host=$bokParams(BOK_DATA_ADDR) port=$bokParams(BOK_DATA_PORT))"
+  set bokVariables(txt_flatfield)  "FlatFieldServer (http://$bokParams(BOK_FF_ADDR):$bokParams(BOK_FF_PORT)/)"
   set bokVariables(txt_ds9)        "ds9"
   trace variable bokVariables(bok_memory)     w bokTraceVariables
   trace variable bokVariables(bok_tcpmem)     w bokTraceVariables
@@ -60,6 +62,7 @@ proc bokInit { } {
   trace variable bokVariables(bok_ngserver)   w bokTraceVariables
   trace variable bokVariables(bok_website)    w bokTraceVariables
   trace variable bokVariables(bok_dataserver) w bokTraceVariables
+  trace variable bokVariables(bok_flatfield)  w bokTraceVariables
   trace variable bokVariables(bok_ds9)        w bokTraceVariables
   bokUpdateVariables
 }
@@ -170,5 +173,6 @@ proc bokUpdateVariables { } {
   set bokVariables(bok_ngserver)   [bokPidOf Galil_DMC_22x0_NgServer]
   set bokVariables(bok_website)    [bokPidOf2 bok.py]
   set bokVariables(bok_dataserver) [bokPidOf dataserver]
+  set bokVariables(bok_flatfield)  [bokPidOf2 bok-flat-field.py]
   set bokVariables(bok_ds9)        [bokPidOf2 ds9.tcl]
 }
