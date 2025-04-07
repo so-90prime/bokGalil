@@ -24,8 +24,10 @@ for three different space telescopes and numerous terrestrial ones. Steward also
 the world that can cast and figure the very large primary mirrors used in telescopes built in the early 21st century.}
 \email{(520) 621-3648, pndaly@arizona.edu}
 \begin{abstract}
-This document describes the new software and hardware systems to suppport the upgraded 90Prime imager at 
+This document describes the new software and hardware systems to support the upgraded 90Prime imager at 
 the Bok 90-inch telescope. \\
+
+\noindent \emph{Document revision date 20250408. Last author: Phil Daly (pndaly@arizona.edu).} \\
 \end{abstract}
 
 \tableofcontents
@@ -94,7 +96,7 @@ actions are global with no application to specific tasks. If a single task crash
                           bok\_gfilters.txt above.
 \end{description}
 
-\noindent These files can be edited as required. After editing, to check that the file(s) are usuable by the system, execute: \\
+\noindent These files can be edited as required. After editing, to check that the file(s) are usable by the system, execute: \\
 
 \emteal{cd \$BOK\_GALIL\_BIN}
 
@@ -109,11 +111,9 @@ actions are global with no application to specific tasks. If a single task crash
 \subsection{/nfs/data/primefocus/\emph{yyyymmdd}}
 \label{datadirectory}
 
-A cronjob runs every day to create a new data directory in /nfs/data/primefocus/\emph{yyyymmdd} where \emph{yyyymmdd} is
-the date at the start of the observing night (\emph{i.e. viz.,} local time). The observer or engineer will have to (manually)
-enter this directory in AzCam.
+A cronjob runs every day, just after local noon, to create a new data directory in /nfs/data/primefocus/\emph{yyyymmdd} where \emph{yyyymmdd} is the date at the start of the observing night (\emph{i.e. viz.,} local time). The observer or engineer will have to (manually) enter this directory in AzCam.
 
-\subsection{Transferring Data Downtown}
+\subsubsection{Transferring Data Downtown}
 \label{Transferring Data Downtown}
 
 The \emph{primefocus} accounts on both \sfmagenta{bonsai} or \sfmagenta{banzai} have ssh-keys registered using the \emph{bok}
@@ -127,7 +127,7 @@ account on \sfmagenta{beast.as.arizona.edu}. Some command(s) to transfer this da
 
 \emteal{ssh bokbeast chown -R bok:users data/yyyymmdd} \\
 
-\noindent where \emph{yyyymmdd} is the observation date associated with the data directory shown in section~\ref{datadirectory} on page~\pageref{datadirectory}.
+\noindent where \emph{yyyymmdd} is the observation date associated with the data directory shown in section~\ref{datadirectory} on page~\pageref{datadirectory}. The last 2 commands should be used regularly throughout the night.
 
 \subsection{Day Crew Action(s)}
 \label{daycrewactions}
@@ -165,16 +165,64 @@ from {\sfmagenta bonsai} or {\sfmagenta banzai} by logging into the \emph{primef
 
 \emteal{bash iraf-community yyyymmdd} \\
 
-where \emph{yyyymmdd} is the observation date associated with the data directory shown in section~\ref{datadirectory} on page~\pageref{datadirectory}.
+where \emph{yyyymmdd} is the observation date associated with the data directory shown in section~\ref{datadirectory} on page~\pageref{datadirectory}. You will then have `ccdlist', `imexam' \emph{etc} available within the iraf window.
 
-\subsection{Astronomer Action(s)}
-\label{astronomeractions}
+\subsection{Astronomer Night Action(s)}
+\label{astronomernightactions}
 
 \begin{description}
- \item[{\sc read filters}] This command reads the instrument filter wheel and must be allowed to complete. Do this at the start of every observing run;
+ \item[{\sc read filters}] This command reads the instrument filter wheel and must be allowed to complete. 
+Do this at the start of every observing run or when the software is restarted;
  \item[{\sc load filter}] This command loads the currently selected instrument filter.
- \item[{\sc unload filter}] This command unloads any previously loaded instrument filter.
+ \item[{\sc unload filter}] This command unloads any previously loaded instrument filter. 
+It is good practice to unload the filter at the end of the observing night.
 \end{description}
+
+\subsection{Astronomer Flat Field Control}
+\label{astronomerflatfieldcontrol}
+Note that as part of the 90Prime startup, a new flat field GUI is created as shown in figure~\ref{bokff}. However, the
+flat field controller in the computer rack must be manually turned on for these controls to become effective. The web
+address for this GUI is \ttblue{http://10.30.1.7:5096} if running on \sfmagenta{bonsai} or \ttblue{http://10.30.1.8:5096} if running on \sfmagenta{banzai}.
+
+\begin{figure}[!h]
+ \centering
+ \includegraphics[width=0.8\linewidth]{bokFlatField.png}
+ \caption{The Bok Flat Field Control Interface.}
+ \label{bokff}
+\end{figure}
+
+\subsection{Astronomer Observer Log}
+\label{astronomerobserverlog}
+
+The directory \emteal{/home/primefocus/bok\_observer\_log} contains 2 utility programs that astronomers might find useful:
+
+\begin{description}
+ \item[\emteal{bok\_observer\_log.py}] This command produces a nightly observing log from the FITS header data within the specified path. It defaults to the observing night date in `yyyymmdd' format. An example of the output is show in figure~\ref{bokol}.
+ \item[\emteal{bok\_observer\_fixfits.py}] This command is able to fix any FITS file header issues and add new keywords to the primary HDU only.
+\end{description}
+
+For the latter utility, there is a JSON-like syntax required by the code. As an example we can fix the OBSERVER keyword and add a new OBSCOMM keyword in the test.fits file like so:
+
+\begin{verbatim}
+    cd /home/primefocus/bok_observer_log
+    python3 bok_observer_fixfits.py --file=test.fits \
+        --data='{"OBSERVER": "Phil Daly", "OBSCOMM": "test comment"}'
+\end{verbatim}
+
+The OBSCOMM keyword is particularly useful since the bok\_observer\_log.py utility will pick it up and, if it's not 
+empty, display it beneath the file in the output PDF. If in doubt, use the following commands to get some simple help:
+
+\begin{verbatim}
+    python3 bok_observer_log.py --help
+    python3 bok_observer_fixfits.py --help
+\end{verbatim}
+
+\begin{figure}[!h]
+ \centering
+ \includegraphics[width=0.8\linewidth]{bok_observer_log.png}
+ \caption{The Bok Observer Log Output.}
+ \label{bokol}
+\end{figure}
 
 \section{Emergency Shutdown}
 \label{Emergency Shutdown}
@@ -219,7 +267,7 @@ The order is unimportant.
 
 \begin{enumerate}
 \item Login to either \sfmagenta{bonsai} as \emph{mtnops} with the usual password.
-\item Click on the username (which should say `mtnops') in the top right of the screen to bringup the menu.
+\item Click on the username (which should say `mtnops') in the top right of the screen to bring up the menu.
 \item Click on `Shut Down'.
 \item The pop-up window shown in Figure~\ref{computershutdown} should appear so click on `Shut Down'.
 \item Repeat for \sfmagenta{banzai}.
@@ -239,7 +287,7 @@ If you have difficulty using the GUI, a power off can be executed from the comma
 \end{figure}
 
 \noindent A graphical representation of the hardware rack, installed in the 2$^{nd}$ floor office is shown in Figure~\ref{bokrack}.
-The basic concept is for an {\sc always on} system that can withstand the usuall Kitt Peak lightning activity so the
+The basic concept is for an {\sc always on} system that can withstand the usual Kitt Peak lightning activity so the
 system is protected by a \emph{Brickwall} surge protector on a 20A circuit. The rack is further protected by an APC 
 2200VA UPS. The CPU(s) are redundant inasmuch as, if \sfmagenta{bonsai} fails, \sfmagenta{banzai} can take over and vice-versa.
 It is imperative, therefore, that infrastructure software on these machines is kept synchronized. We use GitHub repositories
@@ -271,7 +319,7 @@ for the Steward code base and well-documented procedures for obtaining the suppo
               account is \emph{admin} with the standard \emph{mtnops} password. The management interface can be reached at
               \ttblue{http://10.30.0.6/\#/login}.
 \item[\sfmagenta{bokups}] An APC 2200VA SMT2200RM2UC UPS that has enough capacity to support the whole rack. Note that this is
-              attached to the network but has yet to be configured for automatied graceful shutdown after a given time has
+              attached to the network but has yet to be configured for automatic graceful shutdown after a given time has
               elapsed on battery power. Note that this may be referred to as \emph{bokrackups} in /etc/hosts.
 \item[\sfmagenta{bokkvm}] An eKL VGA KVM Switch 8 Port 8x2 which supports Keyboard, Mouse, Audio, USB (although we use it in
               `dumb mode'). It has an IR remote control.
@@ -314,7 +362,7 @@ Other repositories required to support operations are:
 In Figure~\ref{bokGalilIndiDriver} the minimum set of components required to run the system are:
 
 \begin{description}
- \item[INDI / pyINDI] is the infrastructure software. The \emph{indiserver} can be installed following the intructions in
+ \item[INDI / pyINDI] is the infrastructure software. The \emph{indiserver} can be installed following the instructions in
        Appendix~\ref{AppendixA}. The pyINDI software from the MMT is installed direct from a GitHub repository as part of
        the \emph{bok-90prime-gui} installation.
  \item[libgalil.so] This is the software library delivered by the vendor. It can be installed following the instructions in
@@ -420,24 +468,27 @@ Connect either to the astronomer interface (\ttblue{http://10.30.1.7:5905}) or t
   & & & \\
   \hline
   & & & \\
-  \_GALIL\_            & Galil DMC 2280 Hardware    & 192.168.0.100                    & 192.168.0.100                    \\
-  BOK\_GALIL\_CMD\_BOK & Galil DMC 2280 Hardware    & 10.30.3.31                       & 10.30.3.31                       \\
-  BOK\_GALIL\_CMD\_LAB & Galil DMC 2280 Hardware (spare)    & 192.168.0.100                    & 192.168.0.100                    \\
-  BOK\_INSTRUMENT      & Instrument                 & 90Prime                          & 90Prime                          \\
-  BOK\_INDI\_ADDR      & IndiServer Address         & 10.30.1.7                        & 10.30.1.8                        \\
-  BOK\_INDI\_PORT      & IndiServer Port            & 7624                             & 7624                             \\
-  BOK\_NG\_ADDR        & NG Server Address          & 10.30.1.7                        & 10.30.1.8                        \\
-  BOK\_NG\_PORT        & NG Server Port             & 5750                             & 5750                             \\
-  BOK\_TCP\_ADDR       & Galil TCP Command Address  & 10.30.3.31                       & 10.30.3.31                       \\
-  BOK\_TCP\_PORT       & Galil TCP Command Port     & 23                               & 23                               \\
-  BOK\_UDP\_ADDR       & Galil UDP Command Address  & 10.30.1.7                        & 10.30.1.8                        \\
-  BOK\_UDP\_PORT       & Galil UDP Command Port     & 5078                             & 5078                             \\
-  BOK\_DATA\_ADDR      & DataServer Address         & 10.30.4.13                       & 10.30.4.13                       \\
-  BOK\_DATA\_PORT      & DataServer Port            & 6543                             & 6543                             \\
-  BOK\_DATA\_REPO      & DataServer Repository      & /home/primefocus/dataserver      & /home/primefocus/dataserver      \\
-  BOK\_WEB\_ADDR       & pyINDI Website Address     & 10.30.1.7                        & 10.30.1.8                        \\
-  BOK\_WEB\_PORT       & pyINDI Website Port        & 5905                             & 5905                             \\
-  BOK\_WEB\_REPO       & pyINDI Website Repository  & /home/primefocus/bok-90prime-gui & /home/primefocus/bok-90prime-gui \\
+  \_GALIL\_            & Galil DMC 2280 Hardware      & 192.168.0.100                    & 192.168.0.100                    \\
+  BOK\_GALIL\_CMD\_BOK & Galil DMC 2280 Hardware      & 10.30.3.31                       & 10.30.3.31                       \\
+  BOK\_GALIL\_CMD\_LAB & Galil DMC 2280 Spare         & 192.168.0.100                    & 192.168.0.100                    \\
+  BOK\_INSTRUMENT      & Instrument                   & 90Prime                          & 90Prime                          \\
+  BOK\_INDI\_ADDR      & IndiServer Address           & 10.30.1.7                        & 10.30.1.8                        \\
+  BOK\_INDI\_PORT      & IndiServer Port              & 7624                             & 7624                             \\
+  BOK\_NG\_ADDR        & NG Server Address            & 10.30.1.7                        & 10.30.1.8                        \\
+  BOK\_NG\_PORT        & NG Server Port               & 5750                             & 5750                             \\
+  BOK\_TCP\_ADDR       & Galil TCP Command Address    & 10.30.3.31                       & 10.30.3.31                       \\
+  BOK\_TCP\_PORT       & Galil TCP Command Port       & 23                               & 23                               \\
+  BOK\_UDP\_ADDR       & Galil UDP Command Address    & 10.30.1.7                        & 10.30.1.8                        \\
+  BOK\_UDP\_PORT       & Galil UDP Command Port       & 5078                             & 5078                             \\
+  BOK\_WEB\_ADDR       & pyINDI Website Address       & 10.30.1.7                        & 10.30.1.8                        \\
+  BOK\_WEB\_PORT       & pyINDI Website Port          & 5905                             & 5905                             \\
+  BOK\_WEB\_REPO       & pyINDI Website Repository    & /home/primefocus/bok-90prime-gui & /home/primefocus/bok-90prime-gui \\
+  BOK\_DATA\_ADDR      & DataServer Address           & 10.30.1.7                        & 10.30.1.8                        \\
+  BOK\_DATA\_PORT      & DataServer Port              & 6543                             & 6543                             \\
+  BOK\_DATA\_REPO      & DataServer Repository        & /home/primefocus/dataserver      & /home/primefocus/dataserver      \\
+  BOK\_FF\_REPO        & FlatField Website Repository & /home/primefocus/bok-flat-field  & /home/primefocus/bok-flat-field  \\
+  BOK\_FF\_ADDR        & FlatField Website Address    & 10.30.1.7                        & 10.30.1.8                        \\
+  BOK\_FF\_PORT        & FlatField Website Port       & 5096                             & 5096                             \\
   & & & \\
   \hline \hline
  \end{tabular}
