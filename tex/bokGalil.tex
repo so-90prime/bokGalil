@@ -123,7 +123,7 @@ account on \sfmagenta{beast.as.arizona.edu}. Some command(s) to transfer this da
 
 \emteal{ssh bokbeast chown -R bok:users data/yyyymmdd}
 
-\emteal{scp -r /nfs/data/primefocus/yyyymmdd bokbeast:data/}
+\emteal{rsync -avz /nfs/data/primefocus/yyyymmdd bokbeast:data/}
 
 \emteal{ssh bokbeast chown -R bok:users data/yyyymmdd} \\
 
