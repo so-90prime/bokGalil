@@ -28,6 +28,8 @@ dataserver="${HOME}/dataserver"
 export PATH=${dataserver}:${PATH}
 [[ -z $(command -v dataserver) ]] && _dataserver=0 || _dataserver=1
 
+bok_flat_field="${HOME}/bok-flat-field"
+[[ -f "${bok_flat_field}/bff_etc/bok-flat-field.sh" ]] && source ${bok_flat_field}/bff_etc/bok-flat-field.sh ${bok_flat_field} || write_red "<ERROR> No flat field environment found!"
 
 # +
 # utility functions
@@ -101,6 +103,10 @@ _prc7="dataserver"
 _nam7="xterm -e dataserver                  "
 _pid7=$(ps -ef | grep ${_prc7} | grep -v xterm | grep -v grep | awk '{print $2}')
 
+_prc8="bok-flat-field.py"
+_nam8="BokFlatField http://${BFF_APP_HOST}:${BFF_APP_PORT}/  "
+_pid8=$(ps -ef | grep ${_prc8} | grep -v grep | awk '{print $2}')
+
 
 # +
 # execute
@@ -115,6 +121,7 @@ case $(echo ${_command}) in
       write_magenta "Dry-Run> nohup ${BOK_GALIL_BIN}/${_prc5} >> ${BOK_GALIL_LOG}/${_prc5}.log 2>&1 &"
       write_magenta "Dry-Run> nohup python3 ${bok_90prime_gui}/src/${_prc6} >> ${BOK_GALIL_LOG}/${_prc6}.log 2>&1 &"
       write_magenta "Dry-Run> xterm -e ${dataserver}/${_prc7} &"
+      write_magenta "Dry-Run> nohup python3 ${bok_flat_field}/bff_src/${_prc8} >> ${BOK_GALIL_LOG}/${_prc8}.log 2>&1 &"
     else
       [[ -z ${_pid0} ]] && write_green "Starting ${_nam0}" && (nohup ${BOK_GALIL_BIN}/${_prc0} >> ${BOK_GALIL_LOG}/${_prc0}.log 2>&1 &) && write_ok "${_nam0}" "STARTED OK" && sleep 1 || write_error "${_nam0}" "ALREADY RUNNING"
       if [[ ${_indiserver} -eq 1 ]]; then
@@ -125,6 +132,7 @@ case $(echo ${_command}) in
       if [[ ${_dataserver} -eq 1 ]]; then
         [[ -z ${_pid7} ]] && write_green "Starting ${_nam7}" && (xterm -e dataserver &) && write_ok "${_nam7}" "STARTED OK" && sleep 1 || write_error "${_nam7}" "ALREADY RUNNING"
       fi
+      [[ -z ${_pid8} ]] && write_green "Starting ${_nam8}" && (nohup python3 ${bok_flat_field}/bff_src/${_prc8} >> ${BOK_GALIL_LOG}/${_prc8}.log 2>&1 &) && write_ok "${_nam8}" "STARTED OK" && sleep 1 || write_error "${_nam8}" "ALREADY RUNNING"
     fi
     ;;
 
@@ -136,6 +144,7 @@ case $(echo ${_command}) in
       write_magenta "Dry-Run> kill -9 pidof(${_prc5})"
       write_magenta "Dry-Run> kill -9 pidof(${_prc6})"
       write_magenta "Dry-Run> kill -9 pidof(${_prc7})"
+      write_magenta "Dry-Run> kill -9 pidof(${_prc8})"
       write_magenta "Dry-Run> rm -f ${_prc2}"
       write_magenta "Dry-Run> rm -f ${_prc3}"
     else
@@ -145,6 +154,7 @@ case $(echo ${_command}) in
       [[ ! -z ${_pid5} ]] && echo "kill -9 ${_pid5}" && kill -9 ${_pid5} && write_ok "${_nam5}" "KILLED OK" || write_error "${_nam5}" "NOT RUNNING"
       [[ ! -z ${_pid6} ]] && echo "kill -9 ${_pid6}" && kill -9 ${_pid6} && write_ok "${_nam6}" "KILLED OK" || write_error "${_nam6}" "NOT RUNNING"
       [[ ! -z ${_pid7} ]] && echo "kill -9 ${_pid7}" && kill -9 ${_pid7} && write_ok "${_nam7}" "KILLED OK" || write_error "${_nam7}" "NOT RUNNING"
+      [[ ! -z ${_pid8} ]] && echo "kill -9 ${_pid8}" && kill -9 ${_pid8} && write_ok "${_nam8}" "KILLED OK" || write_error "${_nam8}" "NOT RUNNING"
       [[ -f ${_prc2} ]] && echo "rm -rf ${_prc2}" && rm -f ${_prc2} || write_error "${_nam2}" "NOT FOUND"
       [[ -f ${_prc3} ]] && echo "rm -rf ${_prc3}" && rm -f ${_prc3} || write_error "${_nam3}" "NOT FOUND"
     fi
@@ -152,13 +162,14 @@ case $(echo ${_command}) in
 
   # --command=status - no need for a --dry-run option as it's all passive
   status|*)
-    [[ -f ${_prc2} ]] && write_ok "${_nam2}" "EXISTS" || write_error "${_nam2}" "NOT FOUND"
-    [[ -f ${_prc3} ]] && write_ok "${_nam3}" "EXISTS" || write_error "${_nam3}" "NOT FOUND"
     [[ ! -z ${_pid0} ]] && write_ok "${_nam0}" "OK (${_pid0})" || write_error "${_nam0}" "NOT RUNNING"
     [[ ! -z ${_pid4} ]] && write_ok "${_nam4}" "OK (${_pid4})" || write_error "${_nam4}" "NOT RUNNING"
     [[ ! -z ${_pid5} ]] && write_ok "${_nam5}" "OK (${_pid5})" || write_error "${_nam5}" "NOT RUNNING"
     [[ ! -z ${_pid6} ]] && write_ok "${_nam6}" "OK (${_pid6})" || write_error "${_nam6}" "NOT RUNNING"
     [[ ! -z ${_pid7} ]] && write_ok "${_nam7}" "OK (${_pid7})" || write_error "${_nam7}" "NOT RUNNING"
+    [[ ! -z ${_pid8} ]] && write_ok "${_nam8}" "OK (${_pid8})" || write_error "${_nam8}" "NOT RUNNING"
+    [[ -f ${_prc2} ]] && write_ok "${_nam2}" "EXISTS" || write_error "${_nam2}" "NOT FOUND"
+    [[ -f ${_prc3} ]] && write_ok "${_nam3}" "EXISTS" || write_error "${_nam3}" "NOT FOUND"
     ;;
 esac
 
