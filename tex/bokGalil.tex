@@ -27,7 +27,7 @@ the world that can cast and figure the very large primary mirrors used in telesc
 This document describes the new software and hardware systems to support the upgraded 90Prime imager at 
 the Bok 90-inch telescope. \\
 
-\noindent \emph{Document revision date 20250408. Last author: Phil Daly (pndaly@arizona.edu).} \\
+\noindent \emph{Document revision date 20250917. Last author: Phil Daly (pndaly@arizona.edu).} \\
 \end{abstract}
 
 \tableofcontents
@@ -140,15 +140,16 @@ accessed via the engineering interface (\ttblue{http://10.30.1.7:5905/indi}) as 
                        button on the dewar;
  \item[{\sc populate done}] This command completes the populate filter wheel sequence;
  \item[{\sc initialize instrument filter}] This command reads the instrument filter wheel and must be allowed to complete;
+  \item[{\sc load filter}] This command will load the currently selected filter.  Do this as part of setup. This should be done before handing over to astronomers;
  \item[{\sc initialize guider filter}] This (optional) command reads the guider filter wheel and, if invoked, must be allowed 
                                        to complete.
 \end{description}
 
 \begin{figure}[!h]
  \centering
- \includegraphics[width=0.5\linewidth]{DayCrewActions1.png}
+ \includegraphics[width=0.5\linewidth]{DayCrewActions1_v2.png}
  \includegraphics[width=0.5\linewidth]{DayCrewActions2.png}
- \caption{The Day Crew Actions Within The Engineering GUI.}
+ \caption{The Day Crew Actions Within The Engineering GUI. Make sure the radio buttons are 'green' after you are done.}
  \label{engineer}
 \end{figure}
 
