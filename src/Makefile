@@ -16,20 +16,37 @@ TTARGETS  = Galil_DMC_22x0_TCP_Write Galil_DMC_22x0_TCP_Read
 UTARGETS  = Galil_DMC_22x0_UDP_Write Galil_DMC_22x0_UDP_Read Galil_DMC_22x0_Write_Memory
 LIBRARIES = libbokGalil.so libbokGalil.a
 
+setup := $(shell /usr/bin/bash -c "cd ../ && . etc/bokGalil.sh && env")
+export setup
+BOK_GALIL_HOME := $(shell echo $$setup | tr " " "\n" | grep BOK_GALIL_HOME | cut -d'=' -f2)
+BOK_GALIL_BIN  := $(shell echo $$setup | tr " " "\n" | grep BOK_GALIL_BIN  | cut -d'=' -f2)
+BOK_GALIL_DOCS := $(shell echo $$setup | tr " " "\n" | grep BOK_GALIL_DOCS | cut -d'=' -f2)
+BOK_GALIL_ETC  := $(shell echo $$setup | tr " " "\n" | grep BOK_GALIL_ETC  | cut -d'=' -f2)
+BOK_GALIL_LIB  := $(shell echo $$setup | tr " " "\n" | grep BOK_GALIL_LIB  | cut -d'=' -f2)
+BOK_GALIL_LOG  := $(shell echo $$setup | tr " " "\n" | grep BOK_GALIL_LOG  | cut -d'=' -f2)
+BOK_GALIL_SRC  := $(shell echo $$setup | tr " " "\n" | grep BOK_GALIL_SRC  | cut -d'=' -f2)
+BOK_GALIL_TCL  := $(shell echo $$setup | tr " " "\n" | grep BOK_GALIL_TCL  | cut -d'=' -f2)
+BOK_GALIL_TEX  := $(shell echo $$setup | tr " " "\n" | grep BOK_GALIL_TEX  | cut -d'=' -f2)
+
+LD_LIBRARY_PATH := $(shell echo $$setup | tr " " "\n" | grep LD_LIBRARY_PATH  | cut -d'=' -f2)
+PYTHON_PATH     := $(shell echo $$setup | tr " " "\n" | grep PYTHON_PATH  | cut -d'=' -f2)
+export LD_LIBRARY_PATH 
+export PYTHON_PATH     
+
 HERE     := $(shell pwd)
-BOK_HOME := $(shell env | grep BOK_GALIL_HOME | cut -d'=' -f2)
-BOK_BIN  := $(shell env | grep BOK_GALIL_BIN  | cut -d'=' -f2)
-BOK_ETC  := $(shell env | grep BOK_GALIL_ETC  | cut -d'=' -f2)
-BOK_LIB  := $(shell env | grep BOK_GALIL_LIB  | cut -d'=' -f2)
-BOK_LOG  := $(shell env | grep BOK_GALIL_LOG  | cut -d'=' -f2)
-BOK_SRC  := $(shell env | grep BOK_GALIL_SRC  | cut -d'=' -f2)
-BOK_TCL  := $(shell env | grep BOK_GALIL_TCL  | cut -d'=' -f2)
+BOK_HOME := $(BOK_GALIL_HOME)
+BOK_BIN  := $(BOK_GALIL_BIN)
+BOK_ETC  := $(BOK_GALIL_ETC)
+BOK_LIB  := $(BOK_GALIL_LIB)
+BOK_LOG  := $(BOK_GALIL_LOG)
+BOK_SRC  := $(BOK_GALIL_SRC)
+BOK_TCL  := $(BOK_GALIL_TCL)
 
 
 #///////////////////////////////////////////////////////////////////////////////
 #// includes and flags
 #///////////////////////////////////////////////////////////////////////////////
-CFLAGS = -O2 -Wall -I$(BOK_SRC) -g -DDEBUG
+CFLAGS = -O2 -Wall -I$(BOK_SRC) -g -DDEBUG # optimize level 2, warn all, include directory, produce debugging info, predefine macro `DEBUG 1`
 GLIBS = -L/usr/lib -lgclib -lgclibo -lrt
 DLIBS = -lindidriver -lm -lcurl
 LLIBS = -L$(BOK_LIB) -lbokGalil
@@ -159,16 +176,16 @@ install:
 
 libbokGalil.a: bokGalil.c
 	rm -rf $(HERE)/$@ $(BOK_LIB)/$@ $(HERE)/bokGalil.o >> /dev/null 2>&1
-	gcc $(CFLAGS) -c $(BOK_SRC)/$< -o $(HERE)/bokGalil.o
+	gcc -x c++ $(CFLAGS) -c $(BOK_SRC)/$^ -o $(HERE)/bokGalil.o
 	ar rcsv $(HERE)/$@ $(HERE)/bokGalil.o
 	chmod 777 $(HERE)/$@
 	rm -rf $(HERE)/bokGalil.o >> /dev/null 2>&1
-	cp $(HERE)/libbokGalil.a  $(BOK_LIB)/libbokGalil.a
+	cp $(HERE)/$@  $(BOK_LIB)/$@
 
 libbokGalil.so: bokGalil.c
 	rm -rf $(HERE)/$@ $(BOK_LIB)/$@ $(HERE)/bokGalil.o >> /dev/null 2>&1
-	gcc $(CFLAGS) -fPIC -shared -c $(BOK_SRC)/$< -o $(HERE)/bokGalil.o
-	ld -shared -o $(HERE)/$@ $(HERE)/bokGalil.o -lc -ldl
+	gcc -x c++ $(CFLAGS) -fPIC -shared -c $(BOK_SRC)/$< -o $(HERE)/bokGalil.o
+	ld -shared -o $(HERE)/$@ $(HERE)/bokGalil.o -lc -ldl -lgclib
 	chmod 777 $(HERE)/$@
 	rm -rf $(HERE)/bokGalil.o >> /dev/null 2>&1
-	cp $(HERE)/libbokGalil.so $(BOK_LIB)/libbokGalil.so
+	cp $(HERE)/$@ $(BOK_LIB)/$@
