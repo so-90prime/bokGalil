@@ -19,8 +19,8 @@ configure_file(
 )
 
 configure_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/indi_Galil.xml.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/indi_Galil.xml
+    ${CMAKE_CURRENT_SOURCE_DIR}/indi_GalilFilterWheel.xml.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/indi_GalilFilterWheel.xml
 )
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
