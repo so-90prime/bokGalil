@@ -27,7 +27,7 @@ the world that can cast and figure the very large primary mirrors used in telesc
 This document describes the new software and hardware systems to support the upgraded 90Prime imager at 
 the Bok 90-inch telescope. \\
 
-\noindent \emph{Document revision date 20250917. Last author: Phil Daly (pndaly@arizona.edu).} \\
+\noindent \emph{Document revision date 2025/11/11. Last author: David Sand (dsand@arizona.edu).} \\
 \end{abstract}
 
 \tableofcontents
@@ -38,27 +38,43 @@ the Bok 90-inch telescope. \\
 \section{Quick Start}
 \label{quickstart}
 
-\noindent To start the system, execute the following if operating on \sfmagenta{bonsai (10.30.1.7)}\footnote{If running from
+
+\noindent {\bf Prelude: } A couple of basics that may seem obvious, but we put here for completeness:
+
+\begin{enumerate}
+
+\item Before you sit down in the control room, {verify that the manual power switch on the archon controller is in the `on' position.}
+
+\item Start up two Firefox windows on bart (the world icon in the bottom tool bar).
+
+\item In one tab, go to Outlet Control: \sfmagenta{10.30.3.30/index.htm}.  Only the following objects should be in the `ON' state: a) Galil Firewall, b) Galil, c) Camera Shutter, d) New 90Prime CCD, e) Guider Raspberry Pi, f) Guider Camera.
+
+
+
+\end{enumerate}
+
+\noindent To start the system, first start a terminal window.  This is the black box with the `\$' sign in the bottom control panel.   When that window pops up, type the following if operating on \sfmagenta{bonsai (10.30.1.7)}\footnote{If running from
 \sfmagenta{banzai} (10.30.1.8), the command is: \emteal{ssh -XY primefocus@banzai}}: \\
 
 \emteal{ssh -XY primefocus@bonsai}
 
 \emteal{cd /home/primefocus/bokGalil}
 
-\emteal{source \hspace{1mm} etc/bokGalil.sh \hspace{1mm} \$(pwd) \hspace{1mm} gui}\footnote{
-  You can also replace the \emph{\$(pwd)} syntax with the `backward apostrophe' syntax: 
-  \emph{{\small $^\backprime$}~pwd~{\small $^\backprime$}}. The `backward apostrophe' is often 
-  located at the top-left of the keyboard sharing the `$\sim$' key below the {\sc esc} key.
-  However, this syntax only works in the /home/primefocus/bokGalil sub-directory. From \emph{any} location, 
-  use the full command syntax: \emph{source \hspace{1mm} /home/primefocus/bokGalil/etc/bokGalil.sh \hspace{1mm} /home/primefocus/bokGalil \hspace{1mm} gui}.} \\
-
+\emteal{source \hspace{1mm} etc/bokGalil.sh \hspace{1mm} \$(pwd) \hspace{1mm} gui}
+%\footnote{
+%  You can also replace the \emph{\$(pwd)} syntax with the `backward apostrophe' syntax: 
+ % \emph{{\small $^\backprime$}~pwd~{\small $^\backprime$}}. The `backward apostrophe' is often 
+ % located at the top-left of the keyboard sharing the `$\sim$' key below the {\sc esc} key.
+ % However, this syntax only works in the /home/primefocus/bokGalil sub-directory. From \emph{any} location, 
+ % use the full command syntax: \emph{source \hspace{1mm} /home/primefocus/bokGalil/etc/bokGalil.sh \hspace{1mm} /home/primefocus/bokGalil \hspace{1mm} gui}.} \\
+\\
+\\
 \noindent Allow the interface shown in Figure~\ref{boktcl} to appear and press the \emteal{start} button. The last element
-to appear---indicating that startup is complete---is a \emph{ds9} window  Then choose an appropriate web interface as shown 
-in Figure~\ref{bokgui}: \\
+to appear---indicating that startup is complete---is a \emph{ds9} window.  In two separate Firefox windows (so you can see them side by side) type in the following URLs, which should look like those shown in Figure~\ref{bokgui}: \\
 
-\ttblue{http://10.30.1.7:5905} for astronomers, or
+\ttblue{http://10.30.1.7:5905}  [this is meant for astronomers], and
 
-\ttblue{http://10.30.1.7:5905/indi} for engineers. \\
+\ttblue{http://10.30.1.7:5905/indi} [this is meant for Mtn Ops and engineers] \\
 
 \begin{figure}[!h]
  \centering
@@ -76,58 +92,14 @@ in Figure~\ref{bokgui}: \\
  \label{bokgui}
 \end{figure}
 
-\noindent To stop the system, press the \emteal{stop} button. The system status can be interrogated at any time by pressing 
+\noindent To stop the system, press the \emteal{stop} button in the first GUI that you opened up. The system status can be interrogated at any time by pressing 
 the \emteal{status} button. Figure~\ref{boktcl} shows the system completely stopped on the left-hand side (all red) and
 the system fully enabled on the right-hand side (all green). If any subsystem crashes, this interface will reflect the status
 by changing that element from \emph{green} to \emph{red}. Note that the \emteal{start}, \emteal{stop} and \emteal{status} 
 actions are global with no application to specific tasks. If a single task crashes, it is easiest to re-start the whole system
 (and takes a few seconds at most).
 
-\subsection{Filter File(s)}
-\label{filterfiles}
 
-\noindent The list(s) of available filters are stored in separate files in \$BOK\_GALIL\_DOCS:
-
-\begin{description}
- \item[bok\_gfilters.txt] This file lists the available guider wheel filters;
- \item[bok\_ifilters.txt] This file lists the available instrument wheel filters and corresponds to the file in
-                          /home/primefocus/90prime/galil/filters.txt on {\sc bart};
- \item[bok\_sfilters.txt] This file lists the available guider wheel filters and should be synchronized with 
-                          bok\_gfilters.txt above.
-\end{description}
-
-\noindent These files can be edited as required. After editing, to check that the file(s) are usable by the system, execute: \\
-
-\emteal{cd \$BOK\_GALIL\_BIN}
-
-\emteal{./bok\_read\_filters -f\$BOK\_GALIL\_DOCS/bok\_gfilters.txt}
-
-\emteal{./bok\_read\_filters -f\$BOK\_GALIL\_DOCS/bok\_ifilters.txt}
-
-\emteal{./bok\_read\_filters -f\$BOK\_GALIL\_DOCS/bok\_sfilters.txt} \\
-
-\noindent If these files are changed whilst the system is running, the system \emph{must} be re-started for them to take effect.
-
-\subsection{/nfs/data/primefocus/\emph{yyyymmdd}}
-\label{datadirectory}
-
-A cronjob runs every day, just after local noon, to create a new data directory in /nfs/data/primefocus/\emph{yyyymmdd} where \emph{yyyymmdd} is the date at the start of the observing night (\emph{i.e. viz.,} local time). The observer or engineer will have to (manually) enter this directory in AzCam.
-
-\subsubsection{Transferring Data Downtown}
-\label{Transferring Data Downtown}
-
-The \emph{primefocus} accounts on both \sfmagenta{bonsai} or \sfmagenta{banzai} have ssh-keys registered using the \emph{bok}
-account on \sfmagenta{beast.as.arizona.edu}. Some command(s) to transfer this data are: \\
- 
-\emteal{ssh bokbeast mkdir data/yyyymmdd}
-
-\emteal{ssh bokbeast chown -R bok:users data/yyyymmdd}
-
-\emteal{rsync -avz /nfs/data/primefocus/yyyymmdd bokbeast:data/}
-
-\emteal{ssh bokbeast chown -R bok:users data/yyyymmdd} \\
-
-\noindent where \emph{yyyymmdd} is the observation date associated with the data directory shown in section~\ref{datadirectory} on page~\pageref{datadirectory}. The last 2 commands should be used regularly throughout the night.
 
 \subsection{Day Crew Action(s)}
 \label{daycrewactions}
@@ -173,7 +145,54 @@ from {\sfmagenta bonsai} or {\sfmagenta banzai} by logging into the \emph{primef
 
 \emteal{bash iraf-community yyyymmdd} \\
 
-where \emph{yyyymmdd} is the observation date associated with the data directory shown in section~\ref{datadirectory} on page~\pageref{datadirectory}. You will then have `ccdlist', `imexam' \emph{etc} available within the iraf window.
+\noindent where \emph{yyyymmdd} is the observation date associated with the data directory shown in section~\ref{datadirectory} on page~\pageref{datadirectory}. You will then have `ccdlist', `imexam' \emph{etc} available within the iraf window.
+
+\subsection{Filter File(s)}
+\label{filterfiles}
+
+\noindent The file containing all of the 90Prime filters is in a different spot for the new 90Prime; they are now on bonsai/bonzai.  The list(s) of available filters are stored in separate files in \$BOK\_GALIL\_DOCS:
+
+\begin{description}
+ \item[bok\_gfilters.txt] This file lists the available guider wheel filters;
+ \item[bok\_ifilters.txt] This file lists the available instrument wheel filters and corresponds to the file in
+                          /home/primefocus/90prime/galil/filters.txt on {\sc bart};
+ \item[bok\_sfilters.txt] This file lists the available guider wheel filters and should be synchronized with 
+                          bok\_gfilters.txt above.
+\end{description}
+
+\noindent These files can be edited as required. After editing, to check that the file(s) are usable by the system, execute: \\
+
+\emteal{cd \$BOK\_GALIL\_BIN}
+
+\emteal{./bok\_read\_filters -f\$BOK\_GALIL\_DOCS/bok\_gfilters.txt}
+
+\emteal{./bok\_read\_filters -f\$BOK\_GALIL\_DOCS/bok\_ifilters.txt}
+
+\emteal{./bok\_read\_filters -f\$BOK\_GALIL\_DOCS/bok\_sfilters.txt} \\
+
+\noindent If these files are changed whilst the system is running, the system \emph{must} be re-started for them to take effect.
+
+\subsection{/nfs/data/primefocus/\emph{yyyymmdd}}
+\label{datadirectory}
+
+A cronjob runs every day, just after local noon, to create a new data directory in /nfs/data/primefocus/\emph{yyyymmdd} where \emph{yyyymmdd} is the date at the start of the observing night (\emph{i.e. viz.,} local time). The observer or engineer will have to (manually) enter this directory in AzCam.
+
+\subsubsection{Transferring Data Downtown}
+\label{Transferring Data Downtown}
+
+The \emph{primefocus} accounts on both \sfmagenta{bonsai} or \sfmagenta{banzai} have ssh-keys registered using the \emph{bok}
+account on \sfmagenta{beast.as.arizona.edu}. Some command(s) to transfer this data are: \\
+ 
+\emteal{ssh bokbeast mkdir data/yyyymmdd}
+
+\emteal{ssh bokbeast chown -R bok:users data/yyyymmdd}
+
+\emteal{rsync -avz /nfs/data/primefocus/yyyymmdd bokbeast:data/}
+
+\emteal{ssh bokbeast chown -R bok:users data/yyyymmdd} \\
+
+\noindent where \emph{yyyymmdd} is the observation date associated with the data directory shown in section~\ref{datadirectory} on page~\pageref{datadirectory}. The last 2 commands should be used regularly throughout the night.
+
 
 \subsection{Astronomer Night Action(s)}
 \label{astronomernightactions}
@@ -209,7 +228,7 @@ The directory \emteal{/home/primefocus/bok\_observer\_log} contains 2 utility pr
  \item[\emteal{bok\_observer\_fixfits.py}] This command is able to fix any FITS file header issues and add new keywords to the primary HDU only.
 \end{description}
 
-For the latter utility, there is a JSON-like syntax required by the code. As an example we can fix the OBSERVER keyword and add a new OBSCOMM keyword in the test.fits file like so:
+\noindent For the latter utility, there is a JSON-like syntax required by the code. As an example we can fix the OBSERVER keyword and add a new OBSCOMM keyword in the test.fits file like so:
 
 \begin{verbatim}
     cd /home/primefocus/bok_observer_log
@@ -217,7 +236,7 @@ For the latter utility, there is a JSON-like syntax required by the code. As an 
         --data='{"OBSERVER": "Phil Daly", "OBSCOMM": "test comment"}'
 \end{verbatim}
 
-The OBSCOMM keyword is particularly useful since the bok\_observer\_log.py utility will pick it up and, if it's not 
+\noindent The OBSCOMM keyword is particularly useful since the bok\_observer\_log.py utility will pick it up and, if it's not 
 empty, display it beneath the file in the output PDF. If in doubt, use the following commands to get some simple help:
 
 \begin{verbatim}
