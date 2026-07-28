@@ -1408,13 +1408,24 @@ void *thread_handler(void *thread_fd) {
       break;
     }
 
+    rstat = close(handler_fd);
+
     /* reset string(s) */
     (void) memset(incoming, '\0', sizeof(incoming));
     (void) memset(outgoing, '\0', sizeof(outgoing));
+  
+    break;
   }
+  
+  
   if (rstat == 0) {
-    (void) printf("Server thread handler client disconnected\n");
+    (void) printf("Server thread handler client disconnected successfully\n");
   }
+  else
+  {
+    (void) printf("Server thread handler client disconnect error\n");
+  }
+  fflush(stdout);
 
   /* free memory and return */
   cliFree(BOK_NG_BUCKETS, bok_ng_commands);
