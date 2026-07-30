@@ -58,12 +58,15 @@ void *thread_handler(void *thread_fd) {
 
   int tcp_shm_fd = -1;
   int udp_shm_fd = -1;
-  tcp_val_p tcp_shm_ptr = (tcp_val_p)NULL;
-  udp_val_p udp_shm_ptr = (udp_val_p)NULL;
+  tcp_val_p tcp_shm_ptr = MAP_FAILED;
+  udp_val_p udp_shm_ptr = MAP_FAILED;
 
+  ssize_t bytes_read = 0;
+  bool message_read = false;
   char buffer[BOK_NG_STRING];
   char incoming[BOK_NG_STRING];
   char outgoing[BOK_NG_STRING];
+
   (void) memset(buffer, '\0', sizeof(buffer));
   (void) memset(incoming, '\0', sizeof(incoming));
   (void) memset(outgoing, '\0', sizeof(outgoing));
@@ -71,9 +74,18 @@ void *thread_handler(void *thread_fd) {
   /* initialize */
   cliMalloc(BOK_NG_BUCKETS, BOK_NG_WORD, bok_ng_commands);
 
-  /* loop */
-  while ((rstat=recv(handler_fd, incoming, sizeof(incoming), 0)) > 0) {
+  while ((rstat = recv(handler_fd, incoming + bytes_read, sizeof(incoming) - bytes_read, 0)) > 0)
+  {
+    bytes_read += rstat;
 
+    if (strchr(incoming, 0) != NULL)
+    {
+      message_read = true;
+      break; // terminating character (0) found. Incoming message is complete.
+    }
+  }
+
+  if (message_read) {
     /* report incoming */
     if ((p=strchr(incoming, '\n')) != (char *)NULL) { *p = '\0'; }
     if ((p=strchr(incoming, '\r')) != (char *)NULL) { *p = '\0'; }
@@ -130,7 +142,7 @@ void *thread_handler(void *thread_fd) {
           tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
 
           /* check memory */
-          if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
+          if (tcp_shm_fd < 0 || tcp_shm_ptr == MAP_FAILED) {
             (void) strcat(outgoing, " ERROR (invalid tcp memory)");
 
           /* check hardware is idle */
@@ -172,7 +184,7 @@ void *thread_handler(void *thread_fd) {
           }
 
           /* close memory */
-          if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
+          if (tcp_shm_ptr != MAP_FAILED) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
           if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
         }
 
@@ -213,7 +225,7 @@ void *thread_handler(void *thread_fd) {
           tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
 
           /* check memory */
-          if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
+          if (tcp_shm_fd<0 || tcp_shm_ptr == MAP_FAILED) {
             (void) strcat(outgoing, " ERROR (invalid tcp memory)");
 
           /* check hardware is idle */
@@ -258,7 +270,7 @@ void *thread_handler(void *thread_fd) {
           }
 
           /* close memory */
-          if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
+          if (tcp_shm_ptr != MAP_FAILED) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
           if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
         }
 
@@ -295,7 +307,7 @@ void *thread_handler(void *thread_fd) {
           tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
 
           /* check memory */
-          if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
+          if (tcp_shm_fd<0 || tcp_shm_ptr == MAP_FAILED) {
             (void) strcat(outgoing, " ERROR (invalid tcp memory)");
 
           /* check hardware is idle */
@@ -340,7 +352,7 @@ void *thread_handler(void *thread_fd) {
           }
 
           /* close memory */
-          if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
+          if (tcp_shm_ptr != MAP_FAILED) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
           if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
         }
 
@@ -375,11 +387,11 @@ void *thread_handler(void *thread_fd) {
           udp_shm_ptr = (udp_val_p)mmap(0, UDP_VAL_SIZE, PROT_READ, MAP_SHARED, udp_shm_fd, 0);
 
           /* check tcp memory */
-          if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
+          if (tcp_shm_fd<0 || tcp_shm_ptr == MAP_FAILED) {
             (void) strcat(outgoing, " ERROR (invalid tcp memory)");
 
           /* check udp memory */
-          } else if (udp_shm_fd<0 || udp_shm_ptr==(udp_val_p)NULL) {
+          } else if (udp_shm_fd<0 || udp_shm_ptr == MAP_FAILED) {
             (void) strcat(outgoing, " ERROR (invalid udp memory)");
 
           /* check hardware is idle */
@@ -412,9 +424,9 @@ void *thread_handler(void *thread_fd) {
           }
 
           /* close memory */
-          if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
+          if (tcp_shm_ptr != MAP_FAILED) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
           if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
-          if (udp_shm_ptr != (udp_val_p)NULL) { (void) munmap(udp_shm_ptr, UDP_VAL_SIZE); }
+          if (udp_shm_ptr != MAP_FAILED) { (void) munmap(udp_shm_ptr, UDP_VAL_SIZE); }
           if (udp_shm_fd >= 0) { (void) close(udp_shm_fd); }
         }
 
@@ -441,7 +453,7 @@ void *thread_handler(void *thread_fd) {
           tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
 
           /* check memory */
-          if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
+          if (tcp_shm_fd<0 || tcp_shm_ptr == MAP_FAILED) {
             (void) strcat(outgoing, " ERROR (invalid tcp memory)");
 
           /* check hardware is idle */
@@ -483,7 +495,7 @@ void *thread_handler(void *thread_fd) {
           }
 
           /* close memory */
-          if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
+          if (tcp_shm_ptr != MAP_FAILED) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
           if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
         }
 
@@ -510,7 +522,7 @@ void *thread_handler(void *thread_fd) {
           tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
 
           /* check memory */
-          if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
+          if (tcp_shm_fd<0 || tcp_shm_ptr == MAP_FAILED) {
             (void) strcat(outgoing, " ERROR (invalid tcp memory)");
 
           /* check hardware is idle */
@@ -542,7 +554,7 @@ void *thread_handler(void *thread_fd) {
           }
 
           /* close memory */
-          if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
+          if (tcp_shm_ptr != MAP_FAILED) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
           if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
         }
 
@@ -583,7 +595,7 @@ void *thread_handler(void *thread_fd) {
           tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
 
           /* check memory */
-          if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
+          if (tcp_shm_fd<0 || tcp_shm_ptr == MAP_FAILED) {
             (void) strcat(outgoing, " ERROR (invalid tcp memory)");
 
           /* check hardware is idle */
@@ -627,7 +639,7 @@ void *thread_handler(void *thread_fd) {
           }
 
           /* close memory */
-          if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
+          if (tcp_shm_ptr != MAP_FAILED) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
           if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
         }
 
@@ -664,7 +676,7 @@ void *thread_handler(void *thread_fd) {
           tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
 
           /* check memory */
-          if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
+          if (tcp_shm_fd<0 || tcp_shm_ptr == MAP_FAILED) {
             (void) strcat(outgoing, " ERROR (invalid tcp memory)");
 
           /* check hardware is idle */
@@ -708,7 +720,7 @@ void *thread_handler(void *thread_fd) {
           }
 
           /* close memory */
-          if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
+          if (tcp_shm_ptr != MAP_FAILED) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
           if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
         }
 
@@ -735,7 +747,7 @@ void *thread_handler(void *thread_fd) {
           tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
 
           /* check memory */
-          if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
+          if (tcp_shm_fd<0 || tcp_shm_ptr == MAP_FAILED) {
             (void) strcat(outgoing, " ERROR (invalid tcp memory)");
 
           /* check hardware is idle */
@@ -767,7 +779,7 @@ void *thread_handler(void *thread_fd) {
           }
 
           /* close memory */
-          if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
+          if (tcp_shm_ptr != MAP_FAILED) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
           if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
         }
 
@@ -808,11 +820,11 @@ void *thread_handler(void *thread_fd) {
           udp_shm_ptr = (udp_val_p)mmap(0, UDP_VAL_SIZE, PROT_READ, MAP_SHARED, udp_shm_fd, 0);
 
           /* check tcp memory */
-          if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
+          if (tcp_shm_fd<0 || tcp_shm_ptr == MAP_FAILED) {
             (void) strcat(outgoing, " ERROR (invalid tcp memory)");
 
           /* check tcp memory */
-          } else if (udp_shm_fd<0 || udp_shm_ptr==(udp_val_p)NULL) {
+          } else if (udp_shm_fd<0 || udp_shm_ptr == MAP_FAILED) {
             (void) strcat(outgoing, " ERROR (invalid udp memory)");
 
           /* check hardware is idle */
@@ -861,9 +873,9 @@ void *thread_handler(void *thread_fd) {
           }
 
           /* close memory */
-          if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
+          if (tcp_shm_ptr != MAP_FAILED) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
           if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
-          if (udp_shm_ptr != (udp_val_p)NULL) { (void) munmap(udp_shm_ptr, UDP_VAL_SIZE); }
+          if (udp_shm_ptr != MAP_FAILED) { (void) munmap(udp_shm_ptr, UDP_VAL_SIZE); }
           if (udp_shm_fd >= 0) { (void) close(udp_shm_fd); }
         }
 
@@ -898,11 +910,11 @@ void *thread_handler(void *thread_fd) {
           udp_shm_ptr = (udp_val_p)mmap(0, UDP_VAL_SIZE, PROT_READ, MAP_SHARED, udp_shm_fd, 0);
 
           /* check tcp memory */
-          if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
+          if (tcp_shm_fd<0 || tcp_shm_ptr == MAP_FAILED) {
             (void) strcat(outgoing, " ERROR (invalid tcp memory)");
 
           /* check tcp memory */
-          } else if (udp_shm_fd<0 || udp_shm_ptr==(udp_val_p)NULL) {
+          } else if (udp_shm_fd<0 || udp_shm_ptr == MAP_FAILED) {
             (void) strcat(outgoing, " ERROR (invalid udp memory)");
 
           /* check hardware is idle */
@@ -951,9 +963,9 @@ void *thread_handler(void *thread_fd) {
           }
 
           /* close memory */
-          if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
+          if (tcp_shm_ptr != MAP_FAILED) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
           if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
-          if (udp_shm_ptr != (udp_val_p)NULL) { (void) munmap(udp_shm_ptr, UDP_VAL_SIZE); }
+          if (udp_shm_ptr != MAP_FAILED) { (void) munmap(udp_shm_ptr, UDP_VAL_SIZE); }
           if (udp_shm_fd >= 0) { (void) close(udp_shm_fd); }
         }
 
@@ -994,11 +1006,11 @@ void *thread_handler(void *thread_fd) {
           udp_shm_ptr = (udp_val_p)mmap(0, UDP_VAL_SIZE, PROT_READ, MAP_SHARED, udp_shm_fd, 0);
 
           /* check tcp memory */
-          if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
+          if (tcp_shm_fd<0 || tcp_shm_ptr == MAP_FAILED) {
             (void) strcat(outgoing, " ERROR (invalid tcp memory)");
 
           /* check tcp memory */
-          } else if (udp_shm_fd<0 || udp_shm_ptr==(udp_val_p)NULL) {
+          } else if (udp_shm_fd<0 || udp_shm_ptr == MAP_FAILED) {
             (void) strcat(outgoing, " ERROR (invalid udp memory)");
 
           /* check hardware is idle */
@@ -1045,9 +1057,9 @@ void *thread_handler(void *thread_fd) {
           }
 
           /* close memory */
-          if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
+          if (tcp_shm_ptr != MAP_FAILED) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
           if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
-          if (udp_shm_ptr != (udp_val_p)NULL) { (void) munmap(udp_shm_ptr, UDP_VAL_SIZE); }
+          if (udp_shm_ptr != MAP_FAILED) { (void) munmap(udp_shm_ptr, UDP_VAL_SIZE); }
           if (udp_shm_fd >= 0) { (void) close(udp_shm_fd); }
         }
 
@@ -1081,11 +1093,11 @@ void *thread_handler(void *thread_fd) {
           udp_shm_ptr = (udp_val_p)mmap(0, UDP_VAL_SIZE, PROT_READ, MAP_SHARED, udp_shm_fd, 0);
 
           /* check tcp memory */
-          if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
+          if (tcp_shm_fd<0 || tcp_shm_ptr == MAP_FAILED) {
             (void) strcat(outgoing, " ERROR (invalid tcp memory)");
 
           /* check tcp memory */
-          } else if (udp_shm_fd<0 || udp_shm_ptr==(udp_val_p)NULL) {
+          } else if (udp_shm_fd<0 || udp_shm_ptr == MAP_FAILED) {
             (void) strcat(outgoing, " ERROR (invalid udp memory)");
 
           /* check hardware is idle */
@@ -1130,9 +1142,9 @@ void *thread_handler(void *thread_fd) {
           }
 
           /* close memory */
-          if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
+          if (tcp_shm_ptr != MAP_FAILED) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
           if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
-          if (udp_shm_ptr != (udp_val_p)NULL) { (void) munmap(udp_shm_ptr, UDP_VAL_SIZE); }
+          if (udp_shm_ptr != MAP_FAILED) { (void) munmap(udp_shm_ptr, UDP_VAL_SIZE); }
           if (udp_shm_fd >= 0) { (void) close(udp_shm_fd); }
         }
 
@@ -1162,7 +1174,7 @@ void *thread_handler(void *thread_fd) {
         udp_shm_fd = shm_open(BOK_SHM_UDP_NAME, O_RDONLY, 0666);
         udp_shm_ptr = (udp_val_p)mmap(0, UDP_VAL_SIZE, PROT_READ, MAP_SHARED, udp_shm_fd, 0);
 
-        if (udp_shm_fd<0 || udp_shm_ptr==(udp_val_p)NULL) {
+        if (udp_shm_fd<0 || udp_shm_ptr == MAP_FAILED) {
           (void) strcat(outgoing, " ERROR (invalid udp memory)");
 
         } else {
@@ -1175,7 +1187,7 @@ void *thread_handler(void *thread_fd) {
         }
 
         /* close memory */
-        if (udp_shm_ptr != (udp_val_p)NULL) { (void) munmap(udp_shm_ptr, UDP_VAL_SIZE); }
+        if (udp_shm_ptr != MAP_FAILED) { (void) munmap(udp_shm_ptr, UDP_VAL_SIZE); }
         if (udp_shm_fd >= 0) { (void) close(udp_shm_fd); }
 
       /*******************************************************************************
@@ -1215,10 +1227,10 @@ void *thread_handler(void *thread_fd) {
         udp_shm_fd = shm_open(BOK_SHM_UDP_NAME, O_RDONLY, 0666);
         udp_shm_ptr = (udp_val_p)mmap(0, UDP_VAL_SIZE, PROT_READ, MAP_SHARED, udp_shm_fd, 0);
 
-        if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
+        if (tcp_shm_fd<0 || tcp_shm_ptr == MAP_FAILED) {
           (void) strcat(outgoing, " ERROR (invalid tcp memory)");
 
-        } else if (udp_shm_fd<0 || udp_shm_ptr==(udp_val_p)NULL) {
+        } else if (udp_shm_fd<0 || udp_shm_ptr == MAP_FAILED) {
           (void) strcat(outgoing, " ERROR (invalid udp memory)");
 
         } else {
@@ -1243,9 +1255,9 @@ void *thread_handler(void *thread_fd) {
         }
  
        /* close memory */
-        if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
+        if (tcp_shm_ptr != MAP_FAILED) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
         if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
-        if (udp_shm_ptr != (udp_val_p)NULL) { (void) munmap(udp_shm_ptr, UDP_VAL_SIZE); }
+        if (udp_shm_ptr != MAP_FAILED) { (void) munmap(udp_shm_ptr, UDP_VAL_SIZE); }
         if (udp_shm_fd >= 0) { (void) close(udp_shm_fd); }
 
       /*******************************************************************************
@@ -1258,7 +1270,7 @@ void *thread_handler(void *thread_fd) {
         udp_shm_fd = shm_open(BOK_SHM_UDP_NAME, O_RDONLY, 0666);
         udp_shm_ptr = (udp_val_p)mmap(0, UDP_VAL_SIZE, PROT_READ, MAP_SHARED, udp_shm_fd, 0);
 
-        if (udp_shm_fd<0 || udp_shm_ptr==(udp_val_p)NULL) {
+        if (udp_shm_fd<0 || udp_shm_ptr == MAP_FAILED) {
           (void) strcat(outgoing, " ERROR (invalid udp memory)");
 
         } else {
@@ -1270,7 +1282,7 @@ void *thread_handler(void *thread_fd) {
         }
 
         /* close memory */
-        if (udp_shm_ptr != (udp_val_p)NULL) { (void) munmap(udp_shm_ptr, UDP_VAL_SIZE); }
+        if (udp_shm_ptr != MAP_FAILED) { (void) munmap(udp_shm_ptr, UDP_VAL_SIZE); }
         if (udp_shm_fd >= 0) { (void) close(udp_shm_fd); }
 
       /*******************************************************************************
@@ -1283,7 +1295,7 @@ void *thread_handler(void *thread_fd) {
         tcp_shm_fd = shm_open(BOK_SHM_TCP_NAME, O_RDONLY, 0666);
         tcp_shm_ptr = (tcp_val_p)mmap(0, TCP_VAL_SIZE, PROT_READ, MAP_SHARED, tcp_shm_fd, 0);
 
-        if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
+        if (tcp_shm_fd<0 || tcp_shm_ptr == MAP_FAILED) {
           (void) strcat(outgoing, " ERROR (invalid tcp memory)");
 
         } else {
@@ -1309,7 +1321,7 @@ void *thread_handler(void *thread_fd) {
         }
 
         /* close memory */
-        if (udp_shm_ptr != (udp_val_p)NULL) { (void) munmap(udp_shm_ptr, UDP_VAL_SIZE); }
+        if (udp_shm_ptr != MAP_FAILED) { (void) munmap(udp_shm_ptr, UDP_VAL_SIZE); }
         if (udp_shm_fd >= 0) { (void) close(udp_shm_fd); }
 
       /*******************************************************************************
@@ -1325,10 +1337,10 @@ void *thread_handler(void *thread_fd) {
         udp_shm_fd = shm_open(BOK_SHM_UDP_NAME, O_RDONLY, 0666);
         udp_shm_ptr = (udp_val_p)mmap(0, UDP_VAL_SIZE, PROT_READ, MAP_SHARED, udp_shm_fd, 0);
 
-        if (tcp_shm_fd<0 || tcp_shm_ptr==(tcp_val_p)NULL) {
+        if (tcp_shm_fd<0 || tcp_shm_ptr == MAP_FAILED) {
           (void) strcat(outgoing, " ERROR (invalid tcp memory)");
 
-        } else if (udp_shm_fd<0 || udp_shm_ptr==(udp_val_p)NULL) {
+        } else if (udp_shm_fd<0 || udp_shm_ptr == MAP_FAILED) {
           (void) strcat(outgoing, " ERROR (invalid udp memory)");
 
         } else {
@@ -1356,9 +1368,9 @@ void *thread_handler(void *thread_fd) {
         }
 
         /* close memory */
-        if (tcp_shm_ptr != (tcp_val_p)NULL) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
+        if (tcp_shm_ptr != MAP_FAILED) { (void) munmap(tcp_shm_ptr, TCP_VAL_SIZE); }
         if (tcp_shm_fd >= 0) { (void) close(tcp_shm_fd); }
-        if (udp_shm_ptr != (udp_val_p)NULL) { (void) munmap(udp_shm_ptr, UDP_VAL_SIZE); }
+        if (udp_shm_ptr != MAP_FAILED) { (void) munmap(udp_shm_ptr, UDP_VAL_SIZE); }
         if (udp_shm_fd >= 0) { (void) close(udp_shm_fd); }
 
       /*******************************************************************************
@@ -1371,7 +1383,7 @@ void *thread_handler(void *thread_fd) {
         udp_shm_fd = shm_open(BOK_SHM_UDP_NAME, O_RDONLY, 0666);
         udp_shm_ptr = (udp_val_p)mmap(0, UDP_VAL_SIZE, PROT_READ, MAP_SHARED, udp_shm_fd, 0);
 
-        if (udp_shm_fd<0 || udp_shm_ptr==(udp_val_p)NULL) {
+        if (udp_shm_fd<0 || udp_shm_ptr == MAP_FAILED) {
           (void) strcat(outgoing, " ERROR (invalid udp memory)");
 
         } else {
@@ -1388,7 +1400,7 @@ void *thread_handler(void *thread_fd) {
         }
 
         /* close memory */
-        if (udp_shm_ptr != (udp_val_p)NULL) { (void) munmap(udp_shm_ptr, UDP_VAL_SIZE); }
+        if (udp_shm_ptr != MAP_FAILED) { (void) munmap(udp_shm_ptr, UDP_VAL_SIZE); }
         if (udp_shm_fd >= 0) { (void) close(udp_shm_fd); }
 
       /*******************************************************************************
@@ -1405,7 +1417,6 @@ void *thread_handler(void *thread_fd) {
     (void) strcat(outgoing, "\n");
     if ((wstat=write(handler_fd, outgoing, strlen(outgoing))) < 0) {
       (void) printf("Server thread handler write() failed\n");
-      break;
     }
 
     rstat = close(handler_fd);
@@ -1414,10 +1425,12 @@ void *thread_handler(void *thread_fd) {
     (void) memset(incoming, '\0', sizeof(incoming));
     (void) memset(outgoing, '\0', sizeof(outgoing));
   
-    break;
   }
-  
-  
+  else
+  {
+    (void) printf("Failed to fit incoming message in allocated buffer.\n");
+  }
+
   if (rstat == 0) {
     (void) printf("Server thread handler client disconnected successfully\n");
   }
@@ -1427,9 +1440,9 @@ void *thread_handler(void *thread_fd) {
   }
   fflush(stdout);
 
-  /* free memory and return */
-  cliFree(BOK_NG_BUCKETS, bok_ng_commands);
-  (void) free(thread_fd);
+  /* thread "destructor" that would otherwise not be invoked when this thread terminates */
+  cliFree(BOK_NG_BUCKETS, bok_ng_commands); // dynamically allocated within this thread
+  (void) free(thread_fd); // this was originally allocated by main(), not part of memory allocated for thread
   return 0;
 }
 
@@ -1479,25 +1492,27 @@ int main(int argc, char *argv[]) {
 
   /* accept connection via thread */
   client_len = sizeof(client_addr);
-  while ((client_fd=accept(socket_fd, (struct sockaddr *)&client_addr, (socklen_t *)&client_len))) {
+  while ((client_fd = accept(socket_fd, (struct sockaddr *)&client_addr, (socklen_t *)&client_len)) > 0) { // accept() will wait for a connection on socket FD and (this is a blocking method), when one arrives, open a new socket to connect with it. The new socket will be closed by the thread handling each connection.
     pthread_t this_thread;
     (void) memset(&this_thread, '\0', sizeof(this_thread));
     new_sock = malloc(sizeof(int));
     *new_sock = client_fd;
-    if ((istat=pthread_create(&this_thread, NULL, thread_handler, (void *)new_sock)) < 0) {
+    if ((istat = pthread_create(&this_thread, NULL, thread_handler, (void *)new_sock)) != 0) {
       (void) logtime(" server pthread_create() failed\n");
       (void) free(new_sock);
       return istat;
     } else {
+      pthread_detach(this_thread); // marks thread as detached for automatic release of resources on termination, but it won't recurse into cleaning resouces created by the thread and it won't cleanup resources created for the thread but outside the thread's scope (i.e. the thread is expected to clean up new_sock when it terminates)
       (void) logtime(" server pthread_create() success\n");
       (void) logtime(" server handling client '%s'\n", inet_ntop(AF_INET, &client_addr.sin_addr, clientname, sizeof(clientname)));
     }
   }
+
   if (client_fd < 0) {
     (void) logtime(" server accept() failed\n");
     return istat;
   }
 
-  /* return */  
+  /* return */
   return 0;
 }

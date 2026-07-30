@@ -79,6 +79,7 @@ src/Galil_DMC_22x0_TCP_Read
 src/Galil_DMC_22x0_TCP_Write
 src/Galil_DMC_22x0_UDP_Read
 src/Galil_DMC_22x0_UDP_Write
+src/Galil_DMC_22x0_Write_Memory
 src/libbokGalil.a
 src/libbokGalil.so
 src/__hosts__.h
