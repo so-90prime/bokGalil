@@ -78,17 +78,15 @@ void *thread_handler(void *thread_fd) {
   {
     bytes_read += rstat;
 
-    if (strchr(incoming, 0) != NULL)
+    if (strchr(incoming, '\n') != NULL && bytes_read <= sizeof(incoming)) // look for terminating characters, leave last byte as \0 in case parsing performs unsafe string ops
     {
       message_read = true;
-      break; // terminating character (0) found. Incoming message is complete.
+      break; // terminating character (\n) found.
     }
   }
 
   if (message_read) {
     /* report incoming */
-    if ((p=strchr(incoming, '\n')) != (char *)NULL) { *p = '\0'; }
-    if ((p=strchr(incoming, '\r')) != (char *)NULL) { *p = '\0'; }
     (void) logtime(" received from client: '%s'\n", incoming);
 
     /* parse */
@@ -1414,12 +1412,10 @@ void *thread_handler(void *thread_fd) {
 
     /* write response */
     (void) logtime(" sent to client: '%s'\n", outgoing);
-    (void) strcat(outgoing, "\n");
+    (void) strcat(outgoing, "\r\n"); // strcat implicitly appends '\0'. actually terminated as '\r\n\0'
     if ((wstat=write(handler_fd, outgoing, strlen(outgoing))) < 0) {
       (void) printf("Server thread handler write() failed\n");
     }
-
-    rstat = close(handler_fd);
 
     /* reset string(s) */
     (void) memset(incoming, '\0', sizeof(incoming));
@@ -1430,6 +1426,8 @@ void *thread_handler(void *thread_fd) {
   {
     (void) printf("Failed to fit incoming message in allocated buffer.\n");
   }
+
+  rstat = close(handler_fd);
 
   if (rstat == 0) {
     (void) printf("Server thread handler client disconnected successfully\n");

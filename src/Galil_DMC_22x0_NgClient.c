@@ -35,16 +35,18 @@ void client_handler(int handler_fd) {
   int istat = 0;
 
   ssize_t bytes_read = 0;
+  size_t strnlen_out = 0;
   bool message_read = false;
   char incoming[BOK_NG_STRING];
   char outgoing[BOK_NG_STRING];
   (void) memset(incoming, '\0', sizeof(incoming));
   (void) memset(outgoing, '\0', sizeof(outgoing));
-
+  
   /* loop */
   while (running) {
-
+    
     /* clear strings and get input */
+    strnlen_out = 0;
     (void) memset(incoming, '\0', sizeof(incoming));
     (void) memset(outgoing, '\0', sizeof(outgoing));
     (void) printf("NG command> ");
@@ -52,10 +54,24 @@ void client_handler(int handler_fd) {
       continue; 
     }
 
+    // ensure outgoing string is terminated by "\r\n\0"
+    strnlen_out=strnlen(outgoing, sizeof(outgoing)); // use strnlen, strlen is unsafe (even though fgets returns '\n\0' terminated)
+    
+    if (strnlen_out > (sizeof(outgoing) - 2))
+    {
+      (void) printf("Client handler to server message too large: '%d' bytes", strnlen_out);
+    }
+    else
+    {
+      outgoing[strnlen_out - 1] = '\r';
+      outgoing[strnlen_out]     = '\n';
+      outgoing[strnlen_out + 1] = '\0';
+    }
+
     running = false; // at this point, stdin has been received. No need to loop. Send and receive once.
 
     /* send to socket */
-    (void) printf("Client handler to server: '%s'", incoming);
+    (void) printf("Client handler to server: '%s'", outgoing);
     if ((istat=send(handler_fd, outgoing, sizeof(outgoing), 0)) < 0) {
       (void) printf("Client handler send() failed\n");
       running = false;
@@ -67,10 +83,22 @@ void client_handler(int handler_fd) {
     {
       bytes_read += istat;
 
-      if (strchr(incoming, 0) != NULL)
+      if (strchr(incoming, '\n') != NULL) // terminating character found
       {
         message_read = true;
-        break; // terminating character (0) found. Incoming message is complete.
+        
+        if (bytes_read > 2)
+        {
+          if (incoming[bytes_read - 1] == '\r')
+          {
+            incoming[bytes_read - 1] = '\0';
+          }
+          else
+          {
+            incoming[bytes_read] = '\0';
+          }
+        }
+        break;
       }
     }
 
@@ -100,11 +128,12 @@ void client_handler(int handler_fd) {
  ******************************************************************************/
 int main(int argc, char *argv[]) {
 
+  int connect_status = 0;
   while (true)
   {
     /* declare some variable(s) and initialize them */
     int socket_fd = 0;
-    int connect_status = 0;
+    connect_status = 0;
     struct sockaddr_in server_addr;
 
     /* socket create and verification */
@@ -112,29 +141,28 @@ int main(int argc, char *argv[]) {
       (void) printf("Client to server socket creation failed\n");
       exit(socket_fd);
     }
-
-    /* assign IP, PORT */
-    (void) memset(&server_addr, '\0', sizeof(server_addr));
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(BOK_NG_PORT);
-    server_addr.sin_addr.s_addr = inet_addr(BOK_NG_ADDR);
-
-    /* connect the client socket to server socket */
-    if ((connect_status=connect(socket_fd, (struct sockaddr *)&server_addr, sizeof(server_addr))) < 0) {
-      printf("Client to server connection failed\n");
+    else
+    {
+      /* assign IP, PORT */
+      (void) memset(&server_addr, '\0', sizeof(server_addr));
+      server_addr.sin_family = AF_INET;
+      server_addr.sin_port = htons(BOK_NG_PORT);
+      server_addr.sin_addr.s_addr = inet_addr(BOK_NG_ADDR);
+  
+      /* connect the client socket to server socket */
+      if ((connect_status=connect(socket_fd, (struct sockaddr *)&server_addr, sizeof(server_addr))) < 0) {
+        printf("Client to server connection failed\n");
+      }
+      else
+      {
+        /* handler for chat */
+        client_handler(socket_fd);
+      }
+  
       /* close the socket */
-      close(connect_status);
       close(socket_fd);
-      return connect_status;
     }
-
-    /* handler for chat */
-    client_handler(socket_fd);
-
-    /* close the socket */
-    // close(connect_status); // ERROR: for some reason, this causes fgets() to hang when trying to read stdin
-    close(socket_fd);
   }
 
-  return 0;
+  return connect_status;
 }
